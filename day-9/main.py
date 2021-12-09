@@ -6,30 +6,22 @@ with open("input.txt", "r") as f:
         for char in line:
             grid[-1].append(int(char))
 
-def get_voisins(x: int, y:int) -> list:
-    l = []
+def is_low_point(pos: tuple) -> bool:
+    val = grid[pos[0]][pos[1]]
+    x, y = pos
     for a, b in [(-1, 0), (0, -1), (1, 0), (0, 1)]:
         try:
             vos = grid[x + a][y + b]
-            l.append(vos)
+            if val >= vos:
+                return False
         except Exception:
             pass
-    return l
-            
-
-def is_low_point(pos: tuple, voisins: list) -> bool:
-    val = grid[pos[0]][pos[1]]
-    for char in voisins:
-        if val >= char:
-            return False
     return True
         
-low_points = []
-for i, line in enumerate(grid):
-    for j, char in enumerate(line):
-        voisins = get_voisins(i, j)
-        if is_low_point((i, j), voisins):
-            low_points.append(grid[i][j])
+res = 0
+for i in range(len(grid)):
+    for j in range(len(grid[i])):
+        if is_low_point((i, j)):
+            res += 1 + grid[i][j]
 
-print("antall low_points:", len(low_points))
-print("res:", sum([x + 1 for x in low_points]))
+print("res:", res)
