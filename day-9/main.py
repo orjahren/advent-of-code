@@ -7,8 +7,8 @@ with open("input.txt", "r") as f:
             grid[-1].append(int(char))
 
 def is_low_point(pos: tuple) -> bool:
-    val = grid[pos[0]][pos[1]]
     x, y = pos
+    val = grid[x][y]
     for a, b in [(-1, 0), (0, -1), (1, 0), (0, 1)]:
         try:
             vos = grid[x + a][y + b]
