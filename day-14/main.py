@@ -24,7 +24,7 @@ for c in s:
 for a, b in pairwise(s):    
     bis[a + b] += 1
 
-for _ in range(10):
+for _ in range(40):
     l = []
     for k, v in ls:
         if bis[k] != 0:
