@@ -20,8 +20,8 @@ class Node:
         
 
 ls = []
-with open("input.txt", "r") as f:
-#with open("test.txt", "r") as f:
+#with open("input.txt", "r") as f:
+with open("test.txt", "r") as f:
     ls = [x.strip() for x in f.readlines()]
 
 grid = []
