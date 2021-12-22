@@ -54,5 +54,4 @@ while max([x.score for x in pls]) < 1000:
             print("d.total_rolls:", d.total_rolls)
             print("d.val:", d.val)
             print("res:", loser.score * d.total_rolls)
-            print([x.score for x in pls])
             exit()
