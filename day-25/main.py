@@ -6,7 +6,6 @@ class Node:
         Node.cnt += 1
         self.ned, self.hoyre = None, None
 
-
     def is_free(self) -> bool:
         return self.val == "."
     
@@ -33,17 +32,14 @@ for l in ls:
 for i, row in enumerate(grid):
     for j, x in enumerate(row):
         h, d = None, None
-                
         if i + 1 >= len(grid):
             d = grid[0][j]
         else:
             d = grid[i + 1][j]
         x.ned = d
-
         if j + 1 >= len(grid[i]):
             h = grid[i][0]
         else:
-            #print(i, j)
             h = grid[i][j + 1]
         x.hoyre = h
             
@@ -60,33 +56,28 @@ def tegn_grid():
 has_m = True
 res = 0
 d = {
-    ">": set(),
-    "v": set()
+    ">": [],
+    "v": []
 }
 for x in all_nodes:
     if x.val == "v":
-        d["v"].add(x)
+        d["v"].append(x)
     elif x.val == ">":
-        d[">"].add(x)
+        d[">"].append(x)
 
 while has_m:
     #tegn_grid()
     res += 1
     has_m = False
     for c in d.keys():
-        if res > 2:
-            #break
-            pass
-        cmds = []    
-        
-        for x in d[c]:
+        cmds = []            
+        for i, x in enumerate(d[c]):
             y = x.get_next()
-            if y and y.is_free():
-                cmds.append((x, y))
+            if y.is_free():
+                cmds.append((i, x, y))
 
-        for x, y in cmds:
+        for i, x, y in cmds:
             has_m = True
             x.val, y.val = y.val, x.val
-            d[c].remove(x)
-            d[c].add(y)
+            d[c][i] = y
 print("res:", res)
