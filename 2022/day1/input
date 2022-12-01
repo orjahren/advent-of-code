@@ -1,0 +1,140 @@
+Last login: Wed Nov 30 20:25:05 on ttys003
+❯ ls
+Applications  hw2.py                    OneDrive - Universitetet i Oslo
+ay            java_error_in_idea.hprof  package-lock.json
+chaire.py     l.py                      Pictures
+Desktop       Library                   Public
+Documents     lol.py                    VirtualBox VMs
+Downloads     Movies                    WINDOWS
+go            Music
+hw.py         node_modules
+❯ cd Documents
+❯ ls
+akademika                                                   test.pdf
+andre-next                                                  test2.pdf
+api-docs.json                                               upper.py
+Api.ts                                                      work-automation
+Assignment_01 (1)                                           Zoom
+Assignment_01 (1).zip
+Assignment_a
+Assignment_a.zip
+basic-go-chatbot
+basic-java-chatbot
+binary_search.rkt
+binary_search.rkt~
+catcoat
+docs
+feedbackset-875684-2022-08-29_07-01-27.713511-delivery.zip
+hei-verden
+ifi-galla
+in2010-h22
+IN3110-oliverrj
+IN3110-oliverrj-bak
+IN3110-oliverrj-bak-bak
+in3120
+in3120-2021
+in3120-2021-uio
+kattis
+learn-react
+leetcode
+les-chiens
+list genfors h22 header 1920x1080.png
+My EndNote Library.Data
+My EndNote Library.enl
+nettskjema
+nettskjema-api
+nettskjema-api.properties
+nettskjema-frontend
+nettskjema-svaring
+nettskjema.bak
+nettskjema2
+nettskjema3
+nettskjemaPeerdeps
+nettskjemaPostAnswers.py
+nginx.conf
+node-for-nettskjema
+null.ts
+overfore mac til pensie 090922
+PAC
+Paradox Interactive
+parseApi
+plagiat in4120 kariesta.md
+primagen
+Processing
+Processing_og
+programmeringsoppgave
+soketre
+strangeSort.py
+styleEmbeddedNs.html
+swagger-typescript-api
+Søketek-exam pp.pdf
+Søketek classificationChat 2022-10-26.pdf
+❯ ls|grep -i advent
+❯ git clone https://github.com/orjahren/advent-of-code
+Cloning into 'advent-of-code'...
+remote: Enumerating objects: 121, done.
+remote: Counting objects: 100% (56/56), done.
+remote: Compressing objects: 100% (46/46), done.
+remote: Total 121 (delta 17), reused 48 (delta 9), pack-reused 65
+Receiving objects: 100% (121/121), 46.63 KiB | 1.20 MiB/s, done.
+Resolving deltas: 100% (38/38), done.
+❯ rm -rf advent-of-code
+❯ git clone git@github.com:orjahren/advent-of-code.git
+Cloning into 'advent-of-code'...
+Enter passphrase for key '/Users/oliverrj/.ssh/id_ed25519':
+remote: Enumerating objects: 121, done.
+remote: Counting objects: 100% (56/56), done.
+remote: Compressing objects: 100% (46/46), done.
+remote: Total 121 (delta 17), reused 48 (delta 9), pack-reused 65
+Receiving objects: 100% (121/121), 46.63 KiB | 477.00 KiB/s, done.
+Resolving deltas: 100% (38/38), done.
+❯ cd advent-of-code
+❯ s
+zsh: command not found: s
+❯ ls
+day-1  day-3  day-14  day-21  day-24  README.md
+day-2  day-9  day-15  day-22  day-25
+❯ mkdir 2021
+❯ mv * 2021
+mv: rename 2021 to 2021/2021: Invalid argument
+❯ ls
+2021
+❯ mkdir 2022
+❯ cd 2022
+❯ mkdir day1
+❯ cd day1
+❯ wget https://adventofcode.com/2022/day/1/input
+--2022-12-01 11:27:48--  https://adventofcode.com/2022/day/1/input
+Resolving adventofcode.com (adventofcode.com)... 3.94.124.104, 54.235.201.230, 34.236.93.197, ...
+Connecting to adventofcode.com (adventofcode.com)|3.94.124.104|:443... connected.
+HTTP request sent, awaiting response... 400 Bad Request
+2022-12-01 11:27:48 ERROR 400: Bad Request.
+
+❯ ls
+❯ curl https://adventofcode.com/2022/day/1/input
+Puzzle inputs differ by user.  Please log in to get your puzzle input.
+~/Documents/advent-of-code/2022/day1 main ls ?1 ❯ >....
+10369
+6186
+6516
+2477
+4878
+10026
+
+4171
+1221
+1983
+1562
+2616
+6689
+3832
+5275
+6764
+7095
+3985
+
+12828
+2639
+10883
+10054
+13688
