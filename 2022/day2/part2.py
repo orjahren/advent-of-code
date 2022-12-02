@@ -16,7 +16,6 @@ rules = {"rock": {"scissors": True}, "scissors": {"paper": True}, "paper": {"roc
 def main(filename):
 
     pairs = [(s[0], s[1]) for s in [x.strip().split() for x in open(filename, "r").readlines()]]
-    a_score = 0
     b_score = 0
 
     for a_op, b_op in pairs:
@@ -26,17 +25,13 @@ def main(filename):
 
         # Player skal tape
         if b_op == "X":
-            a_score += result_scores["win"]
             b_score += result_scores["loss"]
-            a_score += shape_scores[a_formatted]
             selected_b = list(rules[a_formatted].keys())[0]
             b_score += shape_scores[selected_b]
 
         # player skal vinne
         elif b_op == "Z":
-            a_score += result_scores["loss"]
             b_score += result_scores["win"]
-            a_score += shape_scores[a_formatted]
             selected_b = None
             bad_choice = list(rules[a_formatted].items())[0][0]
             for k, v in rules.items():
@@ -47,9 +42,7 @@ def main(filename):
 
         # draw
         elif b_op == "Y":
-            a_score += result_scores["draw"]
             b_score += result_scores["draw"]
-            a_score += shape_scores[a_formatted]
             b_score += shape_scores[a_formatted]
 
     print("Part 2:", b_score)
