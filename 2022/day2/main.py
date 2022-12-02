@@ -19,6 +19,9 @@ def would_win(foo, bar):
     elif foo == "paper" and bar == "rock":
         return True
     return False
+    rules = {"rock": {"scissors": True}, "scissors": {"paper": True}, "paper": {"rock"}}
+    print(rules)
+    return rules.get(foo, False).get(bar, False)
 
 
 def op_to_name(op):
