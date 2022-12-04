@@ -1,8 +1,8 @@
 go 1.19
 
-use ./day1
 
 use (
+	./day1/go
 	./day3
 	./day4
 )
