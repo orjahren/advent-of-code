@@ -33,6 +33,15 @@ func doesOverlap(p, q, r, s int) bool {
 	return max(p, r) <= min(q, s)
 }
 
+func doPart2(a, b, x, y int, part2 chan int) {
+
+	if doesOverlap(a, b, x, y) || doesOverlap(x, y, a, b) {
+		part2 <- 1
+	} else {
+		part2 <- 0
+	}
+}
+
 func dealWithString(inp string, part1 chan int, part2 chan int) {
 
 	spl := strings.Split(inp, ",")
@@ -44,6 +53,9 @@ func dealWithString(inp string, part1 chan int, part2 chan int) {
 
 	x, _ := strconv.Atoi(spenn2[0])
 	y, _ := strconv.Atoi(spenn2[1])
+
+	go doPart2(a, b, x, y, part2)
+
 	// Spenn1 inneholder hele spenn2
 	if a <= x && b >= y {
 		part1 <- 1
@@ -52,12 +64,6 @@ func dealWithString(inp string, part1 chan int, part2 chan int) {
 		part1 <- 1
 	} else {
 		part1 <- 0
-	}
-
-	if doesOverlap(a, b, x, y) || doesOverlap(x, y, a, b) {
-		part2 <- 1
-	} else {
-		part2 <- 0
 	}
 }
 
