@@ -6,7 +6,7 @@ int main()
 {
     printf("Hello world \n");
     // const char *filename = "small";
-    const char *filename = "input";
+    const char *filename = "../input";
     FILE *fp = NULL;
     printf("Dette er filename:");
     printf(filename);
