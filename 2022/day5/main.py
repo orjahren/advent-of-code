@@ -41,10 +41,14 @@ while len(ops) > 0:
 
     print("Skal flytte", n, "fra", fra, "til", til)
 
-    for _ in range(n):
-        flytt = fra.pop(0)
-        til.insert(0, flytt)
+    # mov = []
+    for i, _ in enumerate(range(n)):
+
+        til.insert(i, fra.pop(0))
+        # til.insert(0, flytt)
+    # for x in mov:
+    # til.insert(0, x)
 
 print("****ferdig***")
 print(stacks)
-print("Part 1:", "".join([x[0] for x in stacks]))
+print("Part 2:", "".join([x[0] for x in stacks if x]))
