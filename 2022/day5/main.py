@@ -1,8 +1,7 @@
 stacks = [[] for _ in range(9)]
 with open("input", "r") as f:
-    ll = f.readlines()
     lager_stax = True
-    for l in ll:
+    for l in f.readlines():
         spl = l.split()
         if len(spl) == 0:
             lager_stax = False
