@@ -2,7 +2,7 @@
 with open("input", "r") as f:
     buf = f.readline()
     for i, s in enumerate(buf):
-        if i > 3:
-            if len(set(buf[i - 4 : i])) == 4:
+        if i > 13:
+            if len(set(buf[i - 14 : i])) == 14:
                 print("Part 1:", i)
-                exit()
+                # exit()
