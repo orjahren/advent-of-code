@@ -88,7 +88,7 @@ prev = fs
 while len(q) > 0:
     # print("Setter x til k av y", prev, k)
     x = prev[k]
-    # print("Sjekker ut:", x)
+    print("Sjekker ut:", x)
     # if type(x) == dict:
     if list(x.values())[0] != False:
         print("Legger dette i q:", x.keys())
