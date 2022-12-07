@@ -3,7 +3,7 @@ from functools import cache
 
 class File:
     def __init__(self, abs_path, size) -> None:
-        self.size = int(size)
+        self.size = size
         self.path = abs_path
 
 
@@ -25,15 +25,10 @@ def get_path(path):
         return "/" + "/".join(path)[1:]
 
 
-ll = []
-with open("input", "r") as f:
-    ll = [x.strip() for x in f.readlines()]
-
 fs = {"/": Folder("/")}
 all_folders = [fs["/"]]
-
 path = []
-for l in ll:
+for l in open("input", "r").readlines():
     spl = l.split()
     if spl[0] == "$":
         cmd = spl[1]
