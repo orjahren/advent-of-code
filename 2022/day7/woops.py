@@ -15,12 +15,7 @@ class Folder:
 
     @cache
     def get_size(self):
-        tot = 0
-        for folder in self.subfolders:
-            tot += folder.get_size()
-        for file in self.files:
-            tot += file.size
-        return tot
+        return sum([fol.get_size() for fol in self.subfolders]) + sum([file.size for file in self.files])
 
 
 def get_path(path):
@@ -62,13 +57,5 @@ for l in ll:
             file_path = abs_path + "/" + spl[1]
             folder.files.append(File(file_path, int(spl[0])))
 
-roof = 100000
-res = 0
-for folder in all_folders:
-    size = folder.get_size()
-    if size < roof:
-        res += size
-print("Part 1:", res)
-
-must_free = 30000000 - (70000000 - fs["/"].get_size())
-print("Part 2:", min([s for x in all_folders if (s := x.get_size()) >= must_free]))
+print("Part 1:", sum([s for x in all_folders if (s := x.get_size()) < 100000]))
+print("Part 2:", min([s for x in all_folders if (s := x.get_size()) >= 30000000 - (70000000 - fs["/"].get_size())]))
