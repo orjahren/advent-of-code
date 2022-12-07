@@ -122,3 +122,19 @@ for folder in all_folders:
     if size < roof:
         res += size
 print("Part 1:", res)
+
+
+av = 70000000
+trenger_unused = 30000000
+tot_used = fs["/"].get_size()
+must_free = trenger_unused - (av - tot_used)
+print("Må fri", must_free)
+curr_min = 99**99
+cands = []
+print(curr_min)
+for folder in all_folders:
+    size = folder.get_size()
+    if size >= must_free:
+        cands.append(size)
+
+print("Part 2:", min(cands))
