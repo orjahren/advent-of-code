@@ -1,4 +1,3 @@
-from collections import defaultdict
 from functools import cache
 
 
@@ -34,7 +33,6 @@ def get_path(path):
 ll = []
 with open("input", "r") as f:
     ll = [x.strip() for x in f.readlines()]
-
 
 fs = {"/": Folder("/")}
 all_folders = [fs["/"]]
