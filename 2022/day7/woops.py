@@ -1,4 +1,5 @@
 from collections import defaultdict
+from functools import cache
 
 
 class File:
@@ -13,6 +14,7 @@ class Folder:
         self.path = abs_path
         self.subfolders = []
 
+    @cache
     def get_size(self):
         tot = 0
         for folder in self.subfolders:
