@@ -31,8 +31,7 @@ path = []
 for l in open("input", "r").readlines():
     spl = l.split()
     if spl[0] == "$":
-        cmd = spl[1]
-        if cmd == "cd":
+        if spl[1] == "cd":
             if spl[2] != "..":
                 path.append(spl[2])
             else:
