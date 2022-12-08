@@ -42,14 +42,12 @@ public:
             int res = 0;
             for (int i = 0; i < this->file_pointers.size(); i++)
             {
-                File *f = this->file_pointers.at(i);
-                res += f->size;
+                res += this->file_pointers.at(i)->size;
             }
 
             for (int i = 0; i < this->subfolder_pointers.size(); i++)
             {
-                Folder *f = this->subfolder_pointers.at(i);
-                res += f->getSize();
+                res += this->subfolder_pointers.at(i)->getSize();
             }
             this->totalSize = res;
         }
