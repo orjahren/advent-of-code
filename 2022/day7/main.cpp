@@ -142,16 +142,6 @@ int main()
         }
     }
     std::cout << "Part 1: " << part1Res << std::endl;
-
-    int currMin = INT_MAX;
-    for (int i = 0; i < cands.size(); i++)
-    {
-        int curr = cands.at(i);
-        if (curr < currMin)
-        {
-            currMin = curr;
-        }
-    }
-    std::cout << "Part 2: " << currMin << std::endl;
+    std::cout << "Part 2: " << *std::min_element(cands.begin(), cands.end()) << std::endl;
     return 0;
 }
