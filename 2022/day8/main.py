@@ -14,7 +14,7 @@ def main(ll):
     for row in range(len(ll)):
         for col in range(len(ll)):
             tests = [
-                [ll[x][col] for x in range(row)],  # down
+                [ll[x][col] for x in range(row + 1)],  # down
                 [ll[x][col] for x in range(len(ll) - 1, row, -1)],  # up
                 [ll[row][y] for y in range(len(ll) - 1, col, -1)],  # back
                 [ll[row][y] for y in range(col)],  # forward
