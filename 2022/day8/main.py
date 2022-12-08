@@ -20,10 +20,10 @@ def main(ll):
             tree = ll[row][col]
             print("Sjekker om dette er synlig: (val, row, col)", tree, row, col)
             tests = [
-                max([ll[row][x] for x in range(col)], default=99999),  # forward
-                max([ll[row][x] for x in range(len(ll) - 1, col, -1)], default=9999),  # back
-                max([ll[y][col] for y in range(row)], default=9999),  # down
-                max([ll[y][col] for y in range(len(ll) - 1, row, -1)], default=9999),  # up
+                max([ll[row][y] for y in range(col)], default=99999),  # forward
+                max([ll[row][y] for y in range(len(ll) - 1, col, -1)], default=9999),  # back
+                max([ll[x][col] for x in range(row)], default=9999),  # down
+                max([ll[x][col] for x in range(len(ll) - 1, row, -1)], default=9999),  # up
             ]
 
             assert len(tests) == 4, "Fucket opp fordeling av tester"
