@@ -198,9 +198,7 @@ int main()
         }
     }
 
-    std::vector<int> cands;
     int roof = 100000;
-    // Finn cands
     int part1Res = 0;
     for (int i = 0; i < allFolders.size(); i++)
     {
@@ -222,36 +220,37 @@ int main()
         Folder f = *fp;
         LOG("Dealer med en folder med path " << f.path)
     }
-    * /
-        /*
-            for (int i = 0; i < cands.size(); i++)
-            {
-                int curr = cands.at(i);
-                if (curr < roof)
-                {
-                    // currMin = curr;
-                }
-            }
+    */
 
-            for (int i = 0; i < allFolders.size(); i++)
-            {
-                Folder f = allFolders.at(i);
-                int size = f.getSize();
-                if (size <= roof)
-                {
-                    cands.push_back(size);
-                }
-            }
-            // Finn minste cand
-            int currMin = 999999;
-            for (int i = 0; i < cands.size(); i++)
-            {
-                int curr = cands.at(i);
-                if (curr < currMin)
-                {
-                    currMin = curr;
-                }
-            }
-        */
+    ll sizeAvailable = 70000000;
+    ll mustHaveUnused = 30000000;
+    ll sizeUsed = fs["/"]->getSize();
+    ll mustDelete = mustHaveUnused - (sizeAvailable - sizeUsed);
+    std::vector<int> cands;
+
+    // Finn cands
+    for (int i = 0; i < allFolders.size(); i++)
+    {
+        Folder *fp = allFolders.at(i);
+        Folder &f = *fp;
+        int size = f.getSize();
+        std::cout << "Size er " << size << std::endl;
+        if (size >= mustDelete)
+        {
+            cands.push_back(size);
+        }
+    }
+    ll currMin = sizeAvailable;
+    for (int i = 0; i < cands.size(); i++)
+    {
+        int curr = cands.at(i);
+        if (curr < currMin)
+        {
+            currMin = curr;
+        }
+    }
+
+    std::cout << "Part 2: " << currMin << std::endl;
+
     return 0;
 }
