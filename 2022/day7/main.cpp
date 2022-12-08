@@ -17,7 +17,6 @@ public:
     {
         this->path = path;
         this->size = size;
-        std::cout << "Opprettet en ny fil på " << *path << " med str : " << this->size << std::endl;
     }
 };
 
@@ -28,104 +27,67 @@ public:
     std::vector<File *> file_pointers;
     std::vector<Folder *> subfolder_pointers;
 
-    // int totalSize;
+    int totalSize;
 
     Folder(std::string *absPath)
     {
         this->path = absPath;
-        // this->totalSize = -1;
-        std::cout << "Opprettet en folder" << std::endl;
+        this->totalSize = -1;
     }
 
     int getSize()
     {
-        /*
-        if (this->totalSize > -1)
+        if (this->totalSize < 0)
         {
-            return this->totalSize;
-        }
-        */
-        std::cout << "Je suis en folder som skal finne min størrelse." << std::endl;
-        int res = 0;
-        // std::cout << "Mine files er: " << this->files << std::endl;
-        // for (File f : this->files)
-        for (int i = 0; i < this->file_pointers.size(); i++)
-        {
-            File *f = this->file_pointers.at(i);
-            std::cout << "Jeg har en fil med " << f->size << "  size" << std::endl;
-            res += f->size;
-        }
+            int res = 0;
+            for (int i = 0; i < this->file_pointers.size(); i++)
+            {
+                File *f = this->file_pointers.at(i);
+                res += f->size;
+            }
 
-        for (Folder *f : this->subfolder_pointers)
-        {
-            int fz = f->getSize();
-            std::cout << "Og jeg har en mappe med " << fz << std::endl;
-            // res += f.getSize();
-            res += fz;
+            for (int i = 0; i < this->subfolder_pointers.size(); i++)
+            {
+                Folder *f = this->subfolder_pointers.at(i);
+                res += f->getSize();
+            }
+            this->totalSize = res;
         }
-        // this->totalSize = res;
-        return res;
+        return this->totalSize;
     }
 };
 
 std::string getPath(std::vector<std::string *> path)
 {
-    std::cout << "Skal generere path fra denne vektoren med strenger: " << std::endl;
-    for (auto x : path)
+    std::string s = "/";
+    if (path.size() != 1)
     {
-        std::cout << x << ", ";
-    }
-    std::cout << std::endl;
-    std::string s = "/"; // = "ssss";
-    if (path.size() == 1)
-    {
-        s = "/";
-    }
-    else
-    {
-        // for (auto x : path) {
         for (int i = 1; i < path.size(); i++)
         {
-            std::cout << "Appender dette til pathen: '" << path.at(i) << "'" << std::endl;
             s += "/" + *path.at(i);
         }
     }
-    std::cout << "Lagde denne stien: " << s << std::endl;
     return s;
 }
 
-std::string getFolderNameFromLine(std::string line)
+std::string getNameFromLine(std::string line)
 {
-    std::cout << "Skal finne folder-navn fra denne linjen: " << line << std::endl;
     std::size_t spaceIndex = line.find(" ") + 1;
-    std::cout << "Fant " << line.substr(spaceIndex) << std::endl;
-    return line.substr(spaceIndex);
-}
-
-std::string getFileNameFromLine(std::string line)
-{
-    std::cout << "Skal finne file-navn fra denne linjen: " << line << std::endl;
-    std::size_t spaceIndex = line.find(" ") + 1;
-    std::cout << "Fant " << line.substr(spaceIndex) << std::endl;
     return line.substr(spaceIndex);
 }
 
 int getFileSizeFromLine(std::string line)
 {
-    std::cout << "Skal finne file-size fra denne linjen: " << line << std::endl;
     std::size_t spaceIndex = line.find(" ") + 1;
-    std::cout << "Fant " << line.substr(0, spaceIndex) << std::endl;
     return stoi(line.substr(0, spaceIndex));
 }
 
 int main()
 {
-    std::cout << "Salut le monde" << std::endl;
     std::string line;
     // std::ifstream minFil("small");
     std::ifstream minFil("input");
 
-    // std::map<std::string, Folder> fs;
     std::map<std::string, Folder *> fs;
     std::string rootPath = "/";
     Folder root(&rootPath);
@@ -137,25 +99,20 @@ int main()
 
     if (minFil.is_open())
     {
-        std::cout << "Fikk lest fil helt fint " << std::endl;
-        std::string workingDir;
         while (getline(minFil, line))
         {
-            std::cout << "Leste: " << line << std::endl;
             if (line[0] == '$')
             {
-                if (line[2] == 'c') // La dette være cd
+                if (line[2] == 'c')
                 {
                     if (line[5] == '.')
-                    { // cd ..
+                    {
                         path.pop_back();
                     }
                     else
-                    { // cd <en faktisk folder>
+                    {
                         std::size_t spaceIndex = line.substr(2).find(" ") + 3;
-                        std::cout << "Space index er: " << spaceIndex << std::endl;
                         std::string *nav_to_folder = new std::string(line.substr(spaceIndex));
-                        std::cout << "Pusher back dette folder-navnet: " << nav_to_folder << std::endl;
                         path.push_back(nav_to_folder);
                     }
                 }
@@ -164,31 +121,20 @@ int main()
             {
                 if (line[0] == 'd')
                 {
-                    // Ikke gjør noe for dirs?
-                    std::cout << "Finner abspath for hvor den nye folderen skal havne" << std::endl;
                     std::string absPath = getPath(path);
-                    std::cout << "Henter parentFolder basert på denne absPath" << std::endl;
-                    Folder &parentFolder = *fs[absPath];
-                    // std::cout << "Denne parent er " << parentFolder << std::endl;
-                    std::string newFolderName = getFolderNameFromLine(line);
+                    std::string newFolderName = getNameFromLine(line);
                     std::string newPath = absPath + "/" + newFolderName;
-                    // std::string newPath = absPath + newFolderName;
-                    std::cout << "Skal lage en ny folder på stien " << newPath << std::endl;
-                    // Folder *newFolder = new Folder(&absPath);
                     Folder *newFolder = new Folder(&newPath);
-                    std::cout << "Skal legge den nye folderen i subolders til parent" << std::endl;
+                    Folder &parentFolder = *fs[absPath];
                     parentFolder.subfolder_pointers.push_back(newFolder);
-                    std::cout << "Skal lagre nye folderen i fs" << std::endl;
                     fs[newPath] = newFolder;
-                    std::cout << "Pusher ny folder til allFolders" << std::endl;
                     allFolders.push_back(newFolder);
                 }
                 else
                 {
                     std::string absPath = getPath(path);
                     Folder *folder = fs[absPath];
-
-                    std::string fileName = getFileNameFromLine(line);
+                    std::string fileName = getNameFromLine(line);
                     int fileSize = getFileSizeFromLine(line);
                     std::string filePath = absPath + "/" + fileName;
                     File *newFile = new File(&filePath, fileSize);
@@ -205,42 +151,26 @@ int main()
         Folder *fp = allFolders.at(i);
         Folder &f = *fp;
         int size = f.getSize();
-        std::cout << "Size er " << size << std::endl;
         if (size <= roof)
         {
-            // cands.push_back(size);
             part1Res += size;
         }
     }
     std::cout << "Part 1: " << part1Res << std::endl;
-    /*
-    LOG("Dette er alle folders:")
-    for (auto fp : allFolders)
-    {
-        Folder f = *fp;
-        LOG("Dealer med en folder med path " << f.path)
-    }
-    */
 
-    ll sizeAvailable = 70000000;
-    ll mustHaveUnused = 30000000;
-    ll sizeUsed = fs["/"]->getSize();
-    ll mustDelete = mustHaveUnused - (sizeAvailable - sizeUsed);
+    ll mustDelete = 30000000 - (70000000 - fs["/"]->getSize());
     std::vector<int> cands;
-
-    // Finn cands
     for (int i = 0; i < allFolders.size(); i++)
     {
         Folder *fp = allFolders.at(i);
         Folder &f = *fp;
         int size = f.getSize();
-        std::cout << "Size er " << size << std::endl;
         if (size >= mustDelete)
         {
             cands.push_back(size);
         }
     }
-    ll currMin = sizeAvailable;
+    ll currMin = INT_MAX;
     for (int i = 0; i < cands.size(); i++)
     {
         int curr = cands.at(i);
@@ -249,8 +179,6 @@ int main()
             currMin = curr;
         }
     }
-
     std::cout << "Part 2: " << currMin << std::endl;
-
     return 0;
 }
