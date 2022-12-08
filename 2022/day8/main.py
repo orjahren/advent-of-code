@@ -32,22 +32,13 @@ def main(ll):
                 if test < tree:
                     bitmap[row][col] = 1
                     print("Er synlig ved test", idx)
-    print("**** Har laget bitmap ****")
     res = 0
     for y in range(len(bitmap)):
         for x in range(len(bitmap[y])):
             l = bitmap[y][x]
             if l == 1 or l == "X":
                 res += 1
-                # print("Fant noe synlig: (val, i, j)", ll[i][j], i, j)
     print("Part 1:", res)
-
-    for y in range(len(bitmap)):
-        for x in range(len(bitmap[y])):
-            h = str(ll[y][x])
-            bv = str(bitmap[y][x])
-            print("|" + h + "" + bv + "", end="")
-        print("")
 
 
 if __name__ == "__main__":
