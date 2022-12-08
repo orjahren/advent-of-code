@@ -4,6 +4,9 @@
 #include <ios>
 #include <vector>
 
+#define LOG(x) std::cout << x << std::endl;
+#define ll long long
+
 class File
 {
 public:
@@ -14,7 +17,7 @@ public:
     {
         this->path = path;
         this->size = size;
-        std::cout << "Opprettet en ny fil på " << *path << std::endl;
+        std::cout << "Opprettet en ny fil på " << *path << " med str : " << this->size << std::endl;
     }
 };
 
@@ -22,8 +25,8 @@ class Folder
 {
 public:
     std::string *path;
-    std::vector<File> files;
-    std::vector<Folder> subfolders;
+    std::vector<File *> file_pointers;
+    std::vector<Folder *> subfolder_pointers;
 
     // int totalSize;
 
@@ -46,16 +49,16 @@ public:
         int res = 0;
         // std::cout << "Mine files er: " << this->files << std::endl;
         // for (File f : this->files)
-        for (int i = 0; i < this->files.size(); i++)
+        for (int i = 0; i < this->file_pointers.size(); i++)
         {
-            File f = this->files.at(i);
-            std::cout << "Jeg har en fil med " << f.size << "  size" << std::endl;
-            res += f.size;
+            File *f = this->file_pointers.at(i);
+            std::cout << "Jeg har en fil med " << f->size << "  size" << std::endl;
+            res += f->size;
         }
 
-        for (Folder f : this->subfolders)
+        for (Folder *f : this->subfolder_pointers)
         {
-            int fz = f.getSize();
+            int fz = f->getSize();
             std::cout << "Og jeg har en mappe med " << fz << std::endl;
             // res += f.getSize();
             res += fz;
@@ -65,7 +68,7 @@ public:
     }
 };
 
-std::string getPath(std::vector<std::string> path)
+std::string getPath(std::vector<std::string *> path)
 {
     std::cout << "Skal generere path fra denne vektoren med strenger: " << std::endl;
     for (auto x : path)
@@ -84,7 +87,7 @@ std::string getPath(std::vector<std::string> path)
         for (int i = 1; i < path.size(); i++)
         {
             std::cout << "Appender dette til pathen: '" << path.at(i) << "'" << std::endl;
-            s += "/" + path.at(i);
+            s += "/" + *path.at(i);
         }
     }
     std::cout << "Lagde denne stien: " << s << std::endl;
@@ -119,7 +122,8 @@ int main()
 {
     std::cout << "Salut le monde" << std::endl;
     std::string line;
-    std::ifstream minFil("small");
+    // std::ifstream minFil("small");
+    std::ifstream minFil("input");
 
     // std::map<std::string, Folder> fs;
     std::map<std::string, Folder *> fs;
@@ -127,9 +131,9 @@ int main()
     Folder root(&rootPath);
     fs["/"] = &root;
 
-    std::vector<Folder> allFolders;
+    std::vector<Folder *> allFolders;
 
-    std::vector<std::string> path;
+    std::vector<std::string *> path;
 
     if (minFil.is_open())
     {
@@ -145,13 +149,12 @@ int main()
                     if (line[5] == '.')
                     { // cd ..
                         path.pop_back();
-                        path.pop_back();
                     }
                     else
                     { // cd <en faktisk folder>
                         std::size_t spaceIndex = line.substr(2).find(" ") + 3;
                         std::cout << "Space index er: " << spaceIndex << std::endl;
-                        std::string nav_to_folder = line.substr(spaceIndex);
+                        std::string *nav_to_folder = new std::string(line.substr(spaceIndex));
                         std::cout << "Pusher back dette folder-navnet: " << nav_to_folder << std::endl;
                         path.push_back(nav_to_folder);
                     }
@@ -165,19 +168,20 @@ int main()
                     std::cout << "Finner abspath for hvor den nye folderen skal havne" << std::endl;
                     std::string absPath = getPath(path);
                     std::cout << "Henter parentFolder basert på denne absPath" << std::endl;
-                    Folder *parentFolder = fs[absPath];
-                    std::cout << "Denne parent er " << parentFolder << std::endl;
+                    Folder &parentFolder = *fs[absPath];
+                    // std::cout << "Denne parent er " << parentFolder << std::endl;
                     std::string newFolderName = getFolderNameFromLine(line);
                     std::string newPath = absPath + "/" + newFolderName;
                     // std::string newPath = absPath + newFolderName;
                     std::cout << "Skal lage en ny folder på stien " << newPath << std::endl;
-                    Folder *newFolder = new Folder(&absPath);
+                    // Folder *newFolder = new Folder(&absPath);
+                    Folder *newFolder = new Folder(&newPath);
                     std::cout << "Skal legge den nye folderen i subolders til parent" << std::endl;
-                    parentFolder->subfolders.push_back(*newFolder);
+                    parentFolder.subfolder_pointers.push_back(newFolder);
                     std::cout << "Skal lagre nye folderen i fs" << std::endl;
                     fs[newPath] = newFolder;
                     std::cout << "Pusher ny folder til allFolders" << std::endl;
-                    allFolders.push_back(*newFolder);
+                    allFolders.push_back(newFolder);
                 }
                 else
                 {
@@ -188,7 +192,7 @@ int main()
                     int fileSize = getFileSizeFromLine(line);
                     std::string filePath = absPath + "/" + fileName;
                     File *newFile = new File(&filePath, fileSize);
-                    folder->files.push_back(*newFile);
+                    folder->file_pointers.push_back(newFile);
                 }
             }
         }
@@ -200,7 +204,8 @@ int main()
     int part1Res = 0;
     for (int i = 0; i < allFolders.size(); i++)
     {
-        Folder f = allFolders.at(i);
+        Folder *fp = allFolders.at(i);
+        Folder &f = *fp;
         int size = f.getSize();
         std::cout << "Size er " << size << std::endl;
         if (size <= roof)
@@ -211,34 +216,42 @@ int main()
     }
     std::cout << "Part 1: " << part1Res << std::endl;
     /*
-        for (int i = 0; i < cands.size(); i++)
-        {
-            int curr = cands.at(i);
-            if (curr < roof)
+    LOG("Dette er alle folders:")
+    for (auto fp : allFolders)
+    {
+        Folder f = *fp;
+        LOG("Dealer med en folder med path " << f.path)
+    }
+    * /
+        /*
+            for (int i = 0; i < cands.size(); i++)
             {
-                // currMin = curr;
+                int curr = cands.at(i);
+                if (curr < roof)
+                {
+                    // currMin = curr;
+                }
             }
-        }
 
-        for (int i = 0; i < allFolders.size(); i++)
-        {
-            Folder f = allFolders.at(i);
-            int size = f.getSize();
-            if (size <= roof)
+            for (int i = 0; i < allFolders.size(); i++)
             {
-                cands.push_back(size);
+                Folder f = allFolders.at(i);
+                int size = f.getSize();
+                if (size <= roof)
+                {
+                    cands.push_back(size);
+                }
             }
-        }
-        // Finn minste cand
-        int currMin = 999999;
-        for (int i = 0; i < cands.size(); i++)
-        {
-            int curr = cands.at(i);
-            if (curr < currMin)
+            // Finn minste cand
+            int currMin = 999999;
+            for (int i = 0; i < cands.size(); i++)
             {
-                currMin = curr;
+                int curr = cands.at(i);
+                if (curr < currMin)
+                {
+                    currMin = curr;
+                }
             }
-        }
-    */
+        */
     return 0;
 }
