@@ -128,7 +128,7 @@ int main()
 
     int part1Res = 0;
     int mustDelete = 30000000 - (70000000 - fs["/"]->getSize());
-    std::vector<int> cands;
+    int currMin = INT_MAX;
     for (int i = 0; i < allFolders.size(); i++)
     {
         int size = allFolders.at(i)->getSize();
@@ -136,12 +136,12 @@ int main()
         {
             part1Res += size;
         }
-        if (size >= mustDelete)
+        if (size >= mustDelete && size < currMin)
         {
-            cands.push_back(size);
+            currMin = size;
         }
     }
     std::cout << "Part 1: " << part1Res << std::endl;
-    std::cout << "Part 2: " << *std::min_element(cands.begin(), cands.end()) << std::endl;
+    std::cout << "Part 2: " << currMin << std::endl;
     return 0;
 }
