@@ -4,9 +4,6 @@
 #include <ios>
 #include <vector>
 
-#define LOG(x) std::cout << x << std::endl;
-#define ll long long
-
 class File
 {
 public:
@@ -58,26 +55,26 @@ public:
 std::string getPath(std::vector<std::string *> path)
 {
     std::string s = "/";
-    if (path.size() != 1)
+    for (int i = 1; i < path.size(); i++)
     {
-        for (int i = 1; i < path.size(); i++)
-        {
-            s += "/" + *path.at(i);
-        }
+        s += "/" + *path.at(i);
     }
     return s;
 }
 
+int findSpaceIndex(std::string &s)
+{
+    return s.find(" ") + 1;
+}
+
 std::string getNameFromLine(std::string line)
 {
-    std::size_t spaceIndex = line.find(" ") + 1;
-    return line.substr(spaceIndex);
+    return line.substr(findSpaceIndex(line));
 }
 
 int getFileSizeFromLine(std::string line)
 {
-    std::size_t spaceIndex = line.find(" ") + 1;
-    return stoi(line.substr(0, spaceIndex));
+    return stoi(line.substr(0, findSpaceIndex(line)));
 }
 
 int main()
@@ -86,69 +83,56 @@ int main()
     std::ifstream minFil("input");
 
     std::map<std::string, Folder *> fs;
-    std::string rootPath = "/";
-    Folder root(&rootPath);
-    fs["/"] = &root;
+    fs["/"] = new Folder(new std::string("/"));
 
     std::vector<Folder *> allFolders;
-
     std::vector<std::string *> path;
 
-    if (minFil.is_open())
+    while (getline(minFil, line))
     {
-        while (getline(minFil, line))
+        if (line[0] == '$')
         {
-            if (line[0] == '$')
+            if (line[2] == 'c')
             {
-                if (line[2] == 'c')
+                if (line[5] == '.')
                 {
-                    if (line[5] == '.')
-                    {
-                        path.pop_back();
-                    }
-                    else
-                    {
-                        std::size_t spaceIndex = line.substr(2).find(" ") + 3;
-                        std::string *nav_to_folder = new std::string(line.substr(spaceIndex));
-                        path.push_back(nav_to_folder);
-                    }
-                }
-            }
-            else
-            {
-                if (line[0] == 'd')
-                {
-                    std::string absPath = getPath(path);
-                    std::string newFolderName = getNameFromLine(line);
-                    std::string newPath = absPath + "/" + newFolderName;
-                    Folder *newFolder = new Folder(&newPath);
-                    Folder &parentFolder = *fs[absPath];
-                    parentFolder.subfolder_pointers.push_back(newFolder);
-                    fs[newPath] = newFolder;
-                    allFolders.push_back(newFolder);
+                    path.pop_back();
                 }
                 else
                 {
-                    std::string absPath = getPath(path);
-                    Folder *folder = fs[absPath];
-                    std::string fileName = getNameFromLine(line);
-                    int fileSize = getFileSizeFromLine(line);
-                    std::string filePath = absPath + "/" + fileName;
-                    File *newFile = new File(&filePath, fileSize);
-                    folder->file_pointers.push_back(newFile);
+                    std::size_t spaceIndex = line.substr(2).find(" ") + 3;
+                    path.push_back(new std::string(line.substr(spaceIndex)));
                 }
+            }
+        }
+        else
+        {
+            if (line[0] == 'd')
+            {
+                std::string absPath = getPath(path);
+                std::string newFolderName = getNameFromLine(line);
+                std::string newPath = absPath + "/" + newFolderName;
+                Folder *newFolder = new Folder(&newPath);
+                fs[absPath]->subfolder_pointers.push_back(newFolder);
+                fs[newPath] = newFolder;
+                allFolders.push_back(newFolder);
+            }
+            else
+            {
+                std::string absPath = getPath(path);
+                std::string filePath = absPath + "/" + getNameFromLine(line);
+                fs[absPath]->file_pointers.push_back(new File(&filePath, getFileSizeFromLine(line)));
             }
         }
     }
 
-    int roof = 100000;
     int part1Res = 0;
-    ll mustDelete = 30000000 - (70000000 - fs["/"]->getSize());
+    int mustDelete = 30000000 - (70000000 - fs["/"]->getSize());
     std::vector<int> cands;
     for (int i = 0; i < allFolders.size(); i++)
     {
         int size = allFolders.at(i)->getSize();
-        if (size <= roof)
+        if (size <= 100000)
         {
             part1Res += size;
         }
@@ -157,10 +141,9 @@ int main()
             cands.push_back(size);
         }
     }
-
     std::cout << "Part 1: " << part1Res << std::endl;
 
-    ll currMin = INT_MAX;
+    int currMin = INT_MAX;
     for (int i = 0; i < cands.size(); i++)
     {
         int curr = cands.at(i);
