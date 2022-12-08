@@ -85,7 +85,6 @@ int getFileSizeFromLine(std::string line)
 int main()
 {
     std::string line;
-    // std::ifstream minFil("small");
     std::ifstream minFil("input");
 
     std::map<std::string, Folder *> fs;
@@ -146,30 +145,23 @@ int main()
 
     int roof = 100000;
     int part1Res = 0;
-    for (int i = 0; i < allFolders.size(); i++)
-    {
-        Folder *fp = allFolders.at(i);
-        Folder &f = *fp;
-        int size = f.getSize();
-        if (size <= roof)
-        {
-            part1Res += size;
-        }
-    }
-    std::cout << "Part 1: " << part1Res << std::endl;
-
     ll mustDelete = 30000000 - (70000000 - fs["/"]->getSize());
     std::vector<int> cands;
     for (int i = 0; i < allFolders.size(); i++)
     {
-        Folder *fp = allFolders.at(i);
-        Folder &f = *fp;
-        int size = f.getSize();
+        int size = allFolders.at(i)->getSize();
+        if (size <= roof)
+        {
+            part1Res += size;
+        }
         if (size >= mustDelete)
         {
             cands.push_back(size);
         }
     }
+
+    std::cout << "Part 1: " << part1Res << std::endl;
+
     ll currMin = INT_MAX;
     for (int i = 0; i < cands.size(); i++)
     {
