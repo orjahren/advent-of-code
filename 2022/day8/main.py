@@ -6,13 +6,12 @@ for y in range(len(ll)):
             bitmap[y][x] = 1
 for row in range(len(ll)):
     for col in range(len(ll)):
-        tests = [
+        for test in [
             [ll[x][col] for x in range(row)],
             [ll[x][col] for x in range(len(ll) - 1, row, -1)],
             [ll[row][y] for y in range(len(ll) - 1, col, -1)],
             [ll[row][y] for y in range(col)],
-        ]
-        for test in tests:
+        ]:
             if max(test, default=99999) < ll[row][col]:
                 bitmap[row][col] = 1
 part1 = sum([1 for y in range(len(bitmap)) for x in range(len(bitmap[y])) if bitmap[y][x] == 1])
