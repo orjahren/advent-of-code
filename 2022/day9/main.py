@@ -1,7 +1,4 @@
-ll = [(s[0], int(s[1])) for x in open("input").readlines() if (s := x.split())]
-
-
-def update_common(tail, head, is_part_2=False):
+def update_tail(tail, head, is_part_2=False):
     tup = head[0] - tail[0], head[1] - tail[1]
     new_tail = list(tail)
 
@@ -34,7 +31,7 @@ part1, part2 = set(), set()
 part2.add(tuple(tail))
 part1.add(tuple(tail))
 
-for act, val in ll:
+for act, val in [(s[0], int(s[1])) for x in open("input").readlines() if (s := x.split())]:
     for _ in range(val):
         match (act):
             case "U":
@@ -47,8 +44,8 @@ for act, val in ll:
                 head[0] -= 1
 
         for i in range(len(knots) - 1):
-            knots[i + 1] = update_common(knots[i + 1], knots[i], True)
-        tail = update_common(tail, head)
+            knots[i + 1] = update_tail(knots[i + 1], knots[i], True)
+        tail = update_tail(tail, head)
         part1.add(tuple(tail))
         part2.add(tuple(knots[-1]))
 
