@@ -30,8 +30,7 @@ def update_common(tail, head, is_part_2=False):
 
 knots = [[0, 0] for _ in range(10)]
 head, tail = knots[0], knots[-1]
-part2 = set()
-part1 = set()
+part1, part2 = set(), set()
 part2.add(tuple(tail))
 part1.add(tuple(tail))
 
