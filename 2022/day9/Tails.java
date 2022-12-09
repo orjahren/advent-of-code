@@ -20,44 +20,34 @@ class Tails {
 
     }
 
-    private boolean isMatch(Knot k1, Knot k2) {
-        return k1.x == k2.x && k1.y == k2.y;
-    }
-
-    private Knot updateTail(Knot tail, Knot head) {
+    private Knot updateTail(Knot tail, Knot head, Knot[][] tests) {
         Knot tup = new Knot(head.x - tail.x, head.y - tail.y);
         Knot ret = new Knot(tail.x, tail.y);
-        Knot[] dt = { new Knot(-2, 1), new Knot(-1, 2), new Knot(0, 2), new Knot(1, 2), new Knot(2, 1) };
-        Knot[] rt = { new Knot(1, 2), new Knot(2, 1), new Knot(2, 0), new Knot(2, -1), new Knot(1, -2) };
-        Knot[] ot = { new Knot(2, -1), new Knot(1, -2), new Knot(0, -2), new Knot(-1, -2), new Knot(-2, -1) };
-        Knot[] lt = { new Knot(-1, -2), new Knot(-2, -1), new Knot(-2, 0), new Knot(-2, 1), new Knot(-1, 2) };
-
-        for (Knot k : dt) {
+        for (Knot k : tests[0]) {
             if (tup.equals(k)) {
                 ret.y++;
                 break;
             }
         }
-        for (Knot k : rt) {
+        for (Knot k : tests[1]) {
             if (tup.equals(k)) {
                 ret.x++;
                 break;
             }
 
         }
-        for (Knot k : ot) {
+        for (Knot k : tests[2]) {
             if (tup.equals(k)) {
                 ret.y--;
                 break;
             }
         }
-        for (Knot k : lt) {
+        for (Knot k : tests[3]) {
             if (tup.equals(k)) {
                 ret.x--;
                 break;
             }
         }
-
         return ret;
     }
 
@@ -70,6 +60,13 @@ class Tails {
         Knot tail = new Knot(0, 0);
 
         LinkedList<Knot> visitedByTail = new LinkedList<>();
+
+        Knot[] dt = { new Knot(-2, 1), new Knot(-1, 2), new Knot(0, 2), new Knot(1, 2), new Knot(2, 1) };
+        Knot[] rt = { new Knot(1, 2), new Knot(2, 1), new Knot(2, 0), new Knot(2, -1), new Knot(1, -2) };
+        Knot[] ot = { new Knot(2, -1), new Knot(1, -2), new Knot(0, -2), new Knot(-1, -2), new Knot(-2, -1) };
+        Knot[] lt = { new Knot(-1, -2), new Knot(-2, -1), new Knot(-2, 0), new Knot(-2, 1), new Knot(-1, 2) };
+
+        Knot[][] tests = { dt, rt, ot, lt };
 
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
@@ -90,7 +87,7 @@ class Tails {
                     case 'L':
                         head.x--;
                 }
-                tail = updateTail(tail, head);
+                tail = updateTail(tail, head, tests);
                 boolean tailIsVisited = false;
                 for (Knot k : visitedByTail) {
                     if (k.equals(tail)) {
