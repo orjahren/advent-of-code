@@ -1,5 +1,3 @@
-//  package day9;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
@@ -41,15 +39,6 @@ class Tails {
             }
         }
         for (Knot k : rt) {
-            /*
-             * 
-             * if (tup == k) {
-             * System.out.println("Like på ekte");
-             * ret.x++;
-             * break;
-             * }
-             */
-
             if (tup.equals(k)) {
                 ret.x++;
                 break;
@@ -72,7 +61,7 @@ class Tails {
         return ret;
     }
 
-    public void solve(String fileName) throws FileNotFoundException {
+    public int solve(String fileName) throws FileNotFoundException {
 
         File f = new File(fileName);
         Scanner scanner = new Scanner(f);
@@ -81,13 +70,11 @@ class Tails {
         Knot tail = new Knot(0, 0);
 
         LinkedList<Knot> visitedByTail = new LinkedList<>();
-        // visitedByTail.add(tail);
 
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
             char direction = line.charAt(0);
             int n = Integer.parseInt(line.split(" ")[1]);
-            System.out.println("Head skal gå " + n + " steg mot " + direction);
 
             for (short i = 0; i < n; i++) {
                 switch (direction) {
@@ -108,37 +95,29 @@ class Tails {
                 for (Knot k : visitedByTail) {
                     if (k.equals(tail)) {
                         tailIsVisited = true;
-                        // break;
+                        break;
                     }
                 }
                 if (!tailIsVisited) {
                     visitedByTail.add(tail);
                 }
-                /*
-                 * 
-                 * if (!visitedByTail.contains(tail)) {
-                 * visitedByTail.add(tail);
-                 * } else {
-                 * System.out.println("Lot være å adde");
-                 * }
-                 */
             }
 
         }
         scanner.close();
-        System.out.println("Part 1: " + visitedByTail.size());
+        return visitedByTail.size();
     }
 
     public static void main(String[] args) {
-        System.out.println("Hello world");
         Tails solver = new Tails();
-        try {
-
-            solver.solve("small");
-            solver.solve("input");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            System.exit(1);
+        for (String filename : new String[] { "small", "input" }) {
+            try {
+                int part1 = solver.solve(filename);
+                System.out.println("Part 1: " + part1);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
         }
     }
 }
