@@ -1,5 +1,4 @@
 ll = [[int(y) for y in list(x.strip())] for x in open("input").readlines()]
-# ll = [[int(y) for y in list(x.strip())] for x in open("small").readlines()]
 
 
 def part_1():
@@ -22,30 +21,25 @@ def part_1():
 
 
 def part_2():
-    scenic_scores = []
+    m = 0
     for row in range(len(ll)):
         for col in range(len(ll)):
-            scenic_scores.append(1)
-            tree = ll[row][col]
+            cand = 1
             for test in [
-                [ll[row][y] for y in range(col - 1, -1, -1)],  # left
-                [ll[row][y] for y in range(col + 1, len(ll))],  # right
-                [ll[x][col] for x in range(row - 1, -1, -1)],  # up
-                [ll[x][col] for x in range(row + 1, len(ll))],  # down
+                [ll[row][y] for y in range(col - 1, -1, -1)],
+                [ll[row][y] for y in range(col + 1, len(ll))],
+                [ll[x][col] for x in range(row - 1, -1, -1)],
+                [ll[x][col] for x in range(row + 1, len(ll))],
             ]:
                 curr_score = 0
-                print("Tester på", ll[row][col], row, col)
-                print(test)
                 for val in test:
-                    print("Sjekker om", val, "er lavere enn", val)
                     curr_score += 1
-                    if val >= tree:
+                    if val >= ll[row][col]:
                         break
-                print("En score er:", curr_score)
-                scenic_scores[-1] *= curr_score
-    print("Alle scores:")
-    print(scenic_scores)
-    return max(scenic_scores)
+                cand *= curr_score
+            if m < cand:
+                m = cand
+    return m
 
 
 print("Part 1:", part_1())
