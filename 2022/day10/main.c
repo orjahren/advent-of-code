@@ -16,11 +16,11 @@ void drawCRT(int *pHorIdx, int *pReg)
     int reg = *pReg;
     if (reg - 1 <= horIdx && reg + 1 >= horIdx)
     {
-        printf("#");
+        printf("█");
     }
     else
     {
-        printf(".");
+        printf(" ");
     }
     *pHorIdx = *pHorIdx + 1;
     if (*pHorIdx == 40)

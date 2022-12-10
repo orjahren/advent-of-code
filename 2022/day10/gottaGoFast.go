@@ -18,9 +18,9 @@ func doPart1(currentCycle, reg int) int {
 
 func drawCRT(reg int, pHorIdx *int) {
 	if reg-1 <= *pHorIdx && reg+1 >= *pHorIdx {
-		fmt.Print("#")
+		fmt.Print("█")
 	} else {
-		fmt.Print(".")
+		fmt.Print(" ")
 	}
 	*pHorIdx++
 	if *pHorIdx >= 40 {
