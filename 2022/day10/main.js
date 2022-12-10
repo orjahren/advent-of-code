@@ -27,8 +27,8 @@ const drawCRT = (reg, horIdx) => {
     let pop2 = 0;
     let horIdx = 0;
     let line = "";
-    let done = false;
-    while (!done) {
+    console.log("Part 2: ");
+    while (true) {
         currentCycle++;
         part1Res += doPart1(currentCycle, reg);
         drawCRT(reg, horIdx);
@@ -44,18 +44,16 @@ const drawCRT = (reg, horIdx) => {
             pop2 = parseInt(line.split(" ")[1]);
         }
         else if (!(pop1 != 0 || pop2 != 0 || line[0] === "n")) {
-            done = true;
             break;
         }
         line = " ";
-        (() => {
-            horIdx++;
-            if (horIdx == 40) {
-                horIdx = 0;
-                //process.stdout.wri
-                console.log("");
-            }
-        })();
+        horIdx =
+            horIdx === 39
+                ? (() => {
+                    console.log(" ");
+                    return 0;
+                })()
+                : horIdx + 1;
     }
     console.log("Part 1: ", part1Res);
 })();

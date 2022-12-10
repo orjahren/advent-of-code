@@ -22,12 +22,12 @@ const drawCRT = (reg: number, horIdx: number) => {
   let currentCycle = 0;
   let reg = 1;
   let part1Res = 0;
-  let pop1: number = 0;
-  let pop2: number = 0;
+  let pop1 = 0;
+  let pop2 = 0;
   let horIdx = 0;
   let line = "";
-  let done = false;
-  while (!done) {
+  console.log("Part 2: ");
+  while (true) {
     currentCycle++;
     part1Res += doPart1(currentCycle, reg);
     drawCRT(reg, horIdx);
@@ -41,17 +41,16 @@ const drawCRT = (reg: number, horIdx: number) => {
     if (line[0] === "a") {
       pop2 = parseInt(line.split(" ")[1]);
     } else if (!(pop1 != 0 || pop2 != 0 || line[0] === "n")) {
-      done = true;
       break;
     }
     line = " ";
-    (() => {
-      horIdx++;
-      if (horIdx == 40) {
-        horIdx = 0;
-        console.log("");
-      }
-    })();
+    horIdx =
+      horIdx === 39
+        ? (() => {
+            console.log(" ");
+            return 0;
+          })()
+        : horIdx + 1;
   }
   console.log("Part 1: ", part1Res);
 })();
