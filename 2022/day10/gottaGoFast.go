@@ -23,7 +23,7 @@ func drawCRT(reg int, pHorIdx *int) {
 		fmt.Print(".")
 	}
 	*pHorIdx++
-	if *pHorIdx == 40 {
+	if *pHorIdx >= 40 {
 		*pHorIdx = 0
 		fmt.Println("")
 	}
@@ -36,10 +36,10 @@ func main() {
 	currentCycle := 0
 	reg := 1
 	part1Res := 0
+	horIdx := 0
 	var line string
 	var pop1 int
 	var pop2 int
-	horIdx := 0
 	var pHorIdx *int = &horIdx
 
 	fmt.Println("Part 2:")
@@ -47,17 +47,13 @@ func main() {
 		currentCycle += 1
 		part1Res += doPart1(currentCycle, reg)
 		drawCRT(reg, pHorIdx)
-
 		pop1 = pop2
 		pop2 = 0
-
 		if pop1 != 0 {
 			reg += pop1
 		} else {
 			if scanner.Scan() {
 				line = scanner.Text()
-			} else {
-				line = " "
 			}
 		}
 		if line[0] == 'a' {
