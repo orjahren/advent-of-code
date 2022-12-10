@@ -35,14 +35,16 @@ int main()
     FILE *fp = fopen("input", "r");
     char line[10];
     int part1Res = 0;
-    int currentCycle = 1;
+    int currentCycle = 0;
     int reg = 1;
     int pendingOperation1 = __INT_MAX__;
     int pendingOperation2 = __INT_MAX__;
     int horIdx = 0;
+    int parsedReadValue;
     printf("Part 2:\n");
     while (1)
     {
+        currentCycle++;
         doPart1(&currentCycle, &part1Res, &reg);
         drawCRT(&horIdx, &reg);
 
@@ -60,16 +62,13 @@ int main()
 
         if (line[0] == 'a')
         {
-            int val;
-            char devNull[10];
-            sscanf(line, "%s %d", &devNull, &val);
-            pendingOperation2 = val;
+            sscanf(line, "%*s %d", &parsedReadValue);
+            pendingOperation2 = parsedReadValue;
         }
         else if (!((line[0] == 'n') || (pendingOperation1 != __INT_MAX__) || (pendingOperation2 != __INT_MAX__)))
         {
             break;
         }
-        currentCycle++;
         memset(line, 0, sizeof(char) * 10);
     }
     fclose(fp);

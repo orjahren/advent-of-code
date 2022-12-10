@@ -3,11 +3,11 @@ default:
 	./part1
 
 fast:
-	gcc -o fast main.c -Ofast
-	./fast
+	gcc -o fastBin main.c -Ofast
+	./fastBin
 
 
 prod:
-	gcc -o prod main.c -O2
-	./prod
+	gcc -o prodBin main.c -O2
+	./prodBin
 
