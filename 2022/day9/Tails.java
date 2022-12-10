@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -56,8 +57,13 @@ class Tails {
         File f = new File(fileName);
         Scanner scanner = new Scanner(f);
 
-        Knot head = new Knot(0, 0);
-        Knot tail = new Knot(0, 0);
+        ArrayList<Knot> allKnots = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            allKnots.add(new Knot(0, 0));
+        }
+
+        Knot tail = allKnots.get(9);
+        Knot head = allKnots.get(0);
 
         LinkedList<Knot> visitedByTail = new LinkedList<>();
 
