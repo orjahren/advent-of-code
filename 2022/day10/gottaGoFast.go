@@ -15,33 +15,38 @@ func doPart1(currentCycle, reg int) int {
 		return 0
 	}
 }
-func check(e error) {
-	if e != nil {
-		panic(e)
+
+func drawCRT(reg int, pHorIdx *int) {
+	if reg-1 <= *pHorIdx && reg+1 >= *pHorIdx {
+		fmt.Print("#")
+	} else {
+		fmt.Print(".")
+	}
+	*pHorIdx++
+	if *pHorIdx == 40 {
+		*pHorIdx = 0
+		fmt.Println("")
 	}
 }
 
 func main() {
-	fmt.Println("Hello world")
-	f, err := os.Open("input")
-	check(err)
+	f, _ := os.Open("input")
 	defer f.Close()
-
 	scanner := bufio.NewScanner(f)
-
-	//numberOfBlocks := 0
 	currentCycle := 0
 	reg := 1
 	part1Res := 0
+	var line string
+	var pop1 int
+	var pop2 int
+	horIdx := 0
+	var pHorIdx *int = &horIdx
 
-	var line string = " "
-	var pop1 int = 0
-	var pop2 int = 0
-
+	fmt.Println("Part 2:")
 	for true {
 		currentCycle += 1
 		part1Res += doPart1(currentCycle, reg)
-		//drawCRT()
+		drawCRT(reg, pHorIdx)
 
 		pop1 = pop2
 		pop2 = 0
@@ -50,24 +55,17 @@ func main() {
 			reg += pop1
 		} else {
 			if scanner.Scan() {
-
 				line = scanner.Text()
-				fmt.Println("Leste: " + line)
 			} else {
-
 				line = " "
 			}
-
 		}
-
 		if line[0] == 'a' {
 			pop2, _ = strconv.Atoi(strings.Split(line, " ")[1])
-			fmt.Println("Fikk parset: ", pop2)
 		} else if !((line[0] == 'n') || pop1 != 0 || pop2 != 0) {
 			break
 		}
 		line = " "
 	}
 	fmt.Println("Part 1:", part1Res)
-
 }
