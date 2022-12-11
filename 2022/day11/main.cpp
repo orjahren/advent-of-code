@@ -7,16 +7,10 @@
 
 using ll = long long;
 
-class Item
-{
-public:
-    ll worryLevel;
-};
-
 class Monkey
 {
 public:
-    std::vector<Item *> items;
+    std::vector<ll> items;
     ll opB;
     char opChar;
     int testDivBy;
@@ -29,43 +23,43 @@ public:
         this->opFlag = false;
         this->inspectionCounter = 0;
     }
-    void inspectItem(Item *item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll lcm, int part)
+    void inspectItem(ll &item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll lcm, int part)
     {
-        item->worryLevel = this->getWorryLevel(item);
+        item = this->getWorryLevel(item);
         if (part == 1)
         {
-            item->worryLevel = floor(item->worryLevel / 3);
+            item = floor(item / 3);
         }
-        item->worryLevel %= lcm;
+        item %= lcm;
         monkeys->at(this->getThrowTargetId(item))->items.push_back(item);
         this->items.erase(this->items.begin() + itemIndex);
         (*pLoopCounter)--;
     }
 
 private:
-    int getThrowTargetId(Item *item)
+    int getThrowTargetId(ll &item)
     {
         return this->doTest(item) ? this->testTrueTarget : this->testFalseTarget;
     }
-    bool doTest(Item *item)
+    bool doTest(ll &item)
     {
-        return (item->worryLevel % this->testDivBy) == 0;
+        return (item % this->testDivBy) == 0;
     }
-    ll getWorryLevel(Item *item)
+    ll getWorryLevel(ll &item)
     {
         ll operand = opB;
         if (this->opFlag)
         {
-            operand = item->worryLevel;
+            operand = item;
         }
         switch (opChar)
         {
         case '+':
-            return item->worryLevel + operand;
+            return item + operand;
         case '*':
-            return item->worryLevel * operand;
+            return item * operand;
         case '/':
-            return item->worryLevel / operand;
+            return item / operand;
         }
         return 0;
     }
@@ -87,11 +81,11 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
         std::size_t commaIdx = line.find(",");
         while (commaIdx != 0)
         {
-            Item *item = new Item;
             commaIdx = line.find(",") + 1;
             std::string numStr = line.substr(0, commaIdx - 1);
-            item->worryLevel = std::stoi(numStr);
-            m->items.push_back(item);
+            ll *item = new ll;
+            *item = (ll)std::stoi(numStr);
+            m->items.push_back(*item);
             line.erase(0, commaIdx); // Delete our handled item for the next iteration
         }
 
@@ -145,8 +139,8 @@ ll performSimulation(int part, std::vector<Monkey *> *monkeys, ll &lcm)
             m.inspectionCounter += m.items.size();
             for (int itemIdx = 0; itemIdx < m.items.size(); itemIdx++)
             {
-                Item &item = *m.items.at(itemIdx);
-                m.inspectItem(&item, monkeys, itemIdx, &itemIdx, lcm, part);
+                ll item = m.items.at(itemIdx);
+                m.inspectItem(item, monkeys, itemIdx, &itemIdx, lcm, part);
             }
         }
     }
