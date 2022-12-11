@@ -15,6 +15,8 @@ ll useCharAsArithmeticOperator(char &op, ll &a, ll &b)
         return a + b;
     case '*':
         return a * b;
+    case '/':
+        return a / b;
     }
     return 0;
 }
@@ -31,7 +33,6 @@ class Monkey
 public:
     int id;
     std::vector<Item *> items;
-    ll opA;
     ll opB;
     char opChar;
     int testDivBy;
@@ -57,10 +58,18 @@ public:
         }
     }
 
-    void inspectItem(Item *item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll lcm)
+    void inspectItem(Item *item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll lcm, int part)
     {
         item->worryLevel = this->getWorryLevel(item);
-        item->worryLevel %= lcm;
+        if (part == 1)
+        {
+            item->worryLevel = floor(item->worryLevel / 3);
+        }
+        else
+        {
+            item->worryLevel %= lcm;
+        }
+        // item->worryLevel %= lcm;
         int throwTargetId = this->getThrowTargetId(item);
         Monkey &throwTarget = *monkeys->at(throwTargetId);
         throwTarget.items.push_back(item);
@@ -155,17 +164,12 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
     return allMonkeys;
 }
 
-int main()
+ll performSimulation(int part, std::vector<Monkey *> *monkeys, ll &lcm)
 {
-    std::string filename = "input";
-    std::vector<Monkey *> *monkeys = readFileAndInitMonkeys(&filename);
-    ll lcm = 1;
-    for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
-    {
-        Monkey &m = *monkeys->at(monkeyIdx);
-        lcm *= m.testDivBy;
-    }
-    for (int turn = 0; turn < 10000; turn++)
+    int loop = (part == 2) ? 10000 : 20;
+    std::cout << loop << std::endl;
+
+    for (int turn = 0; turn < loop; turn++)
     {
         for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
         {
@@ -174,11 +178,10 @@ int main()
             for (int itemIdx = 0; itemIdx < m.items.size(); itemIdx++)
             {
                 Item &item = *m.items.at(itemIdx);
-                m.inspectItem(&item, monkeys, itemIdx, &itemIdx, lcm);
+                m.inspectItem(&item, monkeys, itemIdx, &itemIdx, lcm, part);
             }
         }
     }
-
     std::vector<ll> counts;
     for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
     {
@@ -189,6 +192,23 @@ int main()
     }
     std::sort(counts.begin(), counts.end());
     int nMonkeys = monkeys->size();
-    ll part2Res = counts.at(nMonkeys - 1) * counts.at(nMonkeys - 2);
-    std::cout << "Part 2: " << part2Res << std::endl;
+    return counts.at(nMonkeys - 1) * counts.at(nMonkeys - 2);
+}
+
+int main()
+{
+    std::string filename = "input";
+    std::vector<Monkey *> *monkeys = readFileAndInitMonkeys(&filename);
+    ll lcm = 1;
+    for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
+    {
+        Monkey &m = *monkeys->at(monkeyIdx);
+        lcm *= m.testDivBy;
+    }
+
+    ll res = performSimulation(1, monkeys, lcm);
+    std::cout << "Part 1: " << res << std::endl;
+    monkeys = readFileAndInitMonkeys(&filename);
+    res = performSimulation(2, monkeys, lcm);
+    std::cout << "Part 2: " << res << std::endl;
 }
