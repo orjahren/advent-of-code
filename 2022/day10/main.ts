@@ -37,11 +37,11 @@ const drawCRT = (reg: number, horIdx: number) => {
       reg += pop1;
     } else {
       line = lines.shift() ?? " ";
-    }
-    if (line[0] === "a") {
-      pop2 = parseInt(line.split(" ")[1]);
-    } else if (!(pop1 != 0 || pop2 != 0 || line[0] === "n")) {
-      break;
+      if (line[0] === "a") {
+        pop2 = parseInt(line.split(" ")[1]);
+      } else if (!(pop1 != 0 || pop2 != 0 || line[0] === "n")) {
+        break;
+      }
     }
     line = " ";
     horIdx =

@@ -39,12 +39,12 @@ const drawCRT = (reg, horIdx) => {
         }
         else {
             line = (_a = lines.shift()) !== null && _a !== void 0 ? _a : " ";
-        }
-        if (line[0] === "a") {
-            pop2 = parseInt(line.split(" ")[1]);
-        }
-        else if (!(pop1 != 0 || pop2 != 0 || line[0] === "n")) {
-            break;
+            if (line[0] === "a") {
+                pop2 = parseInt(line.split(" ")[1]);
+            }
+            else if (!(pop1 != 0 || pop2 != 0 || line[0] === "n")) {
+                break;
+            }
         }
         line = " ";
         horIdx =
