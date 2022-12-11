@@ -82,7 +82,7 @@ public:
         }
     }
 
-    void inspectItem(Item *item, std::vector<Monkey *> *monkeys, int &itemIndex)
+    void inspectItem(Item *item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter)
     {
         LOG2("Ape " << this->id << " inspecter item med id " << item->id)
 
@@ -99,7 +99,11 @@ public:
         LOG3("Throwtarget er ape med id " << throwTargetId)
         Monkey &throwTarget = *monkeys->at(throwTargetId);
         throwTarget.items.push_back(item);
+        LOG("Item som vil bli slettet er: ")
+        Item &check = *this->items[itemIndex];
+        LOG(check.id << " , " << check.worryLevel)
         this->items.erase(this->items.begin() + itemIndex);
+        (*pLoopCounter)--;
         LOG3("Kastet item til apen")
         // item->worryLevel = m->getWorryLevel(item);
     }
@@ -198,7 +202,8 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
 
 int main()
 {
-    std::string filename = "small";
+    // std::string filename = "small";
+    std::string filename = "input";
     // ##Assume invariant: monkey at allMonkeys[x] has ID x
     std::vector<Monkey *> *monkeys = readFileAndInitMonkeys(&filename);
     LOG("Alt OK")
@@ -223,7 +228,7 @@ int main()
             {
                 Item &item = *m.items.at(itemIdx);
                 // LOG2("Behandler item " << item.id << ", som har worryLevel " << item.worryLevel)
-                m.inspectItem(&item, monkeys, itemIdx);
+                m.inspectItem(&item, monkeys, itemIdx, &itemIdx);
             }
         }
 
