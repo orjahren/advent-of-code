@@ -3,6 +3,14 @@
 #include <fstream>
 #include <string>
 #include <math.h> //trengs for 'floor'
+// #include <boost/multiprecision/cpp_int.hpp> // hehe
+// #include "/usr/local/Cellar/boost/1.80.0/include/multiprecision/cpp_int.hpp" // hehe
+/*
+#include "/usr/local/Cellar/boost/1.80.0/include/boost/multiprecision/cpp_int.hpp"
+#include "/usr/local/Cellar/boost/1.80.0/include/boost/multiprecision/cpp_dec_float.hpp"
+#define lf boost::multiprecision::cpp_dec_float_50
+#define ll boost::multiprecision::cpp_int
+*/
 
 #define LOG(x) std::cout << x << std::endl;
 #define LOG1(x) LOG("\t" << x)
@@ -11,20 +19,25 @@
 #define LINEBREAK LOG1("-----")
 #define STARBREAK LOG1("*****")
 
+// #define ll boost::multiprecision::int128_t // cpp_int // TODO: this is wack, should fix
+// #define ll boost::multiprecision::cpp_int // cpp_int // TODO: this is wack, should fix
+#define ll long long
+#define lf float
+
 // https://stackoverflow.com/a/34944238/14530865
-double useCharAsArithmeticOperator(char &op, int &a, int &b)
+lf useCharAsArithmeticOperator(char &op, ll &a, ll &b)
 {
     // LOG("SKal bruke denne operatoren: " << op)
     switch (op)
     {
     case '+':
-        return a + b;
+        return (lf)a + (lf)b;
     case '-':
-        return a - b;
+        return (lf)a - (lf)b;
     case '*':
-        return a * b;
+        return (lf)a * (lf)b;
     case '/':
-        return a / b;
+        return (lf)a / (lf)b;
     default:
         throw std::runtime_error("No such operator");
     }
@@ -34,7 +47,8 @@ class Item
 {
 public:
     int id;
-    int worryLevel;
+    // int worryLevel;
+    ll worryLevel;
 };
 
 class Monkey
@@ -42,10 +56,10 @@ class Monkey
 public:
     int id;
     std::vector<Item *> items;
-    int opA;
-    int opB;
+    ll opA;
+    ll opB;
     char opChar;
-    int testDivBy;
+    ll testDivBy;
     int testTrueTarget;
     int testFalseTarget;
     bool opFlag;
@@ -58,7 +72,7 @@ public:
         this->inspectionCounter = 0;
     }
 
-    double getWorryLevel(Item *item)
+    lf getWorryLevel(Item *item)
     {
         if (this->opFlag)
         {
@@ -88,11 +102,13 @@ public:
 
         this->inspectionCounter++;
 
-        double newWorryLevel = this->getWorryLevel(item);
+        lf newWorryLevel = this->getWorryLevel(item);
         LOG3("New worry level is " << newWorryLevel)
-        double dividedBy3 = newWorryLevel / 3;
-        LOG3(", som delt på 3 er " << dividedBy3)
-        int floored = floor(dividedBy3);
+        // double dividedBy3 = newWorryLevel / 3;
+        // LOG3(", som delt på 3 er " << dividedBy3)
+        // int floored = floor(dividedBy3);
+        // ll floored = floor(newWorryLevel);
+        ll floored = ll(newWorryLevel);
         LOG3(",, som floored er: " << floored)
         item->worryLevel = floored;
         int throwTargetId = this->getThrowTargetId(item);
@@ -202,9 +218,9 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
 
 int main()
 {
-    // std::string filename = "small";
-    std::string filename = "input";
-    // ##Assume invariant: monkey at allMonkeys[x] has ID x
+    std::string filename = "small";
+    // std::string filename = "input";
+    //  ##Assume invariant: monkey at allMonkeys[x] has ID x
     std::vector<Monkey *> *monkeys = readFileAndInitMonkeys(&filename);
     LOG("Alt OK")
     LOG("Har antall aper: " << monkeys->size())
@@ -214,7 +230,8 @@ int main()
 
     LOG("////////////////////////////")
     LOG("BEGYNNER Å SIMMULERE TURNS")
-    for (int turn = 0; turn < 20; turn++)
+    const int nTurns = 1000;
+    for (int turn = 0; turn < nTurns; turn++)
     {
         LINEBREAK
         LOG("Simulerer turn " << turn)
@@ -248,6 +265,7 @@ int main()
     }
     std::sort(counts.begin(), counts.end());
     int nMonkeys = monkeys->size();
-    int part1Res = counts.at(nMonkeys - 1) * counts.at(nMonkeys - 2);
-    LOG("Part 1: " << part1Res)
+    int part2Res = counts.at(nMonkeys - 1) * counts.at(nMonkeys - 2);
+    // LOG("Part 1: " << part1Res)
+    LOG("Part 2: " << part2Res)
 }
