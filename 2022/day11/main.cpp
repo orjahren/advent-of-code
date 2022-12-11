@@ -2,14 +2,19 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <math.h> //trengs for 'floor'
 
 #define LOG(x) std::cout << x << std::endl;
 #define LOG1(x) LOG("\t" << x)
+#define LOG2(x) LOG("\t\t" << x)
+#define LOG3(x) LOG("\t\t\t" << x)
 #define LINEBREAK LOG1("-----")
+#define STARBREAK LOG1("*****")
 
 // https://stackoverflow.com/a/34944238/14530865
 double useCharAsArithmeticOperator(char &op, int &a, int &b)
 {
+    // LOG("SKal bruke denne operatoren: " << op)
     switch (op)
     {
     case '+':
@@ -45,9 +50,12 @@ public:
     int testFalseTarget;
     bool opFlag;
 
+    int inspectionCounter;
+
     Monkey()
     {
         this->opFlag = false;
+        this->inspectionCounter = 0;
     }
 
     double getWorryLevel(Item *item)
@@ -61,28 +69,61 @@ public:
             return useCharAsArithmeticOperator(opChar, item->worryLevel, opB);
         }
     }
+
+    int getThrowTargetId(Item *item)
+    {
+        if (this->doTest(item))
+        {
+            return this->testTrueTarget;
+        }
+        else
+        {
+            return this->testFalseTarget;
+        }
+    }
+
+    void inspectItem(Item *item, std::vector<Monkey *> *monkeys, int &itemIndex)
+    {
+        LOG2("Ape " << this->id << " inspecter item med id " << item->id)
+
+        this->inspectionCounter++;
+
+        double newWorryLevel = this->getWorryLevel(item);
+        LOG3("New worry level is " << newWorryLevel)
+        double dividedBy3 = newWorryLevel / 3;
+        LOG3(", som delt på 3 er " << dividedBy3)
+        int floored = floor(dividedBy3);
+        LOG3(",, som floored er: " << floored)
+        item->worryLevel = floored;
+        int throwTargetId = this->getThrowTargetId(item);
+        LOG3("Throwtarget er ape med id " << throwTargetId)
+        Monkey &throwTarget = *monkeys->at(throwTargetId);
+        throwTarget.items.push_back(item);
+        this->items.erase(this->items.begin() + itemIndex);
+        LOG3("Kastet item til apen")
+        // item->worryLevel = m->getWorryLevel(item);
+    }
+
+private:
+    bool doTest(Item *item)
+    {
+        return (item->worryLevel % this->testDivBy) == 0;
+    }
 };
 
-void inspectItem(Monkey *m, Item *item)
+std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
 {
-    item->worryLevel = m->getWorryLevel(item);
-}
-
-int main()
-{
-
     LOG("Les monques seraient inittedé\n")
     std::string line;
-    std::ifstream file("small");
-    std::vector<Monkey *> allMonkeys;
+    std::ifstream file(*filename);
+    std::vector<Monkey *> *allMonkeys = new std::vector<Monkey *>;
     int monkeyIdCounter = 0;
     int itemIdCounter = 0;
-    double worryLevel;
     while (getline(file, line))
     {
         LOG("******** Skal starte en ny ape: " << line)
         Monkey *m = new Monkey;
-        allMonkeys.push_back(m);
+        allMonkeys->push_back(m);
         m->id = monkeyIdCounter++;
 
         // Deal with 'initial items'
@@ -93,15 +134,11 @@ int main()
         std::size_t commaIdx = line.find(",");
         while (commaIdx != 0)
         {
-
             Item *item = new Item;
-
             LOG("Line er: " << line)
-
             commaIdx = line.find(",") + 1;
             LOG("KommaIdx er " << commaIdx)
             std::string numStr = line.substr(0, commaIdx - 1);
-            // numStr = numStr.substr(0, numStr.find(","));
             LOG("Fant nr: " << numStr)
             int worryLevel = std::stoi(numStr);
 
@@ -111,8 +148,6 @@ int main()
             line.erase(0, commaIdx); // Delete our handled item for the next iteration
         }
         LINEBREAK
-        // LOG("Line etter loopen: " << line)
-        //  LOG(numStr) // gir riktig
 
         // Deal with 'operation'
         LOG("\tFikser operation")
@@ -120,6 +155,7 @@ int main()
         std::size_t opIdx = line.find("d ") + 2;
         line.erase(0, opIdx);
         char op = line[0];
+        m->opChar = op;
         line.erase(0, 2); // delete the op and the space after
         if (line[0] == 'o')
         {
@@ -157,12 +193,56 @@ int main()
 
         LOG("------------ Ape ferdig \n")
     }
-    /*
-    for (Monkey *m : allMonkeys)
+    return allMonkeys;
+}
+
+int main()
+{
+    std::string filename = "small";
+    // ##Assume invariant: monkey at allMonkeys[x] has ID x
+    std::vector<Monkey *> *monkeys = readFileAndInitMonkeys(&filename);
+    LOG("Alt OK")
+    LOG("Har antall aper: " << monkeys->size())
+
+    LINEBREAK
+    LOG("\n")
+
+    LOG("////////////////////////////")
+    LOG("BEGYNNER Å SIMMULERE TURNS")
+    for (int turn = 0; turn < 20; turn++)
     {
-        LOG("Frir opp minne for monke " << m->id)
-        delete m;
+        LINEBREAK
+        LOG("Simulerer turn " << turn)
+
+        for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
+        {
+            Monkey &m = *monkeys->at(monkeyIdx);
+            // LOG1("Det er ape " << monkeyIdx << " sin tur.")
+            //  LOG("M sin minneadresse er: " << &m)
+            for (int itemIdx = 0; itemIdx < m.items.size(); itemIdx++)
+            {
+                Item &item = *m.items.at(itemIdx);
+                // LOG2("Behandler item " << item.id << ", som har worryLevel " << item.worryLevel)
+                m.inspectItem(&item, monkeys, itemIdx);
+            }
+        }
+
+        STARBREAK
     }
-    LOG(allMonkeys.size())
-    */
+
+    LINEBREAK
+    LINEBREAK
+
+    std::vector<int> counts;
+    for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
+    {
+        Monkey &m = *monkeys->at(monkeyIdx);
+        int mCount = m.inspectionCounter;
+        counts.push_back(mCount);
+        LOG("Monkey " << monkeyIdx << " inspected items " << mCount << " times.")
+    }
+    std::sort(counts.begin(), counts.end());
+    int nMonkeys = monkeys->size();
+    int part1Res = counts.at(nMonkeys - 1) * counts.at(nMonkeys - 2);
+    LOG("Part 1: " << part1Res)
 }
