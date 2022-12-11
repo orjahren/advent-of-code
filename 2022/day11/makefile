@@ -1,8 +1,8 @@
 default:
-		g++-12 -I /usr/local/Cellar/boost/1.80.0/include/ -o main main.cpp
+		g++-12  -o main main.cpp
 		./main
 		rm main
-ll:
-		g++-12 -I /usr/local/Cellar/boost/1.80.0/include/ -o logless logless.cpp
+stock:
+		g++ -o logless main.cpp
 		./logless
 		rm logless

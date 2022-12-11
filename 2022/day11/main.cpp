@@ -1,16 +1,9 @@
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <fstream>
 #include <string>
 #include <math.h> //trengs for 'floor'
-// #include <boost/multiprecision/cpp_int.hpp> // hehe
-// #include "/usr/local/Cellar/boost/1.80.0/include/multiprecision/cpp_int.hpp" // hehe
-/*
-#include "/usr/local/Cellar/boost/1.80.0/include/boost/multiprecision/cpp_int.hpp"
-#include "/usr/local/Cellar/boost/1.80.0/include/boost/multiprecision/cpp_dec_float.hpp"
-#define lf boost::multiprecision::cpp_dec_float_50
-#define ll boost::multiprecision::cpp_int
-*/
 
 #define LOG(x) std::cout << x << std::endl;
 #define LOG1(x) LOG("\t" << x)
@@ -19,25 +12,18 @@
 #define LINEBREAK LOG1("-----")
 #define STARBREAK LOG1("*****")
 
-// #define ll boost::multiprecision::int128_t // cpp_int // TODO: this is wack, should fix
-// #define ll boost::multiprecision::cpp_int // cpp_int // TODO: this is wack, should fix
-#define ll long long
-#define lf float
+using ll = long long;
 
 // https://stackoverflow.com/a/34944238/14530865
-lf useCharAsArithmeticOperator(char &op, ll &a, ll &b)
+ll useCharAsArithmeticOperator(char &op, ll &a, ll &b)
 {
     // LOG("SKal bruke denne operatoren: " << op)
     switch (op)
     {
     case '+':
-        return (lf)a + (lf)b;
-    case '-':
-        return (lf)a - (lf)b;
+        return a + b;
     case '*':
-        return (lf)a * (lf)b;
-    case '/':
-        return (lf)a / (lf)b;
+        return a * b;
     default:
         throw std::runtime_error("No such operator");
     }
@@ -47,7 +33,6 @@ class Item
 {
 public:
     int id;
-    // int worryLevel;
     ll worryLevel;
 };
 
@@ -59,7 +44,7 @@ public:
     ll opA;
     ll opB;
     char opChar;
-    ll testDivBy;
+    int testDivBy;
     int testTrueTarget;
     int testFalseTarget;
     bool opFlag;
@@ -70,18 +55,6 @@ public:
     {
         this->opFlag = false;
         this->inspectionCounter = 0;
-    }
-
-    lf getWorryLevel(Item *item)
-    {
-        if (this->opFlag)
-        {
-            return useCharAsArithmeticOperator(opChar, item->worryLevel, item->worryLevel);
-        }
-        else
-        {
-            return useCharAsArithmeticOperator(opChar, item->worryLevel, opB);
-        }
     }
 
     int getThrowTargetId(Item *item)
@@ -96,38 +69,32 @@ public:
         }
     }
 
-    void inspectItem(Item *item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter)
+    void inspectItem(Item *item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll lcm)
     {
-        LOG2("Ape " << this->id << " inspecter item med id " << item->id)
-
-        this->inspectionCounter++;
-
-        lf newWorryLevel = this->getWorryLevel(item);
-        LOG3("New worry level is " << newWorryLevel)
-        // double dividedBy3 = newWorryLevel / 3;
-        // LOG3(", som delt på 3 er " << dividedBy3)
-        // int floored = floor(dividedBy3);
-        // ll floored = floor(newWorryLevel);
-        ll floored = ll(newWorryLevel);
-        LOG3(",, som floored er: " << floored)
-        item->worryLevel = floored;
+        item->worryLevel = this->getWorryLevel(item);
+        item->worryLevel %= lcm;
         int throwTargetId = this->getThrowTargetId(item);
-        LOG3("Throwtarget er ape med id " << throwTargetId)
         Monkey &throwTarget = *monkeys->at(throwTargetId);
         throwTarget.items.push_back(item);
-        LOG("Item som vil bli slettet er: ")
-        Item &check = *this->items[itemIndex];
-        LOG(check.id << " , " << check.worryLevel)
         this->items.erase(this->items.begin() + itemIndex);
         (*pLoopCounter)--;
-        LOG3("Kastet item til apen")
-        // item->worryLevel = m->getWorryLevel(item);
     }
 
 private:
     bool doTest(Item *item)
     {
         return (item->worryLevel % this->testDivBy) == 0;
+    }
+    ll getWorryLevel(Item *item)
+    {
+        if (this->opFlag)
+        {
+            return useCharAsArithmeticOperator(opChar, item->worryLevel, item->worryLevel);
+        }
+        else
+        {
+            return useCharAsArithmeticOperator(opChar, item->worryLevel, opB);
+        }
     }
 };
 
@@ -218,44 +185,33 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
 
 int main()
 {
-    std::string filename = "small";
-    // std::string filename = "input";
-    //  ##Assume invariant: monkey at allMonkeys[x] has ID x
+    std::string filename = "input";
     std::vector<Monkey *> *monkeys = readFileAndInitMonkeys(&filename);
-    LOG("Alt OK")
-    LOG("Har antall aper: " << monkeys->size())
 
-    LINEBREAK
-    LOG("\n")
-
-    LOG("////////////////////////////")
-    LOG("BEGYNNER Å SIMMULERE TURNS")
-    const int nTurns = 1000;
-    for (int turn = 0; turn < nTurns; turn++)
+    ll lcm = 1;
+    for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
     {
-        LINEBREAK
-        LOG("Simulerer turn " << turn)
+        Monkey &m = *monkeys->at(monkeyIdx);
+        lcm *= m.testDivBy;
+    }
+    LOG("lcm er " << lcm)
+
+    for (int turn = 0; turn < 10000; turn++)
+    {
 
         for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
         {
             Monkey &m = *monkeys->at(monkeyIdx);
-            // LOG1("Det er ape " << monkeyIdx << " sin tur.")
-            //  LOG("M sin minneadresse er: " << &m)
+            m.inspectionCounter += m.items.size();
             for (int itemIdx = 0; itemIdx < m.items.size(); itemIdx++)
             {
                 Item &item = *m.items.at(itemIdx);
-                // LOG2("Behandler item " << item.id << ", som har worryLevel " << item.worryLevel)
-                m.inspectItem(&item, monkeys, itemIdx, &itemIdx);
+                m.inspectItem(&item, monkeys, itemIdx, &itemIdx, lcm);
             }
         }
-
-        STARBREAK
     }
 
-    LINEBREAK
-    LINEBREAK
-
-    std::vector<int> counts;
+    std::vector<ll> counts;
     for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
     {
         Monkey &m = *monkeys->at(monkeyIdx);
@@ -265,7 +221,7 @@ int main()
     }
     std::sort(counts.begin(), counts.end());
     int nMonkeys = monkeys->size();
-    int part2Res = counts.at(nMonkeys - 1) * counts.at(nMonkeys - 2);
+    ll part2Res = counts.at(nMonkeys - 1) * counts.at(nMonkeys - 2);
     // LOG("Part 1: " << part1Res)
     LOG("Part 2: " << part2Res)
 }
