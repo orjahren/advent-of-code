@@ -31,7 +31,6 @@ public:
 class Monkey
 {
 public:
-    int id;
     std::vector<Item *> items;
     ll opB;
     char opChar;
@@ -69,7 +68,7 @@ public:
         {
             item->worryLevel %= lcm;
         }
-        // item->worryLevel %= lcm;
+        item->worryLevel %= lcm;
         int throwTargetId = this->getThrowTargetId(item);
         Monkey &throwTarget = *monkeys->at(throwTargetId);
         throwTarget.items.push_back(item);
@@ -100,13 +99,10 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
     std::string line;
     std::ifstream file(*filename);
     std::vector<Monkey *> *allMonkeys = new std::vector<Monkey *>;
-    int monkeyIdCounter = 0;
-    int itemIdCounter = 0;
     while (getline(file, line))
     {
         Monkey *m = new Monkey;
         allMonkeys->push_back(m);
-        m->id = monkeyIdCounter++;
 
         // Deal with 'initial items'
         getline(file, line);
@@ -121,7 +117,6 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
             int worryLevel = std::stoi(numStr);
 
             item->worryLevel = worryLevel;
-            item->id = itemIdCounter++;
             m->items.push_back(item);
             line.erase(0, commaIdx); // Delete our handled item for the next iteration
         }
@@ -167,11 +162,10 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
 ll performSimulation(int part, std::vector<Monkey *> *monkeys, ll &lcm)
 {
     int loop = (part == 2) ? 10000 : 20;
-    std::cout << loop << std::endl;
-
+    const int nMonkeys = monkeys->size();
     for (int turn = 0; turn < loop; turn++)
     {
-        for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
+        for (int monkeyIdx = 0; monkeyIdx < nMonkeys; monkeyIdx++)
         {
             Monkey &m = *monkeys->at(monkeyIdx);
             m.inspectionCounter += m.items.size();
@@ -182,17 +176,13 @@ ll performSimulation(int part, std::vector<Monkey *> *monkeys, ll &lcm)
             }
         }
     }
-    std::vector<ll> counts;
-    for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
+    ll counts[nMonkeys];
+    for (int monkeyIdx = 0; monkeyIdx < nMonkeys; monkeyIdx++)
     {
-        Monkey &m = *monkeys->at(monkeyIdx);
-        int mCount = m.inspectionCounter;
-        counts.push_back(mCount);
-        std::cout << "Monkey " << monkeyIdx << " inspected items " << mCount << " times." << std::endl;
+        counts[monkeyIdx] = monkeys->at(monkeyIdx)->inspectionCounter;
     }
-    std::sort(counts.begin(), counts.end());
-    int nMonkeys = monkeys->size();
-    return counts.at(nMonkeys - 1) * counts.at(nMonkeys - 2);
+    std::sort(counts, counts + nMonkeys);
+    return counts[nMonkeys - 1] * counts[nMonkeys - 2];
 }
 
 int main()
@@ -208,6 +198,7 @@ int main()
 
     ll res = performSimulation(1, monkeys, lcm);
     std::cout << "Part 1: " << res << std::endl;
+    delete monkeys;
     monkeys = readFileAndInitMonkeys(&filename);
     res = performSimulation(2, monkeys, lcm);
     std::cout << "Part 2: " << res << std::endl;
