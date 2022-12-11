@@ -7,24 +7,9 @@
 
 using ll = long long;
 
-ll useCharAsArithmeticOperator(char &op, ll &a, ll &b)
-{
-    switch (op)
-    {
-    case '+':
-        return a + b;
-    case '*':
-        return a * b;
-    case '/':
-        return a / b;
-    }
-    return 0;
-}
-
 class Item
 {
 public:
-    int id;
     ll worryLevel;
 };
 
@@ -44,19 +29,6 @@ public:
         this->opFlag = false;
         this->inspectionCounter = 0;
     }
-
-    int getThrowTargetId(Item *item)
-    {
-        if (this->doTest(item))
-        {
-            return this->testTrueTarget;
-        }
-        else
-        {
-            return this->testFalseTarget;
-        }
-    }
-
     void inspectItem(Item *item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll lcm, int part)
     {
         item->worryLevel = this->getWorryLevel(item);
@@ -64,33 +36,38 @@ public:
         {
             item->worryLevel = floor(item->worryLevel / 3);
         }
-        else
-        {
-            item->worryLevel %= lcm;
-        }
         item->worryLevel %= lcm;
-        int throwTargetId = this->getThrowTargetId(item);
-        Monkey &throwTarget = *monkeys->at(throwTargetId);
-        throwTarget.items.push_back(item);
+        monkeys->at(this->getThrowTargetId(item))->items.push_back(item);
         this->items.erase(this->items.begin() + itemIndex);
         (*pLoopCounter)--;
     }
 
 private:
+    int getThrowTargetId(Item *item)
+    {
+        return this->doTest(item) ? this->testTrueTarget : this->testFalseTarget;
+    }
     bool doTest(Item *item)
     {
         return (item->worryLevel % this->testDivBy) == 0;
     }
     ll getWorryLevel(Item *item)
     {
+        ll operand = opB;
         if (this->opFlag)
         {
-            return useCharAsArithmeticOperator(opChar, item->worryLevel, item->worryLevel);
+            operand = item->worryLevel;
         }
-        else
+        switch (opChar)
         {
-            return useCharAsArithmeticOperator(opChar, item->worryLevel, opB);
+        case '+':
+            return item->worryLevel + operand;
+        case '*':
+            return item->worryLevel * operand;
+        case '/':
+            return item->worryLevel / operand;
         }
+        return 0;
     }
 };
 
@@ -104,7 +81,6 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
         Monkey *m = new Monkey;
         allMonkeys->push_back(m);
 
-        // Deal with 'initial items'
         getline(file, line);
         std::size_t colIdx = line.find(":") + 1;
         line.erase(0, colIdx);
@@ -114,9 +90,7 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
             Item *item = new Item;
             commaIdx = line.find(",") + 1;
             std::string numStr = line.substr(0, commaIdx - 1);
-            int worryLevel = std::stoi(numStr);
-
-            item->worryLevel = worryLevel;
+            item->worryLevel = std::stoi(numStr);
             m->items.push_back(item);
             line.erase(0, commaIdx); // Delete our handled item for the next iteration
         }
