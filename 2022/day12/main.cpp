@@ -9,53 +9,26 @@
 
 #define pb push_back
 
-int bfs(std::vector<std::string> lines, int sr, int sc)
+int bfs(std::vector<std::string> &lines, int sr, int sc, int targetX, int targetY)
 {
-    std::cout << "Starter BFS" << std::endl;
     const int height = lines[0].size();
     const int width = lines.size();
-    std::cout << "Grid size: " << width << "x" << height << std::endl;
 
-    const int R = height;
-    const int C = width;
-
-    char m[R][C];
-    bool visited[R][C];
-    int goalI = -1;
-    int goalJ = -1;
-
-    std::cout << "SR og SC før: " << sr << ", " << sc << std::endl;
+    char m[height][width];
+    bool visited[height][width];
 
     for (int i = 0; i < width; i++)
     {
         std::string l = lines.at(i);
         for (int j = 0; j < height; j++)
         {
-            char c = l[j];
-            m[j][i] = c;
+            m[j][i] = l[j];
             visited[j][i] = false;
-
-            if (c == 'E')
-            {
-                m[j][i] = 'z';
-                goalI = j;
-                goalJ = i;
-            }
-            else if (c == 'S')
-            {
-                std::cout << "SETTER SR og SC: " << sr << ", " << sc << std::endl;
-                m[j][i] = 'a';
-                // sr = j;
-                // sc = i;
-                std::cout << "SETTER SR og SC: " << sr << ", " << sc << std::endl;
-            }
-            std::cout << m[j][i];
         }
-        std::cout << std::endl;
     }
 
-    std::cout << "TARGET: " << goalI << ", " << goalJ << std::endl;
-    std::cout << "SR og SC etter: " << sr << ", " << sc << std::endl;
+    m[sr][sc] = 'a';
+    m[targetX][targetY] = 'z';
 
     std::deque<int> rq;
     std::deque<int> cq;
@@ -63,14 +36,13 @@ int bfs(std::vector<std::string> lines, int sr, int sc)
     int nodesLeftInLayer = 1;
     int nodesInNextLayer = 0;
 
-    bool reachEnd = false;
     int moveCount = 0;
 
     int dr[4] = {-1, +1, 0, 0};
     int dc[4] = {0, 0, +1, -1};
 
-    rq.emplace_back(sr);
-    cq.emplace_back(sc);
+    rq.push_back(sr);
+    cq.push_back(sc);
     visited[sr][sc] = true;
 
     while (rq.size() > 0)
@@ -79,67 +51,20 @@ int bfs(std::vector<std::string> lines, int sr, int sc)
         rq.pop_front();
         int c = cq.front();
         cq.pop_front();
-
-        std::cout << "Sjekker ut noden " << m[r][c] << ", " << nodesLeftInLayer << std::endl;
-        // moveCount++;
-        std::cout << moveCount << std::endl;
-
-        if (r == goalI && c == goalJ)
+        if (r == targetX && c == targetY)
         {
-            std::cout << "ER FERDIG" << std::endl;
-            reachEnd = true;
-            break;
+            return moveCount;
         }
-        // exploreNeighbors(r, c);
         for (int i = 0; i < 4; i++)
         {
             int rr = r + dr[i];
             int cc = c + dc[i];
-
-            /*
-                if (m[rr][cc] == 'E')
-                {
-
-                    std::cout << "Terminerer tidlig" << std::endl;
-                    res = moveCount + 1;
-                    return res;
-                    break;
-                }
-            */
-
-            if (rr < 0 || cc < 0)
+            if ((m[rr][cc] - m[r][c] > 1) || rr < 0 || cc < 0 || rr >= height || cc >= width || visited[rr][cc])
             {
                 continue;
             }
-            if (rr >= R || cc >= C)
-            {
-                continue;
-            }
-
-            if (visited[rr][cc] == true)
-            {
-                continue;
-            }
-            std::cout << "\t Sammenligner med " << m[rr][cc] << "( " << rr << ", " << cc << ") " << int(m[rr][cc]) << std::endl;
-            std::cout << "\t\t" << (m[rr][cc] - m[r][c]) << std::endl;
-            // if (m[rr][cc] == '#')            // Må fikse her
-            // if (m[r][c] - m[rr][cc] > 1)
-            if (m[rr][cc] - m[r][c] > 1)
-            {
-                std::cout << "\tUaktuell kandidat." << std::endl;
-                continue;
-            }
-            else
-            {
-
-                std::cout << "\tGår videre" << std::endl;
-            }
-            /*
             rq.push_back(rr);
             cq.push_back(cc);
-            */
-            rq.emplace_back(rr);
-            cq.emplace_back(cc);
             visited[rr][cc] = true;
             nodesInNextLayer++;
         }
@@ -148,21 +73,14 @@ int bfs(std::vector<std::string> lines, int sr, int sc)
         {
             nodesLeftInLayer = nodesInNextLayer;
             nodesInNextLayer = 0;
-            std::cout << "INKREMENTERER MOEVCOUNT " << std::endl;
             moveCount++;
         }
-    }
-    if (reachEnd == true)
-    {
-        std::cout << "HAR NÅDD ENDEN" << std::endl;
-        return moveCount;
     }
     return -1;
 }
 
 int main()
 {
-    // std::string filename("small");
     std::string filename("input");
     std::string line;
     std::ifstream file(filename);
@@ -173,6 +91,10 @@ int main()
     }
     std::vector<int> a_x;
     std::vector<int> a_y;
+    int part1StartX;
+    int part1StartY;
+    int targetX;
+    int targetY;
     for (int i = 0; i < lines.size(); i++)
     {
         std::string l = lines.at(i);
@@ -181,20 +103,23 @@ int main()
             char c = l[j];
             if (c == 'E')
             {
-                // TODO: Should save these as argument for bfs function
-                // tarR = j;
-                // tarC = i;
+                targetX = j;
+                targetY = i;
             }
             else if (c == 'a')
             {
                 a_x.pb(i);
                 a_y.pb(j);
             }
+            else if (c == 'S')
+            {
+                part1StartX = j;
+                part1StartY = i;
+            }
         }
     }
-    std::cout << "Part 1: " << bfs(lines, 0, 0) << std::endl;
-
-    std::vector<int> part2Options;
+    std::cout << "Part 1: " << bfs(lines, part1StartX, part1StartY, targetX, targetY) << std::endl;
+    int currPar2Res = 999;
     while (a_x.size() > 0)
     {
         int x = a_x.back();
@@ -203,13 +128,11 @@ int main()
         int y = a_y.back();
         a_y.pop_back();
 
-        int val = bfs(lines, y, x);
-        if (val != -1)
+        int val = bfs(lines, y, x, targetX, targetY);
+        if (val != -1 && val < currPar2Res)
         {
-
-            part2Options.pb(val);
+            currPar2Res = val;
         }
     }
-    std::sort(part2Options.begin(), part2Options.end());
-    std::cout << "Part 2: " << part2Options[0] << std::endl;
+    std::cout << "Part 2: " << currPar2Res << std::endl;
 }
