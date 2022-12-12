@@ -23,7 +23,7 @@ public:
         this->opFlag = false;
         this->inspectionCounter = 0;
     }
-    void inspectItem(ll &item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll lcm, int part)
+    void inspectItem(ll &item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll &lcm, int &part)
     {
         item = this->getWorryLevel(item);
         if (part == 1)
@@ -58,10 +58,8 @@ private:
             return item + operand;
         case '*':
             return item * operand;
-        case '/':
-            return item / operand;
         }
-        return 0;
+        return item / operand;
     }
 };
 
@@ -76,8 +74,7 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
         allMonkeys->push_back(m);
 
         getline(file, line);
-        std::size_t colIdx = line.find(":") + 1;
-        line.erase(0, colIdx);
+        line.erase(0, line.find(":") + 1);
         std::size_t commaIdx = line.find(",");
         while (commaIdx != 0)
         {
@@ -91,10 +88,8 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
 
         // Deal with 'operation'
         getline(file, line); // Les opLine
-        std::size_t opIdx = line.find("d ") + 2;
-        line.erase(0, opIdx);
-        char op = line[0];
-        m->opChar = op;
+        line.erase(0, line.find("d ") + 2);
+        m->opChar = line[0];
         line.erase(0, 2); // delete the op and the space after
         if (line[0] == 'o')
         {
@@ -108,20 +103,16 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
         // Deal with 'test'
         getline(file, line); // Les test-line
         line.erase(0, 21);   // Delete 'Test: divisible by'
-        int testDivBy = std::stoi(line);
-        m->testDivBy = testDivBy;
+        m->testDivBy = std::stoi(line);
 
         getline(file, line); // Les test-true
         line.erase(0, 29);   // Delete 'If true: throw to monkey'
-        int monkeTrue = std::stoi(line);
-        m->testTrueTarget = monkeTrue;
+        m->testTrueTarget = std::stoi(line);
 
         getline(file, line); // Les test-false
         line.erase(0, 30);   // Delete 'If false: throw to monkey'
-        int monkeFalse = std::stoi(line);
-        m->testFalseTarget = monkeFalse;
+        m->testFalseTarget = std::stoi(line);
 
-        // Just get a newline
         getline(file, line); // les inn en newline for å markere ny ape
     }
     return allMonkeys;
