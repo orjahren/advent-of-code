@@ -7,26 +7,15 @@
 #include <utility>
 #include <deque>
 
-using ll = long long;
+#define pb push_back
 
-int bfs(std::string &filename)
+int bfs(std::vector<std::string> lines, int sr, int sc)
 {
-    std::string line;
-    std::ifstream file(filename);
-    std::vector<std::string> lines;
-    while (getline(file, line))
-    {
-        lines.push_back(line);
-    }
-
+    std::cout << "Starter BFS" << std::endl;
     const int height = lines[0].size();
     const int width = lines.size();
-    char grid[width][height];
     std::cout << "Grid size: " << width << "x" << height << std::endl;
 
-    /*
-    https://towardsdatascience.com/graph-theory-bfs-shortest-path-problem-on-a-grid-1437d5cb4023
-    */
     const int R = height;
     const int C = width;
 
@@ -34,25 +23,15 @@ int bfs(std::string &filename)
     bool visited[R][C];
     int goalI = -1;
     int goalJ = -1;
-    int startI = -1;
-    int startJ = -1;
 
-    int sr = 0;
-    int sc = 0;
-    /*
-    for (int i = 0; i < width; i++)
-    {
-        std::string l = lines.at(i);
-        for (int j = 0; j < height; j++)
-    */
+    std::cout << "SR og SC før: " << sr << ", " << sc << std::endl;
+
     for (int i = 0; i < width; i++)
     {
         std::string l = lines.at(i);
         for (int j = 0; j < height; j++)
         {
-
             char c = l[j];
-            // m[i][j] = c;
             m[j][i] = c;
             visited[j][i] = false;
 
@@ -64,18 +43,19 @@ int bfs(std::string &filename)
             }
             else if (c == 'S')
             {
+                std::cout << "SETTER SR og SC: " << sr << ", " << sc << std::endl;
                 m[j][i] = 'a';
-                startI = j;
-                startJ = i;
-                sr = i;
-                sc = j;
-                sr = j;
-                sc = i;
+                // sr = j;
+                // sc = i;
+                std::cout << "SETTER SR og SC: " << sr << ", " << sc << std::endl;
             }
             std::cout << m[j][i];
         }
         std::cout << std::endl;
     }
+
+    std::cout << "TARGET: " << goalI << ", " << goalJ << std::endl;
+    std::cout << "SR og SC etter: " << sr << ", " << sc << std::endl;
 
     std::deque<int> rq;
     std::deque<int> cq;
@@ -102,7 +82,7 @@ int bfs(std::string &filename)
 
         std::cout << "Sjekker ut noden " << m[r][c] << ", " << nodesLeftInLayer << std::endl;
         // moveCount++;
-        //     std::cout << moveCount << std::endl;
+        std::cout << moveCount << std::endl;
 
         if (r == goalI && c == goalJ)
         {
@@ -184,6 +164,52 @@ int main()
 {
     // std::string filename("small");
     std::string filename("input");
-    int res = bfs(filename);
-    std::cout << "Part 1: " << res << std::endl;
+    std::string line;
+    std::ifstream file(filename);
+    std::vector<std::string> lines;
+    while (getline(file, line))
+    {
+        lines.push_back(line);
+    }
+    std::vector<int> a_x;
+    std::vector<int> a_y;
+    for (int i = 0; i < lines.size(); i++)
+    {
+        std::string l = lines.at(i);
+        for (int j = 0; j < lines[0].size(); j++)
+        {
+            char c = l[j];
+            if (c == 'E')
+            {
+                // TODO: Should save these as argument for bfs function
+                // tarR = j;
+                // tarC = i;
+            }
+            else if (c == 'a')
+            {
+                a_x.pb(i);
+                a_y.pb(j);
+            }
+        }
+    }
+    std::cout << "Part 1: " << bfs(lines, 0, 0) << std::endl;
+
+    std::vector<int> part2Options;
+    while (a_x.size() > 0)
+    {
+        int x = a_x.back();
+        a_x.pop_back();
+
+        int y = a_y.back();
+        a_y.pop_back();
+
+        int val = bfs(lines, y, x);
+        if (val != -1)
+        {
+
+            part2Options.pb(val);
+        }
+    }
+    std::sort(part2Options.begin(), part2Options.end());
+    std::cout << "Part 2: " << part2Options[0] << std::endl;
 }
