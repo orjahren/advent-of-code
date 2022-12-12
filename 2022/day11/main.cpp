@@ -10,7 +10,7 @@ using ll = long long;
 class Monkey
 {
 public:
-    std::vector<ll> items;
+    std::vector<ll *> items;
     ll opB;
     char opChar;
     int testDivBy;
@@ -23,15 +23,23 @@ public:
         this->opFlag = false;
         this->inspectionCounter = 0;
     }
-    void inspectItem(ll &item, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll &lcm, int &part)
+    ~Monkey()
     {
+        for (ll *x : items)
+        {
+            delete x;
+        }
+    }
+    void inspectItem(ll *pItem, std::vector<Monkey *> *monkeys, int &itemIndex, int *pLoopCounter, ll &lcm, int &part)
+    {
+        ll &item = *pItem;
         item = this->getWorryLevel(item);
         if (part == 1)
         {
             item = floor(item / 3);
         }
         item %= lcm;
-        monkeys->at(this->getThrowTargetId(item))->items.push_back(item);
+        monkeys->at(this->getThrowTargetId(item))->items.push_back(pItem);
         this->items.erase(this->items.begin() + itemIndex);
         (*pLoopCounter)--;
     }
@@ -82,7 +90,7 @@ std::vector<Monkey *> *readFileAndInitMonkeys(std::string *filename)
             std::string numStr = line.substr(0, commaIdx - 1);
             ll *item = new ll;
             *item = (ll)std::stoi(numStr);
-            m->items.push_back(*item);
+            m->items.push_back(item);
             line.erase(0, commaIdx); // Delete our handled item for the next iteration
         }
 
@@ -130,7 +138,7 @@ ll performSimulation(int part, std::vector<Monkey *> *monkeys, ll &lcm)
             m.inspectionCounter += m.items.size();
             for (int itemIdx = 0; itemIdx < m.items.size(); itemIdx++)
             {
-                ll item = m.items.at(itemIdx);
+                ll *item = m.items.at(itemIdx);
                 m.inspectItem(item, monkeys, itemIdx, &itemIdx, lcm, part);
             }
         }
@@ -142,6 +150,15 @@ ll performSimulation(int part, std::vector<Monkey *> *monkeys, ll &lcm)
     }
     std::sort(counts, counts + nMonkeys);
     return counts[nMonkeys - 1] * counts[nMonkeys - 2];
+}
+
+void reset(std::vector<Monkey *> *monkeys)
+{
+    for (int monkeyIdx = 0; monkeyIdx < monkeys->size(); monkeyIdx++)
+    {
+        delete monkeys->at(monkeyIdx);
+    }
+    delete monkeys;
 }
 
 int main()
@@ -157,8 +174,9 @@ int main()
 
     ll res = performSimulation(1, monkeys, lcm);
     std::cout << "Part 1: " << res << std::endl;
-    delete monkeys;
+    reset(monkeys);
     monkeys = readFileAndInitMonkeys(&filename);
     res = performSimulation(2, monkeys, lcm);
+    reset(monkeys);
     std::cout << "Part 2: " << res << std::endl;
 }
