@@ -3,6 +3,7 @@ ll = [(eval(x), eval(y)) for x, y in zip(ll[::2], ll[1::2])]
 
 
 def is_in_order(a, b):
+    print("Kalles med:", a, b)
     if type(a) == int and type(b) == int:
         return a < b
     elif type(a) == list and type(b) == list:
@@ -20,6 +21,7 @@ def is_in_order(a, b):
                 idx2 += 1
             else:
                 return False
+        return True
 
     elif type(a) == int:  # hvis denne blir true kan ikke b også være et number
         return is_in_order([a], b)
@@ -34,6 +36,5 @@ for i, (x, y) in enumerate(ll):
     val = is_in_order(x, y)
     if val:
         print("Fant en match på idx", i)
-        res += i
+        res += i + 1
 print("Part 1:", res)
-# for
