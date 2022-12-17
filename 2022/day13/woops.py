@@ -1,14 +1,10 @@
-ll = [z for l in open("input", "r").readlines() if (z := l.rstrip())]
-ll = [(eval(x), eval(y)) for x, y in zip(ll[::2], ll[1::2])]
+from functools import cmp_to_key, reduce
 
 
 def is_in_order(a, b):
-    print("Kalles med:", a, b)
-
-    for i in range(min(len(a) if isinstance(a, list) else a, len(b) if isinstance(b, list) else b)):
-        isListLeft = False if isinstance(a, int) else isinstance(a[i], list)
-        isListRight = False if isinstance(b, int) else isinstance(b[i], list)
-
+    for i in range(min(len(a), len(b))):
+        isListLeft = isinstance(a[i], list)
+        isListRight = isinstance(b[i], list)
         if isListLeft and isListRight:
             result = is_in_order(a[i], b[i])
         elif isListLeft:
@@ -33,12 +29,16 @@ def is_in_order(a, b):
         return -1
 
 
-print(ll)
-res = 0
-for i, (x, y) in enumerate(ll):
-    print("Skal se om er like:", x, y)
-    val = is_in_order(x, y)
-    if val == -1:
-        print("Fant en match på idx", i)
-        res += i + 1
-print("Part 1:", res)
+ll = [eval(z) for l in open("input", "r").readlines() if (z := l.rstrip())]
+part1 = 0
+for i, (x, y) in enumerate(zip(ll[::2], ll[1::2])):
+    if is_in_order(x, y) == -1:
+        part1 += i + 1
+print("Part 1:", part1)
+ll = sorted(ll + [[[6]], [[2]]], key=cmp_to_key(is_in_order))
+l = []
+for i, x in enumerate(ll):
+    for y in [[[6]], [[2]]]:
+        if is_in_order(x, y) == 0:
+            l.append(i)
+print("Part 2:", reduce(lambda x, y: (1 + x) * (1 + y), l))
