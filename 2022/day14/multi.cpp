@@ -4,22 +4,13 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <multiset>
 
 #define LOG(x) std::cout << x << std::endl;
 
 bool vecContains(std::vector<std::pair<int, int>> &vec, std::pair<int, int> val)
 {
     return std::binary_search(vec.begin(), vec.end(), val);
-    /*
-    for (int i = 0; i < vec.size(); i++)
-    {
-        std::pair<int, int> &p = vec.at(i);
-        if (p.first == val.first && p.second == val.second)
-        {
-            return 0;
-        }
-    }
-    */
 }
 
 // Inspired by: https://github.com/hyper-neutrino/advent-of-code/blob/main/2022/day14p1.py

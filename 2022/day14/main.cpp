@@ -1,34 +1,32 @@
 #include <iostream>
+#include <complex>
 #include <set>
 #include <fstream>
 #include <vector>
 #include <utility>
-#include <algorithm>
+#include <unordered_set>
 
 #define LOG(x) std::cout << x << std::endl;
 
-bool vecContains(std::vector<std::pair<int, int>> &vec, std::pair<int, int> val)
+bool vecContains(std::vector<std::complex<int>> &vec, std::complex<int> val)
 {
-    return std::binary_search(vec.begin(), vec.end(), val);
-    /*
     for (int i = 0; i < vec.size(); i++)
     {
-        std::pair<int, int> &p = vec.at(i);
-        if (p.first == val.first && p.second == val.second)
+        if (vec.at(i) == val)
         {
-            return 0;
+            return true;
         }
     }
-    */
+    return false;
 }
 
 // Inspired by: https://github.com/hyper-neutrino/advent-of-code/blob/main/2022/day14p1.py
 int main()
 {
     int abyss = 0;
-    // std::set<std::pair<int, int>> b;
-    // std::unordered_set<std::pair<int, int> > b;
-    std::vector<std::pair<int, int>> b;
+    // std::set<std::complex<int>> b;
+    // std::unordered_set<std::complex<int> > b;
+    std::vector<std::complex<int>> b;
 
     std::string line;
     // std::ifstream file("small");
@@ -75,7 +73,7 @@ int main()
             {
                 for (int y = y1; y < y2 + 1; y++)
                 {
-                    std::pair<int, int> c = std::make_pair(x, y);
+                    std::complex<int> c(x, y * 1);
                     // b.insert(c);
                     b.push_back(c);
                     abyss = std::max(abyss, y + 1);
@@ -84,48 +82,38 @@ int main()
         }
     }
     LOG("Har lest og inittet")
-    LOG("sorterer vec")
-    std::sort(b.begin(), b.end());
-    LOG("sorterert ferdig")
+
     int t = 0;
 
     while (true)
     {
-        std::pair<int, int> s = std::make_pair(500, 1);
-        // LOG("Ytre")
+        std::complex<int> s(500, 1);
         while (true)
         {
-            // LOG("Indre")
-            if (s.second >= abyss)
+            if (std::imag(s) >= abyss)
             {
                 std::cout << "Part 1: " << t << std::endl;
                 return 0;
             }
 
-            if (!vecContains(b, std::make_pair(s.first, s.second + 1)))
+            std::complex<int> y1(0, 1);
+            std::complex<int> c1 = s + y1; //(s, 1);
+            if (!vecContains(b, c1))
             {
-                s.second++;
+                s += std::complex<int>(0, 1);
                 continue;
             }
-            if (!vecContains(b, std::make_pair(s.first - 1, s.second + 1)))
+            if (!vecContains(b, c1 - 1))
             {
-                s.second++;
-                s.first--;
+                s += std::complex<int>(0, 1) - 1;
                 continue;
             }
-            if (!vecContains(b, std::make_pair(s.first + 1, s.second + 1)))
+            if (!vecContains(b, c1 + 1))
             {
-                s.first++;
-                s.second++;
+                s += std::complex<int>(0, 1) + 1;
                 continue;
             }
             b.push_back(s);
-
-            LOG("inserter ")
-            std::sort(b.begin(), b.end());
-            auto it = std::upper_bound(b.cbegin(), b.cend(), s);
-            b.insert(it, s);
-            LOG("har insertet ")
             t++;
             break;
         }
