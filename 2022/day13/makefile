@@ -1,5 +1,5 @@
 default:
-		g++-12  -o main main.cpp
+		g++ -o main main.cpp
 		./main
 		rm main
 stock:
