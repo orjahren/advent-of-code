@@ -40,7 +40,7 @@ ll solve(std::string &line, int part)
         int bp = field.size() + 3;
         int shift = 0;
         bool drop = true;
-        do
+        while (drop)
         {
             // Blow the wind
             switch (line[lineIdx])
@@ -56,16 +56,14 @@ ll solve(std::string &line, int part)
                 {
                     shift++;
                 }
-                break;
             }
-
             lineIdx = (lineIdx + 1) % windSize;
             drop = stonefit(sp % 5, shift, bp - 1);
             if (drop)
             {
                 --bp;
             }
-        } while (drop);
+        }
         int top = bp + rocks[sp % 5].size();
         if (field.size() < top)
         {
@@ -76,10 +74,9 @@ ll solve(std::string &line, int part)
             int sv = shift > 0 ? rocks[sp % 5][r] >> shift : rocks[sp % 5][r] << -shift;
             field[bp + r] |= sv;
         }
-        ++sp;
+        sp++;
         heights.push_back(field.size() - 1);
-
-        auto check = std::make_pair((sp - 1) % 5, (lineIdx - 1 + windSize) % windSize);
+        std::pair<int, int> check = std::make_pair((sp - 1) % 5, (lineIdx - 1 + windSize) % windSize);
         if (drops[check].size() != 0)
         {
             for (int x : drops[check])
@@ -89,9 +86,9 @@ ll solve(std::string &line, int part)
                 if (part == 2 && loopCount[d] >= 20)
                 {
                     int hd = heights[sp - 1] - heights[x];
-                    int64_t TURNS = 1'000'000'000'000;
-                    int64_t loops = (TURNS - x) / d;
-                    int64_t inLoop = TURNS - loops * d;
+                    ll TURNS = 1'000'000'000'000;
+                    ll loops = (TURNS - x) / d;
+                    ll inLoop = TURNS - loops * d;
                     return heights[inLoop] + hd * loops - 1;
                 }
             }
@@ -107,8 +104,6 @@ ll solve(std::string &line, int part)
 
 int main()
 {
-    std::cout << "Hello world \n";
-    // std::ifstream file("small");
     std::ifstream file("input");
     std::string line;
     getline(file, line);
