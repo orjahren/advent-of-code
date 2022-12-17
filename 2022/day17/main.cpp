@@ -6,14 +6,10 @@
 #include <unordered_map>
 #include <map>
 
-int main()
+using ll = long long;
+
+ll solve(std::string &line, int part)
 {
-    std::cout << "Hello world \n";
-    // std::ifstream file("small");
-    std::ifstream file("input");
-    std::string line;
-    getline(file, line);
-    file.close();
     int windSize = line.size();
     // Use bits to indicate rock occupancy
     std::vector<int> rocks[5] = {{0x1E}, {0x08, 0x1C, 0x08}, {0x1C, 0x04, 0x04}, {0x10, 0x10, 0x10, 0x10}, {0x18, 0x18}};
@@ -92,14 +88,35 @@ int main()
             {
                 int d = (sp - 1) - x;
                 loopCount[d]++;
+                if (part == 2 && loopCount[d] >= 20)
+                {
+                    int hd = heights[sp - 1] - heights[x];
+                    int64_t TURNS = 1'000'000'000'000;
+                    int64_t loops = (TURNS - x) / d;
+                    int64_t inLoop = TURNS - loops * d;
+                    return heights[inLoop] + hd * loops - 1;
+                }
             }
         }
         drops[check].push_back(sp - 1);
-        if (sp == 2022)
+        if (part == 1 && sp == 2022)
         {
-            std::cout << "Part 1: " << field.size() - 1 << std::endl;
-            return 0;
+            return field.size() - 1;
         }
     }
-    return 0;
+    return -1;
+}
+
+int main()
+{
+    std::cout << "Hello world \n";
+    // std::ifstream file("small");
+    std::ifstream file("input");
+    std::string line;
+    getline(file, line);
+    file.close();
+    int part1 = solve(line, 1);
+    std::cout << "Part 1: " << part1 << std::endl;
+    ll part2 = solve(line, 2);
+    std::cout << "Part 2: " << part2 << std::endl;
 }
