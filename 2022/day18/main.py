@@ -9,7 +9,7 @@ Mx = My = Mz = -float("inf")
 
 droplet = set()
 
-for line in open(0):
+for line in open("input"):
     x, y, z = cell = tuple(map(int, line.split(",")))
     droplet.add(cell)
 
@@ -59,4 +59,5 @@ for x, y, z in air:
     for dx, dy, dz in offsets:
         free.add((x + dx, y + dy, z + dz))
 
-print(len(set(faces) & free))
+print("Part 1:", list(faces.values()).count(1))
+print("Part 2:", len(set(faces) & free))
