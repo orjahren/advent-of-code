@@ -11,7 +11,7 @@ import (
 )
 
 type Blueprint struct {
-	recipe [][]int
+	recipes [][][]int
 }
 
 type Tuple struct {
@@ -22,51 +22,63 @@ type Tuple struct {
 
 func dfs(bp Blueprint, maxSpend []int, cache map[Tuple]int, time int, bots []int, amt []int, vChan chan int, iChan chan int, lineNumber int) int {
 	if time == 0 {
-		fmt.Println(amt)
+		//fmt.Println(amt)
 		return amt[3]
 
 	}
-
 	key := Tuple{time, 0, 0}
-	for i := 0; i < 4; i++ {
+	for i := 0; i < len(bots); i++ {
 		fmt.Println("Getter bot", i)
 		b := bots[i]
 		if b != 0 {
 			key.bots++
 		}
 	}
-	for i := 0; i < 4; i++ {
+	for i := 0; i < len(amt); i++ {
 		fmt.Println("Getter amt", i)
 		a := amt[i]
 		if a != 0 {
 			key.amt++
 		}
 	}
+	//key := Tuple{time, len(bots), len(amt)}
 	cacheVal, exists := cache[key]
 	if exists {
 		return cacheVal
-
 	}
-	fmt.Println("Encore")
 	maxVal := amt[3] + bots[3]*time
 	///
 	// BOtTuype skal kun skulle kunne gå fra 0 - 3
-	for botType := 0; botType < len(bp.recipe); botType++ {
-		recipe := bp.recipe[botType]
+	for botType := 0; botType < len(bp.recipes); botType++ {
+		recipe := bp.recipes[botType]
 		fmt.Println("Hentet recide: ", recipe)
 		fmt.Println("SJakker maxSpend ", botType)
 		if botType != 3 && bots[botType] >= maxSpend[botType] {
 			continue
 		}
 		wait := 0
-		rAmt := recipe[0]
-		rType := recipe[1]
-		fmt.Println("Fant bottype: ", bots[rType])
-		if bots[rType] == 0 {
-			break
+		///// SKAL GARRA VÆRE EN LOOP
+		rAmt := -1
+		rType := -1
+		breaket := false
+		for tupIdx := 0; tupIdx < len(recipe); tupIdx++ {
+			tup := recipe[tupIdx]
+
+			rType = tup[1]
+			rAmt = tup[0]
+			fmt.Println("Fant bottype: ", bots[rType])
+			if bots[rType] == 0 {
+				breaket = true
+				break
+			}
+			a := float64(rAmt - amt[rType])
+			b := float64(bots[rType])
+			//wait = int(math.Max(float64(wait), math.Floor(a/b)))
+			wait = int(math.Max(float64(wait), math.Ceil(a/b)))
+			fmt.Println("a, b:", a, b)
+			fmt.Println("******** Bereget wait til: ", wait)
 		}
-		wait = int(math.Max(float64(-(-(rAmt - amt[rType]) / bots[rType])), float64(wait)))
-		if bots[rType] != 0 {
+		if !breaket {
 			remTime := time - wait - 1
 			if remTime <= 0 {
 				continue
@@ -88,8 +100,8 @@ func dfs(bp Blueprint, maxSpend []int, cache map[Tuple]int, time int, bots []int
 
 	////
 	cache[key] = maxVal
-	vChan <- maxVal
-	iChan <- lineNumber
+	//vChan <- maxVal
+	//iChan <- lineNumber
 	return maxVal
 
 }
@@ -105,14 +117,9 @@ func main() {
 
 	vChan := make(chan int)
 	iChan := make(chan int)
-	/*
-		res := 0
-	*/
 	f, err := os.Open("small")
 	check(err)
-
 	scanner := bufio.NewScanner(f)
-
 	exp, rErr := regexp.Compile("(\\d+) (\\w+)")
 	check(rErr)
 
@@ -124,41 +131,53 @@ func main() {
 	numberOfBluePrints := 0
 	lineNumber := 0
 	p1r := 0
+	var blueprints []Blueprint = make([]Blueprint, 0)
 	for scanner.Scan() {
-		text := scanner.Text()
+		text := scanner.Text()[11:]
 		var bp Blueprint
-		match := exp.FindAllString(text, -1)
-		fmt.Println(match)
-
-		lineNumber++
-
 		maxSpend := make([]int, 3)
+		//sections := seXp.FindAllString(text, -1)
+		sections := strings.Split(text, ". ")
+		fmt.Println("Alle sections: ", sections)
+		for sIdx := 0; sIdx < len(sections); sIdx++ {
 
-		for i := 0; i < len(match); i += 1 {
-			recipe := make([]int, 2)
-			parts := strings.Split(match[i], " ")
-			fmt.Println(parts)
-			x, sErr := strconv.Atoi(parts[0])
-			check(sErr)
-			y := dictToIndex[parts[1]]
-			fmt.Println(x, y)
-			//recipe = append(recipe, x, y)
-			recipe[0] = x
-			recipe[1] = y
-			maxSpend[y] = int(math.Max(float64(maxSpend[y]), float64(x)))
-			bp.recipe = append(bp.recipe, recipe)
+			section := sections[sIdx]
+			fmt.Println(section)
+
+			match := exp.FindAllString(section, -1)
+			fmt.Println(match)
+
+			recipe := make([][]int, 0)
+			for i := 0; i < len(match); i += 1 {
+				parts := strings.Split(match[i], " ")
+				fmt.Println(parts)
+				x, sErr := strconv.Atoi(parts[0])
+				check(sErr)
+				y := dictToIndex[parts[1]]
+				fmt.Println(x, y)
+				//recipe = append(recipe, x, y)
+				tup := make([]int, 2)
+				tup[0] = x
+				tup[1] = y
+				maxSpend[y] = int(math.Max(float64(maxSpend[y]), float64(x)))
+				recipe = append(recipe, tup)
+			}
+			bp.recipes = append(bp.recipes, recipe)
+			fmt.Println("Blueprint: ", bp)
+			fmt.Println(maxSpend)
+			numberOfBluePrints++
+			blueprints = append(blueprints, bp)
 		}
-		fmt.Println(bp)
-		fmt.Println(maxSpend)
-		numberOfBluePrints++
 		botsArr := make([]int, 4)
 		botsArr[0] = 1
 		amtArr := make([]int, 4)
 		fmt.Println("Starter DFS")
 		v := dfs(bp, maxSpend, make(map[Tuple]int), 24, botsArr, amtArr, vChan, iChan, lineNumber)
-		p1r += (lineNumber + 1) * v
+		p1r += ((lineNumber + 1) * v)
+		lineNumber++
 
 	}
+	//fmt.Println("Alle blueprints: ", blueprints)
 	/*
 		res := 0
 		for numberOfBluePrints > 0 {
