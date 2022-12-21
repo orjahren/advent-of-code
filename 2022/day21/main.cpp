@@ -13,7 +13,7 @@ double useCharAsOp(double lx, char op, double rx)
         return lx + rx;
     case '-':
         return lx - rx;
-    case '*':
+    default:
         return lx * rx;
     }
 }
@@ -71,5 +71,5 @@ int main()
             }
         }
     }
-    std::cout << "Part 1: " << std::setprecision(100) << hm["root"] << std::endl;
+    std::cout << "Part 1: " << std::setprecision(20) << hm["root"] << std::endl;
 }
