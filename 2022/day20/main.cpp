@@ -1,95 +1,112 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <utility>
-#include <algorithm>
 
 #define LOG(x) std::cout << x << std::endl;
 
-void printArr(std::vector<int> &arr, int n)
+class Point
 {
-    std::cout << "\t\t[";
-    for (int i = 0; i < n; i++)
+public:
+    Point(int x)
     {
-        std::cout << arr[i] << ", ";
+        this->val = x;
+        this->l = nullptr;
+        this->r = nullptr;
     }
-    LOG("]")
-}
+    int val;
+    Point *l;
+    Point *r;
+};
 
 int main()
 {
     std::string line;
-    std::vector<std::pair<int, int>> pairs;
-    std::vector<int> arr;
-    std::ifstream file("small");
+    std::vector<Point *> tuples;
+    std::ifstream file("input");
+    // std::ifstream file("small");
 
-    int lineCounter = 0;
+    Point *z = nullptr;
+
     while (getline(file, line))
     {
-        LOG(line)
         int x = std::stoi(line);
-        std::pair<int, int> p = std::make_pair(lineCounter++, x);
-        pairs.push_back(p);
-        arr.push_back(x);
+        Point *pp = new Point(x);
+        tuples.push_back(pp);
     }
     LOG("Har lest fil")
-    LOG("Initial status:")
-    printArr(arr, pairs.size());
     std::cout << "Begynner simulering..\n";
-    for (int i = 0; i < pairs.size(); i++)
+    for (int i = 0; i < tuples.size(); i++)
     {
-        std::pair<int, int> &p = pairs.at(i);
-        // int newIdx = (((i + p.second) % pairs.size()) + pairs.size()) % pairs.size(); // burde ikke gjøre denne beregningen hvis casen under slår inn
-        // int newIdx = (((p.first + p.second) % pairs.size()) + pairs.size()) % pairs.size(); // burde ikke gjøre denne beregningen hvis casen under slår inn
-        int newIdx = (((p.first + p.second) % pairs.size()) + pairs.size()) % pairs.size(); // burde ikke gjøre denne beregningen hvis casen under slår inn
-        if (i + p.second <= 0)
+        Point *p = tuples.at(i);
+        p->r = tuples.at((i + 1) % tuples.size());
+        p->l = tuples.at((i - 1) % tuples.size());
+    }
+
+    const int m = tuples.size() - 1;
+
+    for (int i = 0; i < tuples.size(); i++)
+    {
+        Point *xp = tuples.at(i);
+        if (xp->val == 0)
         {
-            newIdx = pairs.size() + p.second; // subtraher fra slutten
-            LOG("Hacket ny idx til: " << newIdx)
+            z = tuples.at(i);
+            continue;
         }
-
-        if (newIdx < 0)
+        Point *pp = xp;
+        if (xp->val > 0)
         {
-            LOG("FEIL med ny idx: " << newIdx)
-            return 1;
+            for (int j = 0; j < (xp->val % m); j++)
+            {
+                pp = pp->r;
+            }
+            // if (xp->val == pp->val || (xp->l == pp->l && xp->r == pp->r))
+            if (&*xp == &*pp)
+
+            // if (*xp == *pp)
+            {
+                continue;
+            }
+            tuples.at(i)->r->l = xp->l;
+            tuples.at(i)->l->r = xp->r;
+            pp->r->l = tuples.at(i);
+            xp->r = pp->r;
+            pp->r = xp;
+            xp->l = pp;
         }
-        LOG("\t Skal flytte " << p.second << " fra " << p.first << " til " << newIdx)
-        std::cout << "Før: \t";
-        printArr(arr, pairs.size());
-        /*
-        arr.insert(arr.begin() + newIdx, p.second);
-        arr.erase(arr.begin() + p.first);
-        */
-        arr.erase(arr.begin() + p.first);
-        arr.insert(arr.begin() + newIdx, p.second);
-
-        p.first = newIdx;
-        std::cout << "Etter: \t";
-        printArr(arr, pairs.size());
-
-        LOG("Oppdaterer indexer")
-        for (int j = 0; j < pairs.size(); j++)
+        else
         {
-            // pairs.at(j).first = j;
-            auto idx = std::find(arr.begin(), arr.end(), pairs.at(j).second);
-            if (idx != arr.end())
+            for (int j = 0; j < ((-(xp->val)) % m); j++)
             {
-                std::cout << "Fant " << *idx << " på " << idx - arr.begin() << std::endl;
-                pairs.at(j).first = idx - arr.begin();
+                pp = pp->l;
             }
-            else
+            // if (xp == pp)
+            // if (xp->val == pp->val)
+            // if (xp->val == pp->val || (xp->l == pp->l && xp->r == pp->r))
+            if (&*xp == &*pp)
             {
-                LOG("Fant ikke " << pairs.at(j).second << " i arr...");
-                return 1;
+                continue;
             }
-            //  pairs.at(j).first = arr.begin(), arr.end(), pairs.at(j).second);
-            /*
-            std::pair<int, int> &p = pairs.at(j);
-            arr.at(j) = p.second;
-            */
+            tuples.at(i)->l->r = xp->r;
+            tuples.at(i)->r->l = xp->l;
+            pp->l->r = tuples.at(i);
+            xp->l = pp->l;
+            pp->l = xp;
+            xp->r = pp;
         }
     }
+
+    int part1res = 0;
+
+    for (short i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 1000; j++)
+        {
+            z = z->r;
+        }
+        LOG(z)
+        LOG("i:" << i << ", val: " << z->val)
+        part1res += z->val;
+    }
     LOG("...done")
-    LOG("Final array: ")
-    printArr(arr, pairs.size());
+    LOG("Part 1: " << part1res)
 }
