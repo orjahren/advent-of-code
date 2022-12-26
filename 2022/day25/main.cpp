@@ -5,7 +5,7 @@
 
 using ll = long long;
 
-ll convertToInt(std::string snafu)
+ll convertToDecimal(std::string snafu)
 {
     ll res = 0;
     for (int i = snafu.size() - 1; i >= 0; i--)
@@ -41,7 +41,7 @@ int main()
     ll toBeConv = 0;
     while (getline(file, line))
     {
-        toBeConv += convertToInt(line);
+        toBeConv += convertToDecimal(line);
     }
     std::string str = std::to_string(toBeConv);
     std::deque<char> q;
@@ -51,12 +51,7 @@ int main()
     {
         ll pf = toBeConv + 2;
         toBeConv = pf / 5;
-        q.push_front(chars[pf % 5]);
-    }
-    while (q.size() > 0)
-    {
-        res.push_back(q.front());
-        q.pop_front();
+        res.insert(0, 1, chars[pf % 5]);
     }
     std::cout << "Part 1: " << res << std::endl;
 }
