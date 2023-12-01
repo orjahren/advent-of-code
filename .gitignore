@@ -130,3 +130,8 @@ dmypy.json
 
 ## AoC custom input
 input
+
+## Haskell binaries
+*.hi
+*.o
+main
