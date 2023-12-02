@@ -51,10 +51,41 @@ const part1 = (fileName: string): number => {
     return acc;
   }, 0);
 };
+const part2 = (fileName: string): number => {
+  const getPowerOfGame = (game: string): number => {
+    console.log("Skal løse game:");
+    console.log(game);
+    const bits = game.split(":")[1].split(";");
+    console.log(bits);
+    const rgb = [0, 0, 0];
+    bits.forEach((bit) => {
+      console.log(bit);
+      const split = bit.split(",").map((x) => x.trim());
+      console.log(split);
+      split.forEach((op) => {
+        const [value, color] = op.split(" ");
+        const idx = ["red", "green", "blue"].indexOf(color);
+        const parsed = parseInt(value);
+        rgb[idx] = Math.max(parsed, rgb[idx]);
+      });
+    });
+    return rgb.reduce((acc, val) => acc * val, 1);
+  };
 
+  const lines = fs.readFileSync(fileName, "utf-8").split("\n").filter(Boolean);
+
+  console.log(lines);
+  return lines.reduce((acc, line) => acc + getPowerOfGame(line), 0);
+};
+
+console.log("Part 1:");
 console.log(part1("example"));
 console.log(part1("input"));
 // Første resultat: 227. For lavt
 // Andre res: 128. (Også for lavt (lol))
 // Trede res: 2151. (Også for lavt??)
 // Fjerde res: 2239. Riktig
+
+console.log("Part 2:");
+console.log(part2("example"));
+console.log(part2("input"));
