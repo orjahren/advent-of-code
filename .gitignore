@@ -129,9 +129,11 @@ dmypy.json
 .pyre/
 
 ## AoC custom input
-input
+part1
+part2
 
 ## Haskell binaries
 *.hi
 *.o
 main
+
