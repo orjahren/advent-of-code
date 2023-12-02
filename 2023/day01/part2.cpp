@@ -26,11 +26,12 @@ int main()
 {
     vector<string> nums = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
     string s;
-    int partOne, partTwo, x, y;
-    char a, b;
-    partOne = partTwo = 0;
+    int partTwo, x, y;
+    string a, b;
+    partTwo = 0;
     while (cin >> s)
     {
+        cout << "***************" << endl;
         cout << s << endl;
         for (int i = 0; i < s.size(); i++)
         {
@@ -40,7 +41,24 @@ int main()
                 a = s[i];
                 break;
             }
+            for (auto &num : nums)
+            {
+                // cout << "Skal lage candstring" << endl;
+                //  string candString = s.substr(i - num.size() + 1, num.size());
+                string candString = s.substr(i, num.size());
+
+                cout << "laget candstring: " << candString << endl;
+                if (candString == num)
+                {
+                    a = candString;
+                    a = to_string(stringToNum(a, nums));
+                    cout << "FANT NUMMER: " << a << endl;
+                    goto andre;
+                    break;
+                }
+            }
         }
+    andre:
         cout << "ANDRE" << endl;
         for (int i = s.size() - 1; i >= 0; i--)
         {
@@ -50,15 +68,28 @@ int main()
                 b = s[i];
                 break;
             }
+            for (auto &num : nums)
+            {
+                string candString = s.substr(i, num.size());
+                if (candString == num)
+                {
+                    b = candString;
+                    b = to_string(stringToNum(b, nums));
+                    cout << "FANT NUMMER: " << b << endl;
+                    goto ut;
+                    break;
+                }
+            }
         }
+    ut:
         cout << "Første: " << a << endl;
         cout << "Sidste: " << b << endl;
 
-        string comp{a, b};
+        string comp = a + b;
         cout << comp << endl;
         int parsed = stoi(comp);
         cout << parsed << endl;
-        partOne += parsed;
+        partTwo += parsed;
     }
-    cout << "Part 1: " << partOne << endl;
+    cout << "Part 2: " << partTwo << endl;
 }
