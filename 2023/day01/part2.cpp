@@ -15,6 +15,17 @@ char stringToNum(string &s, vector<string> &nums)
     return -1;
 }
 
+void maybeSet(string &s, vector<string> &nums, int &idx, string &target)
+{
+    for (auto &num : nums)
+    {
+        string candString = s.substr(idx, num.size());
+        if (candString == num)
+        {
+            target = stringToNum(candString, nums);
+        }
+    }
+}
 int main()
 {
     vector<string> nums = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
@@ -25,39 +36,13 @@ int main()
         for (int i = 0; i < s.size(); i++)
         {
             if (charIsNum(s[i]))
-            {
-                a = s[i];
-                goto sec;
-            }
-            for (auto &num : nums)
-            {
-                string candString = s.substr(i, num.size());
-                if (candString == num)
-                {
-                    a = stringToNum(candString, nums);
-                    goto sec;
-                }
-            }
-        }
-    sec:
-        for (int i = s.size() - 1; i >= 0; i--)
-        {
-            if (charIsNum(s[i]))
-            {
                 b = s[i];
-                goto ut;
-            }
-            for (auto &num : nums)
-            {
-                string candString = s.substr(i, num.size());
-                if (candString == num)
-                {
-                    b = stringToNum(candString, nums);
-                    goto ut;
-                }
-            }
+            maybeSet(s, nums, i, b);
+            int j = s.size() - i - 1;
+            if (charIsNum(s[j]))
+                a = s[j];
+            maybeSet(s, nums, j, a);
         }
-    ut:
         partTwo += stoi(a + b);
     }
     cout << "Part 2: " << partTwo << endl;
