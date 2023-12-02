@@ -16,13 +16,13 @@ for line in lines:
         if found:
             break
         if is_num(line[i]):
-            first_num = int(line[i])
+            first_num = line[i]
             found = True
             break
         for num in nums:
             candidate = line[i : i + len(num)]
             if is_num(candidate):
-                first_num = nums.index(candidate) + 1
+                first_num = str(nums.index(candidate) + 1)
                 found = True
                 break
 
@@ -32,18 +32,15 @@ for line in lines:
         if found:
             break
         if is_num(line[i]):
-            last_num = int(line[i])
+            last_num = line[i]
             found = True
             break
         for num in nums:
             candidate = line[i - len(num) + 1 : i + 1]
             if is_num(candidate):
-                last_num = nums.index(candidate) + 1
+                last_num = str(nums.index(candidate) + 1)
                 found = True
                 break
 
-    s = str(first_num) + str(last_num)
-    res += int(s)
-
-
+    res += int(first_num + last_num)
 print(res)
