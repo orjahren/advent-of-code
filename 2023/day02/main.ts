@@ -1,5 +1,6 @@
 import * as fs from "fs";
 
+const idx = (color: string) => ["red", "green", "blue"].indexOf(color);
 const part1 = (lines: string[]): number => {
   const getIdIfValid = (game: string): number => {
     const rgb = [0, 0, 0];
@@ -9,8 +10,8 @@ const part1 = (lines: string[]): number => {
         .split(",")
         .map((x) => x.trim())
         .forEach((op) => {
-          const [value, color] = op.split(" ");
-          rgb[["red", "green", "blue"].indexOf(color)] = parseInt(value);
+          const [val, col] = op.split(" ");
+          rgb[idx(col)] = parseInt(val);
         });
       return rgb[0] < 13 && rgb[1] < 14 && rgb[2] < 15;
     })
@@ -31,9 +32,8 @@ const part2 = (lines: string[]): number => {
           .split(",")
           .map((x) => x.trim())
           .forEach((op) => {
-            const [value, color] = op.split(" ");
-            const idx = ["red", "green", "blue"].indexOf(color);
-            rgb[idx] = Math.max(parseInt(value), rgb[idx]);
+            const [val, col] = op.split(" ");
+            rgb[idx(col)] = Math.max(parseInt(val), rgb[idx(col)]);
           })
       );
     return rgb.reduce((acc, val) => acc * val, 1);
