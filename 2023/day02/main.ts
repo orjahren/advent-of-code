@@ -8,17 +8,10 @@ const part1 = (fileName: string): number => {
   };
 
   const gameIsValid = (game: string): boolean => {
-    console.log("Skal løse game:");
-    console.log(game);
     const bits = game.split(":")[1].split(";");
-    console.log(bits);
     const rgb = [0, 0, 0];
-    console.log(rgb);
     return bits.every((bit) => {
-      console.log(bit);
       const split = bit.split(",").map((x) => x.trim());
-      console.log(split);
-      console.log(rgb);
       split.forEach((op) => {
         const [value, color] = op.split(" ");
         rgb[["red", "green", "blue"].indexOf(color)] = parseInt(value);
@@ -42,10 +35,8 @@ const part1 = (fileName: string): number => {
 
   const lines = fs.readFileSync(fileName, "utf-8").split("\n").filter(Boolean);
 
-  console.log(lines);
   return lines.reduce((acc, line) => {
     if (gameIsValid(line)) {
-      console.log("Valid game: " + getIdFromLine(line));
       return acc + getIdFromLine(line);
     }
     return acc;
@@ -53,15 +44,10 @@ const part1 = (fileName: string): number => {
 };
 const part2 = (fileName: string): number => {
   const getPowerOfGame = (game: string): number => {
-    console.log("Skal løse game:");
-    console.log(game);
     const bits = game.split(":")[1].split(";");
-    console.log(bits);
     const rgb = [0, 0, 0];
     bits.forEach((bit) => {
-      console.log(bit);
       const split = bit.split(",").map((x) => x.trim());
-      console.log(split);
       split.forEach((op) => {
         const [value, color] = op.split(" ");
         const idx = ["red", "green", "blue"].indexOf(color);
@@ -71,10 +57,7 @@ const part2 = (fileName: string): number => {
     });
     return rgb.reduce((acc, val) => acc * val, 1);
   };
-
   const lines = fs.readFileSync(fileName, "utf-8").split("\n").filter(Boolean);
-
-  console.log(lines);
   return lines.reduce((acc, line) => acc + getPowerOfGame(line), 0);
 };
 
@@ -89,3 +72,4 @@ console.log(part1("input"));
 console.log("Part 2:");
 console.log(part2("example"));
 console.log(part2("input"));
+// Res: 83435. Riktig på første forsøk
