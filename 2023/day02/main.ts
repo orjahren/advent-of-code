@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-const part1 = (fileName: string): number => {
+const part1 = (lines: string[]): number => {
   const getIdIfValid = (game: string): number => {
     const rgb = [0, 0, 0];
     const [idStr, content] = game.split(":");
@@ -17,14 +17,10 @@ const part1 = (fileName: string): number => {
       ? parseInt(idStr.substring(5))
       : 0;
   };
-  return fs
-    .readFileSync(fileName, "utf-8")
-    .split("\n")
-    .filter(Boolean)
-    .reduce((acc, line) => getIdIfValid(line) + acc, 0);
+  return lines.reduce((acc, line) => getIdIfValid(line) + acc, 0);
 };
 
-const part2 = (fileName: string): number => {
+const part2 = (lines: string[]): number => {
   const getPowerOfGame = (game: string): number => {
     const rgb = [0, 0, 0];
     game
@@ -42,17 +38,16 @@ const part2 = (fileName: string): number => {
       );
     return rgb.reduce((acc, val) => acc * val, 1);
   };
-  return fs
-    .readFileSync(fileName, "utf-8")
-    .split("\n")
-    .filter(Boolean)
-    .reduce((acc, line) => getPowerOfGame(line) + acc, 0);
+  return lines.reduce((acc, line) => getPowerOfGame(line) + acc, 0);
 };
 
+const getLines = (fileName: string): string[] =>
+  fs.readFileSync(fileName, "utf-8").split("\n").filter(Boolean);
+
 console.log("Part 1:");
-console.log(part1("example"));
-console.log(part1("input"));
+console.log(part1(getLines("example")));
+console.log(part1(getLines("input")));
 
 console.log("Part 2:");
-console.log(part2("example"));
-console.log(part2("input"));
+console.log(part2(getLines("example")));
+console.log(part2(getLines("input")));
