@@ -137,3 +137,5 @@ part2
 *.o
 main
 
+## G++ binaries
+a.out
