@@ -11,6 +11,7 @@ struct numEnt
 
 bool numberIsAdjacentToSymbol(numEnt num, vector<string> lines)
 {
+    // TODO: Should instead use "not isNumeric && not isDot"
     char symbols[] = {'*', '$', '#', '+', '-', '!', '%', '&', '/', '(', ')', '=', '@'};
     for (char symbol : symbols)
     {

@@ -9,6 +9,41 @@ struct numEnt
     short idxEnd;
     int lineIdx;
 };
+struct gearEnt
+{
+    short pos;
+    int lineIdx;
+};
+
+int getValIdValidGear(gearEnt gear, vector<numEnt> nums, vector<string> lines)
+{
+    // check if gear is adjecent to exactly 2 numbers {
+    int adjecentNums = 0;
+    int a, b;
+    for (numEnt num : nums)
+    {
+        if (num.lineIdx == gear.lineIdx)
+        {
+            if (num.idxStart == gear.pos - 1 || num.idxEnd == gear.pos + 1)
+            {
+                if (adjecentNums == 0)
+                    a = num.numVal;
+                else
+                    b = num.numVal;
+                adjecentNums++;
+            }
+        }
+    }
+    if (adjecentNums == 2)
+    {
+        cout << "Found valid gear at " << gear.lineIdx << ", " << gear.pos << endl;
+        return a * b;
+    }
+    else
+    {
+        return 1;
+    }
+}
 
 bool numberIsAdjacentToSymbol(numEnt num, vector<string> lines)
 {
@@ -115,22 +150,29 @@ int main()
         }
     }
     cout << "Found " << nums.size() << " numbers" << endl;
-    int res = 0;
-    for (numEnt num : nums)
+
+    // find all gears
+    vector<gearEnt> possibleGears;
+    for (int lineCounter = 0; lineCounter < lines.size(); lineCounter++)
     {
-        if (numberIsAdjacentToSymbol(num, lines))
+        string line = lines[lineCounter];
+        for (int i = 0; i < line.size(); i++)
         {
-            cout << "Found valid num " << num.numVal << " at line " << num.lineIdx << endl;
-            res += num.numVal;
-        }
-        else
-        {
-            cout << "\t Not valid num " << num.numVal << " at line " << num.lineIdx << endl;
+            if (line[i] == '*')
+            {
+                gearEnt gear;
+                gear.pos = i;
+                gear.lineIdx = lineCounter;
+                possibleGears.push_back(gear);
+            }
         }
     }
-    cout << "Part 1: " << res << endl;
+    cout << "Found " << possibleGears.size() << " possible gears" << endl;
+    int validGears = 0;
+    int res = 1;
+    for (gearEnt gear : possibleGears)
+    {
+        res *= getValIdValidGear(gear, nums, lines);
+    }
+    cout << "Part 2: " << res << endl;
 }
-// First res: 410371. Too low
-// 2nd res    492709. Also too low.
-// 3rd res    516469. Also too low.
-// 4th res    536576. Correct
