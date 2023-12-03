@@ -22,26 +22,15 @@ bool charIsNumeric(char c)
 
 bool gearIsAdjacentToNumber(gearEnt gent, numEnt num)
 {
+    bool isValid = false;
     for (int idx = num.idxStart; idx <= num.idxEnd; idx++)
     {
-        if (num.lineIdx == gent.lineIdx && idx - 1 == gent.pos)
-            return true;
-        if (num.lineIdx == gent.lineIdx && idx + 1 == gent.pos)
-            return true;
-        if (num.lineIdx - 1 == gent.lineIdx && idx - 1 == gent.pos)
-            return true;
-        if (num.lineIdx - 1 == gent.lineIdx && idx + 1 == gent.pos)
-            return true;
-        if (num.lineIdx + 1 == gent.lineIdx && idx - 1 == gent.pos)
-            return true;
-        if (num.lineIdx + 1 == gent.lineIdx && idx + 1 == gent.pos)
-            return true;
-        if (num.lineIdx - 1 == gent.lineIdx && idx == gent.pos)
-            return true;
-        if (num.lineIdx + 1 == gent.lineIdx && idx == gent.pos)
-            return true;
+        if (num.lineIdx == gent.lineIdx || num.lineIdx - 1 == gent.lineIdx || num.lineIdx + 1 == gent.lineIdx)
+        {
+            isValid |= idx == gent.pos || idx + 1 == gent.pos || idx - 1 == gent.pos;
+        }
     }
-    return false;
+    return isValid;
 }
 int getValIdValidGear(gearEnt gear, vector<numEnt> nums)
 {
