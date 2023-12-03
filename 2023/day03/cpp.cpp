@@ -12,7 +12,7 @@ struct numEnt
 
 bool numberIsAdjacentToSymbol(numEnt num, vector<string> lines)
 {
-    char symbols[] = {'*', '$', '#', '+'};
+    char symbols[] = {'*', '$', '#', '+', '-', '!', '%', '&', '/', '(', ')', '=', '@'};
     for (char symbol : symbols)
     {
         for (int idx = num.idxStart; idx <= num.idxEnd; idx++)
@@ -130,3 +130,7 @@ int main()
     }
     cout << "Part 1: " << res << endl;
 }
+// First res: 410371. Too low
+// 2nd res    492709. Also too low.
+// 3rd res    516469. Also too low.
+// 4th res    536576. Correct
