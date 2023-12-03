@@ -15,22 +15,25 @@ struct gearEnt
     int lineIdx;
 };
 
-int getValIdValidGear(gearEnt gear, vector<numEnt> nums, vector<string> lines)
+bool gearIsAdjacentToNumber(gearEnt gent, numEnt num);
+int getValIdValidGear(gearEnt gear, vector<numEnt> nums)
 {
     // check if gear is adjecent to exactly 2 numbers {
     int adjecentNums = 0;
     int a, b;
     for (numEnt num : nums)
     {
-        if (num.lineIdx == gear.lineIdx)
+        if (gearIsAdjacentToNumber(gear, num))
         {
-            if (num.idxStart == gear.pos - 1 || num.idxEnd == gear.pos + 1)
+            cout << "Gear at line " << gear.lineIdx << ", idx " << gear.pos << " is adjecent to " << num.stringVal << endl;
+            adjecentNums++;
+            if (adjecentNums == 1)
             {
-                if (adjecentNums == 0)
-                    a = num.numVal;
-                else
-                    b = num.numVal;
-                adjecentNums++;
+                a = num.numVal;
+            }
+            else
+            {
+                b = num.numVal;
             }
         }
     }
@@ -41,67 +44,62 @@ int getValIdValidGear(gearEnt gear, vector<numEnt> nums, vector<string> lines)
     }
     else
     {
-        return 1;
+        cout << "invalid gear at " << gear.lineIdx << ", " << gear.pos << endl;
+        cout << "adjecentNums: " << adjecentNums << endl;
+        return 0;
     }
 }
 
-bool numberIsAdjacentToSymbol(numEnt num, vector<string> lines)
+bool gearIsAdjacentToNumber(gearEnt gent, numEnt num)
 {
-    char symbols[] = {'*', '$', '#', '+', '-', '!', '%', '&', '/', '(', ')', '=', '@'};
-    for (char symbol : symbols)
+    for (int idx = num.idxStart; idx <= num.idxEnd; idx++)
     {
-        for (int idx = num.idxStart; idx <= num.idxEnd; idx++)
+        // To the left of curr num
+        if (num.lineIdx == gent.lineIdx && idx - 1 == gent.pos)
         {
-            // To the left of curr num
-            if (num.idxStart > 0 && lines[num.lineIdx][idx - 1] == symbol)
-            {
-                return true;
-            }
-            // To the right on same line
-            if (num.idxEnd < lines[num.lineIdx].size() - 1 && lines[num.lineIdx][idx + 1] == symbol)
-            {
-                return true;
-            }
+            return true;
+        }
+        // To the right on same line
+        if (num.lineIdx == gent.lineIdx && idx + 1 == gent.pos)
+        {
+            return true;
+        }
 
-            // check diagonally
-            if (num.lineIdx > 0)
+        // check diagonally
+        if (num.lineIdx > 0)
+        {
+            // top left
+            if (num.lineIdx - 1 == gent.lineIdx && idx - 1 == gent.pos)
             {
-                // top left
-                if (num.idxStart > 0 && lines[num.lineIdx - 1][idx - 1] == symbol)
-                {
-                    return true;
-                }
-                // top right
-                if (num.idxEnd < lines[num.lineIdx - 1].size() - 1 && lines[num.lineIdx - 1][idx + 1] == symbol)
-                {
-                    return true;
-                }
+                return true;
             }
+            // top right
+            if (num.lineIdx - 1 == gent.lineIdx && idx + 1 == gent.pos)
+            {
+                return true;
+            }
+        }
 
-            if (num.lineIdx < lines.size() - 1)
-            {
-                // bottom left
-                if (num.idxStart > 0 && lines[num.lineIdx + 1][idx - 1] == symbol)
-                {
-                    return true;
-                }
-                // bottom right
-                if (num.idxEnd < lines[num.lineIdx + 1].size() - 1 && lines[num.lineIdx + 1][idx + 1] == symbol)
-                {
-                    return true;
-                }
-            }
-            // check above and under
-            // above
-            if (num.lineIdx > 0 && lines[num.lineIdx - 1][idx] == symbol)
-            {
-                return true;
-            }
-            // under
-            if (num.lineIdx < lines.size() - 1 && lines[num.lineIdx + 1][idx] == symbol)
-            {
-                return true;
-            }
+        // bottom left
+        if (num.lineIdx + 1 == gent.lineIdx && idx - 1 == gent.pos)
+        {
+            return true;
+        }
+        // bottom right
+        if (num.lineIdx + 1 == gent.lineIdx && idx + 1 == gent.pos)
+        {
+            return true;
+        }
+        // check above and under
+        // above
+        if (num.lineIdx - 1 == gent.lineIdx && idx == gent.pos)
+        {
+            return true;
+        }
+        // under
+        if (num.lineIdx + 1 == gent.lineIdx && idx == gent.pos)
+        {
+            return true;
         }
     }
     return false;
@@ -168,11 +166,10 @@ int main()
         }
     }
     cout << "Found " << possibleGears.size() << " possible gears" << endl;
-    int validGears = 0;
-    int res = 1;
+    int res = 0;
     for (gearEnt gear : possibleGears)
     {
-        res *= getValIdValidGear(gear, nums, lines);
+        res += getValIdValidGear(gear, nums);
     }
     cout << "Part 2: " << res << endl;
 }
