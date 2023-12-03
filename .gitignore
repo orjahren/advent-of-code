@@ -139,3 +139,8 @@ main
 
 ## G++ binaries
 a.out
+
+## Node stuff
+package*json
+node_modules
+*js
