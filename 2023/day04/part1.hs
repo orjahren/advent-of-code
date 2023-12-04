@@ -4,11 +4,11 @@ substringWithoutCard = takeWhileEnd (/= ':')
 
 splitOndSpace = map (splitOn (pack " "))
 
-getNumsThatAppearInBothLists :: [Int] -> [Int] -> [Int]
-getNumsThatAppearInBothLists xs ys = [x | x <- xs, y <- ys, x == y]
+getNumsOfSecondListThatAppearsInFirst :: [Int] -> [Int] -> [Int]
+getNumsOfSecondListThatAppearsInFirst xs ys = [y | x <- xs, y <- ys, x == y]
 
 getPairwiseOverlapp :: [[Int]] -> [Int]
-getPairwiseOverlapp = foldl1 getNumsThatAppearInBothLists
+getPairwiseOverlapp = foldl1 getNumsOfSecondListThatAppearsInFirst
 
 main = do
   contents <- readFile "example"
