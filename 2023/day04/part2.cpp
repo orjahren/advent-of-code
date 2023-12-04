@@ -33,18 +33,12 @@ int solvePart2(vector<int> &cards)
 {
     vector<int> cardCounts = vector<int>(cards.size(), 1);
     vector<int> cardsConsumed = vector<int>(cards.size(), 0);
-    bool isDone;
-    do
+    for (int i = 0; i < cards.size(); i++)
     {
-        isDone = true;
-        for (int i = 0; i < cards.size(); i++)
-        {
-            for (int winId = i + 1; winId <= min(i + cards[i], (int)cards.size()); winId++)
-                cardCounts[winId] += cardCounts[i] - cardsConsumed[i];
-            cardsConsumed[i] += cardCounts[i];
-            isDone = cardCounts[i] != cardsConsumed[i];
-        }
-    } while (!isDone);
+        for (int winId = i + 1; winId <= min(i + cards[i], (int)cards.size()); winId++)
+            cardCounts[winId] += cardCounts[i] - cardsConsumed[i];
+        cardsConsumed[i] += cardCounts[i];
+    }
     return sum(cardCounts);
 }
 
