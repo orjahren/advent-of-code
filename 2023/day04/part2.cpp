@@ -62,8 +62,8 @@ vector<int> initCardsFromIO()
 {
     vector<int> cardsByHowManyRight;
     char line[MAX_LINE_LENGTH];
-    int x, counter = 0;
-    while (cin.getline(line, MAX_LINE_LENGTH) && ++counter)
+    int x;
+    while (cin.getline(line, MAX_LINE_LENGTH))
     {
         vector<int> winVals, candVals;
         stringstream ss;
