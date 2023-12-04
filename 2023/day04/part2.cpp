@@ -6,7 +6,7 @@ struct card
     int id;
     vector<int> winVals;
     vector<int> candVals;
-    vector<int> hasRight;
+    int howManyRight;
 };
 
 int sum(vector<int> &v)
@@ -19,12 +19,12 @@ int sum(vector<int> &v)
 
 int getScoreOfCard(card &c)
 {
-    if (c.hasRight.size() == 0)
+    if (c.howManyRight == 0)
         return 0;
-    else if (c.hasRight.size() == 1)
+    else if (c.howManyRight == 1)
         return 1;
     int res = 1;
-    for (int i = 1; i < c.hasRight.size(); i++)
+    for (int i = 1; i < c.howManyRight; i++)
         res *= 2;
     return res;
 }
@@ -52,7 +52,7 @@ int solvePart2(vector<card> &cards)
             card &c = cards[i];
             if (cardCounts[c.id] != cardsConsumed[c.id])
             {
-                for (int winId = c.id + 1; winId <= min(c.id + c.hasRight.size(), cards.size()); winId++)
+                for (int winId = c.id + 1; winId <= min(c.id + c.howManyRight, cards.size()); winId++)
                     cardCounts[winId] += cardCounts[c.id] - cardsConsumed[c.id];
                 cardsConsumed[c.id] += cardCounts[c.id];
                 isDone = false;
@@ -62,14 +62,14 @@ int solvePart2(vector<card> &cards)
     return sum(cardCounts);
 }
 
-vector<int> cardHasTheseRight(card &c)
+int cardHasHowManyRight(card &c)
 {
-    vector<int> v;
+    int res = 0;
     for (int i = 0; i < c.winVals.size(); i++)
         for (int j = 0; j < c.candVals.size(); j++)
             if (c.winVals[i] == c.candVals[j])
-                v.push_back(c.winVals[i]);
-    return v;
+                res++;
+    return res;
 }
 
 vector<card> getCardsFromIO()
@@ -95,7 +95,7 @@ vector<card> getCardsFromIO()
             else if (stringstream(s) >> x)
                 hasSeenPipe ? c.candVals.push_back(x) : c.winVals.push_back(x);
         }
-        c.hasRight = cardHasTheseRight(c);
+        c.howManyRight = cardHasHowManyRight(c);
         cards.push_back(c);
     }
     return cards;
