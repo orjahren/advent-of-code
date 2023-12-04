@@ -19,23 +19,21 @@ int sum(vector<int> &v)
 
 int getScoreOfCard(card &c)
 {
-    if (c.howManyRight == 0)
-        return 0;
-    else if (c.howManyRight == 1)
-        return 1;
-    int res = 1;
-    for (int i = 1; i < c.howManyRight; i++)
-        res *= 2;
-    return res;
+    if (c.howManyRight > 1)
+    {
+        int res = 1;
+        for (int i = 1; i < c.howManyRight; i++)
+            res *= 2;
+        return res;
+    }
+    return c.howManyRight;
 }
 
 int solvePart1(vector<card> &cards)
 {
     int res = 0;
     for (int i = 0; i < cards.size(); i++)
-    {
         res += getScoreOfCard(cards[i]);
-    }
     return res;
 }
 
@@ -72,7 +70,7 @@ int cardHasHowManyRight(card &c)
     return res;
 }
 
-vector<card> getCardsFromIO()
+vector<card> initCardsFromIO()
 {
     vector<card> cards;
     char line[MAX_LINE_LENGTH];
@@ -103,7 +101,7 @@ vector<card> getCardsFromIO()
 
 int main()
 {
-    vector<card> cards = getCardsFromIO();
+    vector<card> cards = initCardsFromIO();
     cout << "Part 1: " << solvePart1(cards) << endl;
     cout << "Part 2: " << solvePart2(cards) << endl;
 }
