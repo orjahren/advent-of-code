@@ -1,14 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define MAX_LINE_LENGTH 1000
-struct card
-{
-    int id;
-    vector<int> winVals;
-    vector<int> candVals;
-    int howManyRight;
-};
-
 int sum(vector<int> &v)
 {
     int res = 0;
@@ -17,19 +9,19 @@ int sum(vector<int> &v)
     return res;
 }
 
-int getScoreOfCard(card &c)
+int getScoreOfCard(int &c)
 {
-    if (c.howManyRight > 1)
+    if (c > 1)
     {
         int res = 1;
-        for (int i = 1; i < c.howManyRight; i++)
+        for (int i = 1; i < c; i++)
             res *= 2;
         return res;
     }
-    return c.howManyRight;
+    return c;
 }
 
-int solvePart1(vector<card> &cards)
+int solvePart1(vector<int> &cards)
 {
     int res = 0;
     for (int i = 0; i < cards.size(); i++)
@@ -37,7 +29,7 @@ int solvePart1(vector<card> &cards)
     return res;
 }
 
-int solvePart2(vector<card> &cards)
+int solvePart2(vector<int> &cards)
 {
     vector<int> cardCounts = vector<int>(cards.size(), 1);
     vector<int> cardsConsumed = vector<int>(cards.size(), 0);
@@ -47,35 +39,33 @@ int solvePart2(vector<card> &cards)
         isDone = true;
         for (int i = 0; i < cards.size(); i++)
         {
-            card &c = cards[i];
-            for (int winId = c.id + 1; winId <= min(c.id + c.howManyRight, (int)cards.size()); winId++)
-                cardCounts[winId] += cardCounts[c.id] - cardsConsumed[c.id];
-            cardsConsumed[c.id] += cardCounts[c.id];
-            isDone = cardCounts[c.id] != cardsConsumed[c.id];
+            for (int winId = i + 1; winId <= min(i + cards[i], (int)cards.size()); winId++)
+                cardCounts[winId] += cardCounts[i] - cardsConsumed[i];
+            cardsConsumed[i] += cardCounts[i];
+            isDone = cardCounts[i] != cardsConsumed[i];
         }
     } while (!isDone);
     return sum(cardCounts);
 }
 
-int cardHasHowManyRight(card &c)
+int cardHasHowManyRight(vector<int> &winVals, vector<int> &candVals)
 {
     int res = 0;
-    sort(c.candVals.begin(), c.candVals.end());
-    for (int i = 0; i < c.winVals.size(); i++)
-        if (binary_search(c.candVals.begin(), c.candVals.end(), c.winVals[i]))
+    sort(candVals.begin(), candVals.end());
+    for (int i = 0; i < winVals.size(); i++)
+        if (binary_search(candVals.begin(), candVals.end(), winVals[i]))
             res++;
     return res;
 }
 
-vector<card> initCardsFromIO()
+vector<int> initCardsFromIO()
 {
-    vector<card> cards;
+    vector<int> cardsByHowManyRight;
     char line[MAX_LINE_LENGTH];
     int x, counter = 0;
     while (cin.getline(line, MAX_LINE_LENGTH) && ++counter)
     {
-        card c;
-        c.id = counter - 1;
+        vector<int> winVals, candVals;
         stringstream ss;
         string s;
         bool hasSeenPipe = false;
@@ -88,17 +78,15 @@ vector<card> initCardsFromIO()
             if (!hasSeenPipe && s == "|")
                 hasSeenPipe = true;
             else if (stringstream(s) >> x)
-                hasSeenPipe ? c.candVals.push_back(x) : c.winVals.push_back(x);
+                hasSeenPipe ? candVals.push_back(x) : winVals.push_back(x);
         }
-        c.howManyRight = cardHasHowManyRight(c);
-        cards.push_back(c);
+        cardsByHowManyRight.push_back(cardHasHowManyRight(winVals, candVals));
     }
-    return cards;
+    return cardsByHowManyRight;
 }
-
 int main()
 {
-    vector<card> cards = initCardsFromIO();
+    vector<int> cards = initCardsFromIO();
     cout << "Part 1: " << solvePart1(cards) << endl;
     cout << "Part 2: " << solvePart2(cards) << endl;
 }
