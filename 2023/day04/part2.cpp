@@ -52,7 +52,7 @@ int solvePart2(vector<card> &cards)
             card &c = cards[i];
             if (cardCounts[c.id] != cardsConsumed[c.id])
             {
-                for (int winId = c.id + 1; winId <= min(c.id + c.howManyRight, cards.size()); winId++)
+                for (int winId = c.id + 1; winId <= min(c.id + c.howManyRight, (int)cards.size()); winId++)
                     cardCounts[winId] += cardCounts[c.id] - cardsConsumed[c.id];
                 cardsConsumed[c.id] += cardCounts[c.id];
                 isDone = false;
@@ -65,10 +65,11 @@ int solvePart2(vector<card> &cards)
 int cardHasHowManyRight(card &c)
 {
     int res = 0;
+    sort(c.winVals.begin(), c.winVals.end());
+    sort(c.candVals.begin(), c.candVals.end());
     for (int i = 0; i < c.winVals.size(); i++)
-        for (int j = 0; j < c.candVals.size(); j++)
-            if (c.winVals[i] == c.candVals[j])
-                res++;
+        if (binary_search(c.candVals.begin(), c.candVals.end(), c.winVals[i]))
+            res++;
     return res;
 }
 
