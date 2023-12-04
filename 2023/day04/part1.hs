@@ -20,8 +20,8 @@ getScore [x] = 1
 getScore arr = getScoreRec (tail arr) 1
 
 main = do
-  contents <- readFile "example"
-  -- contents <- readFile "input"
+  -- contents <- readFile "example"
+  contents <- readFile "input"
   let input = lines contents
   print input
   let packedPipe = pack "|"
