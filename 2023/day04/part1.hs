@@ -18,9 +18,8 @@ getScore arr = getScoreRec (tail arr) 1
 
 main = do
   -- contents <- readFile "example"
-  contents <- readFile "input"
-  let input = lines contents
-  let bits = map (splitOn (pack "|") . pack) input
+  input <- readFile "input"
+  let bits = map (splitOn (pack "|") . pack) (lines input)
   let bitsWithoutCard = map (map substringWithoutCard) bits
   let stripped = map (map strip) bitsWithoutCard
   let numsAsStr = map splitOndSpace stripped
