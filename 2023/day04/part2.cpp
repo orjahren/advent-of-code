@@ -61,37 +61,59 @@ int solvePart2(vector<card> &cards)
         card &c = cards[i];
         // c.wonCands = c.candVals;
     }
-    vector<int> cardCounts = vector<int>(cards.size() + 1, 1);
-    vector<int> cardsConsumed = vector<int>(cards.size() + 1, 0);
+    vector<int> cardCounts = vector<int>(cards.size(), 1);
+    vector<int> cardsConsumed = vector<int>(cards.size(), 0);
     bool somethingWasWon = false;
     do
     {
         somethingWasWon = false;
         for (int i = 0; i < cards.size(); i++)
         {
-            if (cardCounts[i + 1] == cardsConsumed[i + 1])
+            card &c = cards[i];
+            if (cardCounts[c.id] == cardsConsumed[c.id])
             {
+                cout << "Skipping card " << c.id + 1 << " because it has been consumed" << endl;
                 continue;
             }
-            card &c = cards[i];
 
             vector<int> hasRight = cardHasTheseRight(c);
-            cout << c.id << " har " << hasRight.size() << " riktige" << endl;
+            cout << c.id + 1 << " har " << hasRight.size() << " riktige" << endl;
             int howManyAreWon = cardCounts[c.id] - cardsConsumed[c.id];
             cout << "We have " << cardCounts[c.id] << " of the winner" << endl;
-            for (int winId = c.id + 1; winId <= min(c.id + hasRight.size(), cards.size() + 1); winId++)
+            cout << "Consumption: " << cardsConsumed[c.id] << endl;
+            // for (int winId = c.id + 1; winId <= min(c.id + hasRight.size(), cards.size() + 1); winId++)
+            for (int winId = c.id + 1; winId <= min(c.id + hasRight.size(), cards.size()); winId++)
             {
-                cout << "Card " << c.id << " won " << howManyAreWon << " of " << winId << endl;
+                cout << "Card " << c.id + 1 << " won " << howManyAreWon << " of " << winId + 1 << endl;
                 cardCounts[winId] += howManyAreWon;
                 somethingWasWon = true;
             }
             // cardCounts[c.id]--;
-            cardsConsumed[c.id]++;
+
+            // cardsConsumed[c.id]++;
+            cardsConsumed[c.id] += cardCounts[c.id];
             cout << "--" << endl;
         }
 
     } while (somethingWasWon);
+    int res = 0;
+    for (int i = 0; i < cards.size(); i++)
+    {
+        cout << "\n \t ### Card " << i + 1 << " ###" << endl;
+        // int score = cardCounts[i + 1];
+        //  score += cardsConsumed[i + 1];
+        // int score = cardsConsumed[i + 1];
+        // score -= cardCounts[i + 1];
+        // int score = cardCounts[i] - cardsConsumed[i];
+        int score = cardCounts[i];
+        cout << "Has " << cardCounts[i] << " of " << i + 1 << endl;
+        cout << "Has consumed " << cardsConsumed[i] << " of " << i + 1 << endl;
+        cout << "Score for card " << i + 1 << " is " << score << endl;
+        res += score;
+    }
+    return res;
 
+    /*
     int res = 0;
     for (int i = 0; i < cards.size(); i++)
     {
@@ -107,6 +129,7 @@ int solvePart2(vector<card> &cards)
         res += score;
     }
     return res;
+    */
 }
 
 int main()
@@ -120,7 +143,7 @@ int main()
     while (cin.getline(line, MAX_LINE_LENGTH) && ++counter)
     {
         card c;
-        c.id = counter;
+        c.id = counter - 1;
 
         stringstream ss;
         string s;
