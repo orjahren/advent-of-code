@@ -10,6 +10,15 @@ getNumsOfSecondListThatAppearsInFirst xs ys = [y | x <- xs, y <- ys, x == y]
 getPairwiseOverlapp :: [[Int]] -> [Int]
 getPairwiseOverlapp = foldl1 getNumsOfSecondListThatAppearsInFirst
 
+getScoreRec :: [Int] -> Int -> Int
+getScoreRec [] acc = acc
+getScoreRec arr acc = getScoreRec (tail arr) (acc * 2)
+
+getScore :: [Int] -> Int
+getScore [] = 0
+getScore [x] = 1
+getScore arr = getScoreRec (tail arr) 1
+
 main = do
   contents <- readFile "example"
   -- contents <- readFile "input"
@@ -44,3 +53,11 @@ main = do
   putStrLn "overlapp"
   let overlapp = map getPairwiseOverlapp nums
   print overlapp
+
+  let scores = map getScore overlapp
+  putStrLn "Scores"
+  print scores
+
+  let finalResult = sum scores
+  putStrLn "Part 1:"
+  print finalResult
