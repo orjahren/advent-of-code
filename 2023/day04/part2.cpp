@@ -48,13 +48,10 @@ int solvePart2(vector<card> &cards)
         for (int i = 0; i < cards.size(); i++)
         {
             card &c = cards[i];
-            if (cardCounts[c.id] != cardsConsumed[c.id])
-            {
-                for (int winId = c.id + 1; winId <= min(c.id + c.howManyRight, (int)cards.size()); winId++)
-                    cardCounts[winId] += cardCounts[c.id] - cardsConsumed[c.id];
-                cardsConsumed[c.id] += cardCounts[c.id];
-                isDone = false;
-            }
+            for (int winId = c.id + 1; winId <= min(c.id + c.howManyRight, (int)cards.size()); winId++)
+                cardCounts[winId] += cardCounts[c.id] - cardsConsumed[c.id];
+            cardsConsumed[c.id] += cardCounts[c.id];
+            isDone = cardCounts[c.id] != cardsConsumed[c.id];
         }
     } while (!isDone);
     return sum(cardCounts);
