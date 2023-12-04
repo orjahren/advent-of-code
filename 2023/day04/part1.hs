@@ -1,4 +1,4 @@
-import Data.Text (isInfixOf, pack, replace, splitOn, strip, takeWhileEnd, unpack)
+import Data.Text (Text, isInfixOf, pack, replace, splitOn, strip, takeWhileEnd, unpack)
 
 -- removeCard :: String -> String
 -- removeCard [] = []
@@ -6,6 +6,10 @@ import Data.Text (isInfixOf, pack, replace, splitOn, strip, takeWhileEnd, unpack
 -- removeCard = takeWhileEnd /= pack ":"
 -- substringWithoutCard :: String -> String
 substringWithoutCard = takeWhileEnd (/= ':')
+
+-- splitAndConvert :: [Text] -> [Int]
+-- splitAndConvertToInt = map (read . unpack)
+splitOndSpace = map (splitOn (pack " "))
 
 main = do
   contents <- readFile "example"
@@ -21,3 +25,25 @@ main = do
   let stripped = map (map strip) bitsWithoutCard
   putStrLn "stripped"
   print stripped
+
+  putStrLn "numsAsStr"
+  let numsAsStr = map splitOndSpace stripped
+  print numsAsStr
+
+  putStrLn "unpacked"
+  let unpacked = map (map (map unpack)) numsAsStr
+  print unpacked
+
+  let filtered = map (map (filter (/= ""))) unpacked
+  putStrLn "filtered"
+  print filtered
+
+  -- let nums = map (map (map (read :: Int))) numsAsStr
+  -- let nums = map (map (map (read :: String -> Int))) unpacked
+  let nums = map (map (map (read :: String -> Int))) filtered
+  putStrLn "nums"
+  print nums
+
+-- print nums
+-- let x = show nums
+-- print x
