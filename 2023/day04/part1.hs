@@ -1,15 +1,11 @@
 import Data.Text (Text, isInfixOf, pack, replace, splitOn, strip, takeWhileEnd, unpack)
 
--- removeCard :: String -> String
--- removeCard [] = []
--- removeCard (x : xs) = if pack "Card" `isInfixOf` x then xs else removeCard xs
--- removeCard = takeWhileEnd /= pack ":"
--- substringWithoutCard :: String -> String
 substringWithoutCard = takeWhileEnd (/= ':')
 
--- splitAndConvert :: [Text] -> [Int]
--- splitAndConvertToInt = map (read . unpack)
 splitOndSpace = map (splitOn (pack " "))
+
+getNumsThatAppearInBothLists :: [Int] -> [Int] -> [Int]
+getNumsThatAppearInBothLists xs ys = [x | x <- xs, y <- ys, x == y]
 
 main = do
   contents <- readFile "example"
@@ -38,12 +34,8 @@ main = do
   putStrLn "filtered"
   print filtered
 
-  -- let nums = map (map (map (read :: Int))) numsAsStr
-  -- let nums = map (map (map (read :: String -> Int))) unpacked
   let nums = map (map (map (read :: String -> Int))) filtered
   putStrLn "nums"
   print nums
 
--- print nums
--- let x = show nums
--- print x
+  print (head nums)
