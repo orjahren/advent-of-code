@@ -65,7 +65,6 @@ int solvePart2(vector<card> &cards)
 int cardHasHowManyRight(card &c)
 {
     int res = 0;
-    sort(c.winVals.begin(), c.winVals.end());
     sort(c.candVals.begin(), c.candVals.end());
     for (int i = 0; i < c.winVals.size(); i++)
         if (binary_search(c.candVals.begin(), c.candVals.end(), c.winVals[i]))
