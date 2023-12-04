@@ -7,6 +7,9 @@ splitOndSpace = map (splitOn (pack " "))
 getNumsThatAppearInBothLists :: [Int] -> [Int] -> [Int]
 getNumsThatAppearInBothLists xs ys = [x | x <- xs, y <- ys, x == y]
 
+getPairwiseOverlapp :: [[Int]] -> [Int]
+getPairwiseOverlapp = foldl1 getNumsThatAppearInBothLists
+
 main = do
   contents <- readFile "example"
   -- contents <- readFile "input"
@@ -38,4 +41,6 @@ main = do
   putStrLn "nums"
   print nums
 
-  print (head nums)
+  putStrLn "overlapp"
+  let overlapp = map getPairwiseOverlapp nums
+  print overlapp
