@@ -6,17 +6,9 @@ struct card
     int id;
     vector<int> winVals;
     vector<int> candVals;
+    vector<int> hasRight;
 };
 
-vector<int> cardHasTheseRight(card &c)
-{
-    vector<int> v;
-    for (int i = 0; i < c.winVals.size(); i++)
-        for (int j = 0; j < c.candVals.size(); j++)
-            if (c.winVals[i] == c.candVals[j])
-                v.push_back(c.winVals[i]);
-    return v;
-}
 int sum(vector<int> &v)
 {
     int res = 0;
@@ -27,13 +19,12 @@ int sum(vector<int> &v)
 
 int getScoreOfCard(card &c)
 {
-    vector<int> hasRight = cardHasTheseRight(c);
-    if (hasRight.size() == 0)
+    if (c.hasRight.size() == 0)
         return 0;
-    else if (hasRight.size() == 1)
+    else if (c.hasRight.size() == 1)
         return 1;
     int res = 1;
-    for (int i = 1; i < hasRight.size(); i++)
+    for (int i = 1; i < c.hasRight.size(); i++)
         res *= 2;
     return res;
 }
@@ -61,8 +52,7 @@ int solvePart2(vector<card> &cards)
             card &c = cards[i];
             if (cardCounts[c.id] != cardsConsumed[c.id])
             {
-                vector<int> hasRight = cardHasTheseRight(c);
-                for (int winId = c.id + 1; winId <= min(c.id + hasRight.size(), cards.size()); winId++)
+                for (int winId = c.id + 1; winId <= min(c.id + c.hasRight.size(), cards.size()); winId++)
                     cardCounts[winId] += cardCounts[c.id] - cardsConsumed[c.id];
                 cardsConsumed[c.id] += cardCounts[c.id];
                 isDone = false;
@@ -72,10 +62,20 @@ int solvePart2(vector<card> &cards)
     return sum(cardCounts);
 }
 
-int main()
+vector<int> cardHasTheseRight(card &c)
 {
-    char line[MAX_LINE_LENGTH];
+    vector<int> v;
+    for (int i = 0; i < c.winVals.size(); i++)
+        for (int j = 0; j < c.candVals.size(); j++)
+            if (c.winVals[i] == c.candVals[j])
+                v.push_back(c.winVals[i]);
+    return v;
+}
+
+vector<card> getCardsFromIO()
+{
     vector<card> cards;
+    char line[MAX_LINE_LENGTH];
     int x, counter = 0;
     while (cin.getline(line, MAX_LINE_LENGTH) && ++counter)
     {
@@ -95,8 +95,15 @@ int main()
             else if (stringstream(s) >> x)
                 hasSeenPipe ? c.candVals.push_back(x) : c.winVals.push_back(x);
         }
+        c.hasRight = cardHasTheseRight(c);
         cards.push_back(c);
     }
+    return cards;
+}
+
+int main()
+{
+    vector<card> cards = getCardsFromIO();
     cout << "Part 1: " << solvePart1(cards) << endl;
     cout << "Part 2: " << solvePart2(cards) << endl;
 }
