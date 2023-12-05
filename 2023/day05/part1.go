@@ -26,10 +26,24 @@ type mapWrapper struct {
 func main() {
 	println("Hello, World!")
 	file, _ := os.Open("example")
+	//file, _ := os.Open("input")
 	reader := bufio.NewReader(file)
 	line, _ := reader.ReadString('\n')
 	stripped := strings.TrimSpace(line)
+	seeds := make([]int, 0)
+	split := strings.Split(stripped, " ")
+
+	for i := range split {
+		split[i] = strings.TrimSpace(split[i])
+		parsed, _ := strconv.Atoi(split[i])
+		if parsed > 0 {
+
+			seeds = append(seeds, parsed)
+		}
+	}
+
 	fmt.Println(stripped)
+	fmt.Println(seeds)
 
 	fmt.Println("Starting loop.")
 	currMap := make([]mapEntry, 0)
