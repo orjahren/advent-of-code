@@ -15,6 +15,10 @@ func main() {
 	println("Hello, World!")
 	file, _ := os.Open("example")
 	reader := bufio.NewReader(file)
+	line, _ := reader.ReadString('\n')
+	stripped := strings.TrimSpace(line)
+	fmt.Println(stripped)
+
 	allLines := make([]string, 0)
 	for {
 		line, err := reader.ReadString('\n')
