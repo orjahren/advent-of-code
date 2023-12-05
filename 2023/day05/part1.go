@@ -61,7 +61,10 @@ func main() {
 			fmt.Println("new map found: " + stripped)
 			if len(currRange) > 1 {
 				fmt.Println("currMap: ", currRange)
-				currMap = aocMap{currRange, stripped, "", ""}
+				spl := strings.Split(stripped, "-")
+				to := strings.Split(spl[2], " ")[0]
+				fmt.Println(spl)
+				currMap = aocMap{currRange, stripped, spl[0], to}
 				allMaps = append(allMaps, currMap)
 				currMap = aocMap{}
 				fmt.Println("has length: ", len(currRange))
