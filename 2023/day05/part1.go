@@ -25,6 +25,10 @@ type aocMap struct {
 	to      string
 }
 
+func pathFromSeedToLocation(seed int, location int, maps []aocMap) int {
+	return 0
+}
+
 func main() {
 	println("Hello, World!")
 	file, _ := os.Open("example")
@@ -100,4 +104,8 @@ func main() {
 	fmt.Println(allMaps)
 	fmt.Println(len(allMaps))
 	fmt.Println(allMaps[0])
+
+
+	minVal := 0
+
 }
