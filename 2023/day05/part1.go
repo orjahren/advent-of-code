@@ -12,15 +12,17 @@ func stringContainsMap(s string) bool {
 	return strings.Contains(s, "map")
 }
 
-type mapEntry struct {
+type rangeEntry struct {
 	rangeStart int
 	rangeEnd   int
 	rangeSpan  int
 }
 
-type mapWrapper struct {
-	entries []mapEntry
+type aocMap struct {
+	entries []rangeEntry
 	name    string
+	from    string
+	to      string
 }
 
 func main() {
@@ -46,8 +48,9 @@ func main() {
 	fmt.Println(seeds)
 
 	fmt.Println("Starting loop.")
-	currMap := make([]mapEntry, 0)
-	allMaps := make([][]mapEntry, 0)
+	currRange := make([]rangeEntry, 0)
+	allMaps := make([]aocMap, 0)
+	var currMap aocMap
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
@@ -55,12 +58,15 @@ func main() {
 		}
 		stripped := strings.TrimSpace(line)
 		if stringContainsMap(stripped) {
-			if len(currMap) > 1 {
-				fmt.Println("currMap: ", currMap)
+			fmt.Println("new map found: " + stripped)
+			if len(currRange) > 1 {
+				fmt.Println("currMap: ", currRange)
+				currMap = aocMap{currRange, stripped, "", ""}
 				allMaps = append(allMaps, currMap)
-				fmt.Println("has length: ", len(currMap))
+				currMap = aocMap{}
+				fmt.Println("has length: ", len(currRange))
 			}
-			currMap = make([]mapEntry, 0)
+			currRange = make([]rangeEntry, 0)
 			continue
 		} else {
 			spl := strings.Split(stripped, " ")
@@ -75,12 +81,14 @@ func main() {
 				parsed, _ := strconv.Atoi(spl[i])
 				parr[i] = parsed
 			}
-			var me mapEntry
+			var me rangeEntry
 			me.rangeStart = parr[0]
 			me.rangeEnd = parr[1]
 			me.rangeSpan = parr[2]
+			fmt.Println("me:: ")
+			fmt.Println(me)
 
-			currMap = append(currMap, me)
+			currRange = append(currRange, me)
 			fmt.Println(stripped)
 
 		}
@@ -88,4 +96,5 @@ func main() {
 	allMaps = append(allMaps, currMap)
 	fmt.Println(allMaps)
 	fmt.Println(len(allMaps))
+	fmt.Println(allMaps[0])
 }
