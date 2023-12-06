@@ -27,28 +27,39 @@ vector<int> getWinningOptions(int timeLimit, int competitor)
 int main()
 {
     cout << "Hello World!" << endl;
-    vector<int> times(3);
-    vector<int> distances(3);
+    vector<int> times;
+    vector<int> distances;
     string devNull;
     cin >> devNull;
-    for (int i = 0; i < 3; i++)
-        cin >> times[i];
+    int x;
+    bool isTest = false;
+    int numsToRead = isTest ? 3 : 4;
+    for (int i = 0; i < numsToRead; i++)
+    {
+        cin >> x;
+        times.push_back(x);
+    }
+
     cin >> devNull;
-    for (int i = 0; i < 3; i++)
-        cin >> distances[i];
+
+    for (int i = 0; i < numsToRead; i++)
+    {
+        cin >> x;
+        distances.push_back(x);
+    }
     cout << "Times: ";
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < numsToRead; i++)
         cout << times[i] << " ";
     cout << endl;
     cout << "Distances: ";
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < numsToRead; i++)
         cout << distances[i] << " ";
     cout << endl;
 
     // int vals[3][3];
-    vector<vector<int>> vals(3, vector<int>(3));
+    vector<vector<int>> vals(numsToRead, vector<int>(numsToRead));
     int res = 1;
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < numsToRead; i++)
     {
         cout << "i: " << i << ", would win with " << endl;
         vector<int> winningOptions = getWinningOptions(times[i], distances[i]);
