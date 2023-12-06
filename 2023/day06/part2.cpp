@@ -19,8 +19,7 @@ int howManyWinningOptions(ll timeLimit, ll competitor)
 
 int main()
 {
-    vector<string> times;
-    vector<string> distances;
+    vector<string> v;
     string inp;
     cin >> inp;
 
@@ -30,22 +29,16 @@ int main()
     for (int i = 0; i < numsToRead; i++)
     {
         cin >> inp;
-        times.push_back(inp);
+        v.push_back(inp);
     }
-    string timesConcat = accumulate(times.begin(), times.end(), string(""));
     cin >> inp;
+    string time = accumulate(v.begin(), v.end(), string(""));
+    v.clear();
     for (int i = 0; i < numsToRead; i++)
     {
         cin >> inp;
-        distances.push_back(inp);
+        v.push_back(inp);
     }
-    string distanceConcat = accumulate(distances.begin(), distances.end(), string(""));
-
-    cout << timesConcat << endl;
-    cout << distanceConcat << endl;
-
-    ll bigTime = stoll(timesConcat);
-    ll bigDist = stoll(distanceConcat);
-
-    cout << "Part 2: " << howManyWinningOptions(bigTime, bigDist) << endl;
+    string dist = accumulate(v.begin(), v.end(), string(""));
+    cout << "Part 2: " << howManyWinningOptions(stoll(time), stoll(dist)) << endl;
 }
