@@ -24,7 +24,7 @@ int main()
     string inp;
     cin >> inp;
 
-    bool isTest = true;
+    bool isTest = false;
     int numsToRead = isTest ? 3 : 4;
 
     for (int i = 0; i < numsToRead; i++)
