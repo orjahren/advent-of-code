@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
-bool optionWouldWin(int opt, int competitor, int timeLimit)
+typedef long long ll;
+bool optionWouldWin(ll opt, ll competitor, ll timeLimit)
 {
     int currentSpeedInMs = 0;
     int speedIncreasesByMsPrSec = 1;
@@ -13,10 +14,10 @@ bool optionWouldWin(int opt, int competitor, int timeLimit)
     return (currentSpeedInMs * (timeLimit - opt)) > competitor;
 }
 
-vector<int> getWinningOptions(int timeLimit, int competitor)
+vector<ll> getWinningOptions(ll timeLimit, ll competitor)
 {
-    vector<int> winningOptions;
-    for (int i = 0; i < timeLimit; i++)
+    vector<ll> winningOptions;
+    for (ll i = 0; i < timeLimit; i++)
     {
         if (optionWouldWin(i, competitor, timeLimit))
             winningOptions.push_back(i);
@@ -26,30 +27,35 @@ vector<int> getWinningOptions(int timeLimit, int competitor)
 
 int main()
 {
-    vector<int> times;
-    vector<int> distances;
-    string devNull;
-    cin >> devNull;
-    int x;
+    vector<string> times;
+    vector<string> distances;
+    string inp;
+    cin >> inp;
 
-    bool isTest = false;
+    bool isTest = true;
     int numsToRead = isTest ? 3 : 4;
 
     for (int i = 0; i < numsToRead; i++)
     {
-        cin >> x;
-        times.push_back(x);
+        cin >> inp;
+        times.push_back(inp);
     }
-    cin >> devNull;
+    string timesConcat = std::accumulate(times.begin(), times.end(), std::string(""));
+    cin >> inp;
     for (int i = 0; i < numsToRead; i++)
     {
-        cin >> x;
-        distances.push_back(x);
+        cin >> inp;
+        distances.push_back(inp);
     }
+    string distanceConcat = accumulate(distances.begin(), distances.end(), std::string(""));
 
-    int res = 1;
-    for (int i = 0; i < numsToRead; i++)
-        res *= getWinningOptions(times[i], distances[i]).size();
+    cout << timesConcat << endl;
+    cout << distanceConcat << endl;
 
-    cout << "Part 1: " << res << endl;
+    ll bigTime = stoll(timesConcat);
+    ll bigDist = stoll(distanceConcat);
+
+    ll res = getWinningOptions(bigTime, bigDist).size();
+
+    cout << "Part 2: " << res << endl;
 }
