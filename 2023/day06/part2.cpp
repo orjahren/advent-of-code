@@ -6,15 +6,15 @@ bool optionWouldWin(ll opt, ll competitor, ll timeLimit)
     return (opt * (timeLimit - opt)) > competitor;
 }
 
-vector<ll> getWinningOptions(ll timeLimit, ll competitor)
+int howManyWinningOptions(ll timeLimit, ll competitor)
 {
-    vector<ll> winningOptions;
+    int res = 0;
     for (ll i = 0; i < timeLimit; i++)
     {
         if (optionWouldWin(i, competitor, timeLimit))
-            winningOptions.push_back(i);
+            res++;
     }
-    return winningOptions;
+    return res;
 }
 
 int main()
@@ -32,14 +32,14 @@ int main()
         cin >> inp;
         times.push_back(inp);
     }
-    string timesConcat = std::accumulate(times.begin(), times.end(), std::string(""));
+    string timesConcat = accumulate(times.begin(), times.end(), string(""));
     cin >> inp;
     for (int i = 0; i < numsToRead; i++)
     {
         cin >> inp;
         distances.push_back(inp);
     }
-    string distanceConcat = accumulate(distances.begin(), distances.end(), std::string(""));
+    string distanceConcat = accumulate(distances.begin(), distances.end(), string(""));
 
     cout << timesConcat << endl;
     cout << distanceConcat << endl;
@@ -47,7 +47,5 @@ int main()
     ll bigTime = stoll(timesConcat);
     ll bigDist = stoll(distanceConcat);
 
-    ll res = getWinningOptions(bigTime, bigDist).size();
-
-    cout << "Part 2: " << res << endl;
+    cout << "Part 2: " << howManyWinningOptions(bigTime, bigDist) << endl;
 }
