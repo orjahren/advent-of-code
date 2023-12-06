@@ -12,16 +12,15 @@ int nWinningOptions(ll timeLimit, ll competitor)
 int main()
 {
     bool isTest = false;
-    int numsToRead = isTest ? 3 : 4;
-    int x, part1 = 1;
+    int part1 = 1;
     string inp;
     cin >> inp;
-    vector<string> v(numsToRead);
-    for (int i = 0; i < numsToRead; i++)
+    vector<string> v(isTest ? 3 : 4);
+    for (int i = 0; i < v.size(); i++)
         cin >> v[i];
     string time = accumulate(v.begin(), v.end(), string(""));
     cin >> inp;
-    for (int i = 0; i < numsToRead; i++)
+    for (int i = 0; i < v.size(); i++)
     {
         cin >> inp;
         part1 *= nWinningOptions(stoll(v[i]), stoll(inp));
