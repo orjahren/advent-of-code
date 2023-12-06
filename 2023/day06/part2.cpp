@@ -3,15 +3,7 @@ using namespace std;
 typedef long long ll;
 bool optionWouldWin(ll opt, ll competitor, ll timeLimit)
 {
-    int currentSpeedInMs = 0;
-    int speedIncreasesByMsPrSec = 1;
-    // TODO: There must be some way to do this in O(1) time lol
-    // Set currSped = opt and no loop?
-    for (int i = 0; i < opt; i++)
-    {
-        currentSpeedInMs += speedIncreasesByMsPrSec;
-    }
-    return (currentSpeedInMs * (timeLimit - opt)) > competitor;
+    return (opt * (timeLimit - opt)) > competitor;
 }
 
 vector<ll> getWinningOptions(ll timeLimit, ll competitor)
