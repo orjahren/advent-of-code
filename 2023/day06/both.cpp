@@ -1,31 +1,28 @@
 #include <bits/stdc++.h>
 typedef long long ll;
-using namespace std;
 int nWinningOptions(ll timeLimit, ll competitor)
 {
     int res = 0;
     for (int i = 1; i < timeLimit; i++)
-        if ((i * (timeLimit - i)) > competitor)
-            res++;
+        ((i * (timeLimit - i)) > competitor) && res++;
     return res;
 }
 int main()
 {
-    bool isTest = false;
     int part1 = 1;
-    string inp;
-    cin >> inp;
-    vector<string> v(isTest ? 3 : 4);
+    std::string inp;
+    std::cin >> inp;
+    std::vector<std::string> v(4);
     for (int i = 0; i < v.size(); i++)
-        cin >> v[i];
-    string time = accumulate(v.begin(), v.end(), string(""));
-    cin >> inp;
+        std::cin >> v[i];
+    std::string time = accumulate(v.begin(), v.end(), std::string(""));
+    std::cin >> inp;
     for (int i = 0; i < v.size(); i++)
     {
-        cin >> inp;
+        std::cin >> inp;
         part1 *= nWinningOptions(stoll(v[i]), stoll(inp));
         v[i] = inp;
     }
-    cout << "Part 1: " << part1 << endl;
-    cout << "Part 2: " << nWinningOptions(stoll(time), stoll(accumulate(v.begin(), v.end(), string("")))) << endl;
+    std::cout << "Part 1: " << part1 << std::endl;
+    std::cout << "Part 2: " << nWinningOptions(stoll(time), std::stoll(accumulate(v.begin(), v.end(), std::string("")))) << std::endl;
 }
