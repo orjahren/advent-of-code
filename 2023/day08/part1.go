@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-func getInstruction(idx int, instructions string) rune {
-	return rune(instructions[idx%len(instructions)])
-}
-
 type Node struct {
 	name        string
 	left        *Node
@@ -20,35 +16,32 @@ type Node struct {
 	nameOfRight string
 }
 
-func readFileAndStructureInput(reader bufio.Reader) ([]*Node, map[string]*Node, []Node) {
-	nodes := make([]*Node, 0)
-	nodesRaw := make([]Node, 0)
-	nameToNodeMap := make(map[string]*Node)
+func readFileAndStructureInput(reader *bufio.Reader) map[string]*Node {
 
+	nameToNodeMap := make(map[string]*Node)
 	onlyLettersRegex := regexp.MustCompile("[a-zA-Z]+")
+
 	for {
 		line, err := reader.ReadString('\n')
+		spl := strings.Split(line, " ")
 		if err != nil {
 			break
 		}
-		spl := strings.Split(line, " ")
 		if len(spl) > 1 {
 			var node Node
 			letters := onlyLettersRegex.FindAllString(line, -1)
 			node.name = letters[0]
 			node.nameOfLeft = letters[1]
 			node.nameOfRight = letters[2]
-			nodesRaw = append(nodesRaw, node)
-			nodes = append(nodes, &node)
 			nameToNodeMap[node.name] = &node
 		}
 	}
-	for i := range nodes {
-		node := nodes[i]
+	for i := range nameToNodeMap {
+		node := nameToNodeMap[i]
 		node.left = nameToNodeMap[node.nameOfLeft]
 		node.right = nameToNodeMap[node.nameOfRight]
 	}
-	return nodes, nameToNodeMap, nodesRaw
+	return nameToNodeMap
 }
 
 func main() {
@@ -58,12 +51,12 @@ func main() {
 	instructions, _ := reader.ReadString('\n')
 	instructions = strings.TrimSuffix(instructions, "\n")
 
-	_, nameToNodeMap, _ := readFileAndStructureInput(*reader)
+	nameToNodeMap := readFileAndStructureInput(reader)
 
 	instructionCounter := 0
 	currentNode := nameToNodeMap["AAA"]
 	for currentNode.name != "ZZZ" {
-		instruction := getInstruction(instructionCounter, instructions)
+		instruction := rune(instructions[instructionCounter%len(instructions)])
 		if instruction == 'L' {
 			currentNode = currentNode.left
 		} else {
