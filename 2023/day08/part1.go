@@ -23,8 +23,16 @@ type Node struct {
 	selfVisitCount int
 }
 
-func readFileAndStructureInput(reader bufio.Reader) ([]*Node, map[string]*Node) {
+func isInifiiteLoop(node *Node) bool {
+	a := node.left == node.right
+	b := node.left == node
+	c := node.right == node
+	return a && (b || c)
+}
+
+func readFileAndStructureInput(reader bufio.Reader) ([]*Node, map[string]*Node, []Node) {
 	nodes := make([]*Node, 0)
+	nodesRaw := make([]Node, 0)
 	nameToNodeMap := make(map[string]*Node)
 
 	onlyLettersRegex := regexp.MustCompile("[a-zA-Z]+")
@@ -48,6 +56,7 @@ func readFileAndStructureInput(reader bufio.Reader) ([]*Node, map[string]*Node) 
 			node.nameOfLeft = letters[1]
 			node.nameOfRight = letters[2]
 			fmt.Println(node)
+			nodesRaw = append(nodesRaw, node)
 			nodes = append(nodes, &node)
 			nameToNodeMap[node.name] = &node
 		}
@@ -62,12 +71,12 @@ func readFileAndStructureInput(reader bufio.Reader) ([]*Node, map[string]*Node) 
 		node.right = nameToNodeMap[node.nameOfRight]
 	}
 	fmt.Println("\t Har satt opp pekere")
-	return nodes, nameToNodeMap
+	return nodes, nameToNodeMap, nodesRaw
 }
 
 func main() {
-	//file, _ := os.Open("input")
-	file, _ := os.Open("example")
+	file, _ := os.Open("input")
+	//file, _ := os.Open("example")
 	//file, _ := os.Open("ex2")
 	reader := bufio.NewReader(file)
 
@@ -76,35 +85,38 @@ func main() {
 	fmt.Println(instructions)
 	reader.ReadString('\n')
 
-	nodes, nameToNodeMap := readFileAndStructureInput(*reader)
+	nodes, nameToNodeMap, _ := readFileAndStructureInput(*reader)
 
 	fmt.Println(nodes)
 	fmt.Println(nameToNodeMap)
 
-	//startNode := nameToNodeMap["AAA"]
-	startNode := nodes[0]
+	startNode := nameToNodeMap["AAA"]
+	//startNode := nodes[0]
 	fmt.Println("StartNode:", startNode)
 	res := 0
-	i := 0
 	currentNode := startNode
-	//os.Exit(0)
-	selfVisitLimit := 10
+	selfVistLimit := 10000
+	instructionCounter := 0
 	for (*currentNode).name != "ZZZ" {
-		fmt.Println("Current node: ", currentNode)
-		res++
-		(*currentNode).selfVisitCount++
-		if (*currentNode).selfVisitCount > selfVisitLimit {
-			fmt.Println("Self visit count exceeded")
+		fmt.Println("CurrentNode: ", currentNode)
+		currentNode.selfVisitCount++
+		if currentNode.selfVisitCount > selfVistLimit {
+			fmt.Println("Self visit limit reached")
 			os.Exit(0)
 		}
-		instruction := getInstruction(i, instructions)
-		fmt.Println("Instruction: ", rune(instruction))
+		if isInifiiteLoop(currentNode) {
+			fmt.Println("Infinite loop detected")
+			os.Exit(0)
+		}
+		res++
+		instruction := getInstruction(instructionCounter, instructions)
+		fmt.Println("Instruction: ", string(instruction))
 		if instruction == 'L' {
 			currentNode = currentNode.left
 		} else {
 			currentNode = currentNode.right
 		}
-		i++
+		instructionCounter++
 	}
 	fmt.Println("har kommet til ", currentNode)
 	fmt.Println("Res: ", res)
