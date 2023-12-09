@@ -140,3 +140,9 @@ a.out
 package*json
 node_modules
 *js
+
+## C# binaries
+*dll
+*pdb
+obj
+bin
