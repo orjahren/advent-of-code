@@ -18,13 +18,13 @@
         for (int i = histories.Count - 1; i > 0; i--)
         {
             List<int> currHist = histories[i];
-            List<int> nextHistory = histories[i - 1];
+            List<int> nextHist = histories[i - 1];
 
-            int appPre = nextHistory.First() - currHist.First();
-            int appPost = currHist.Last() + nextHistory.Last();
+            int appPre = nextHist.First() - currHist.First();
+            int appPost = currHist.Last() + nextHist.Last();
 
-            nextHistory.Insert(0, appPre);
-            nextHistory.Add(appPost);
+            nextHist.Insert(0, appPre);
+            nextHist.Add(appPost);
 
         }
         return (nums.First(), nums.Last());
