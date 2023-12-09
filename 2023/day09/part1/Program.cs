@@ -32,7 +32,7 @@
     }
     private static void Main(string[] args)
     {
-        List<int> nextNumbers = new();
+        int part1 = 0;
         using (var reader = new StreamReader(args[1]))
         {
             string? line = reader.ReadLine();
@@ -42,10 +42,10 @@
                 List<int> lineNums = new();
                 foreach (string s in split)
                     lineNums.Add(int.Parse(s));
-                nextNumbers.Add(GetNextNumberForList(lineNums));
+                part1 += GetNextNumberForList(lineNums);
                 line = reader.ReadLine();
             }
         }
-        Console.WriteLine("Part 1: " + nextNumbers.Sum());
+        Console.WriteLine("Part 1: " + part1);
     }
 }
