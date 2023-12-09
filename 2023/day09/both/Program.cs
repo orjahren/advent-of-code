@@ -10,7 +10,7 @@
         }
         return diffs;
     }
-    private static int GetPrevNumberForList(List<int> nums)
+    private static (int, int) GetPrevAndNextNumberForList(List<int> nums)
     {
         List<List<int>> histories = new();
         List<int> diffs = nums;
@@ -22,33 +22,18 @@
         }
         for (int i = histories.Count - 1; i > 0; i--)
         {
-            int a = histories[i].First();
+            List<int> currHist = histories[i];
             List<int> nextHistory = histories[i - 1];
-            int toApp = nextHistory.First() - a;
-            nextHistory.Insert(0, toApp);
+
+            int appPre = nextHistory.First() - currHist.First();
+            int appPost = currHist.Last() + nextHistory.Last();
+
+            nextHistory.Insert(0, appPre);
+            nextHistory.Add(appPost);
 
         }
-        return histories[0].First();
-    }
-    private static int GetNextNumberForList(List<int> nums)
-    {
-        List<List<int>> histories = new();
-        List<int> diffs = new(nums);
-        histories.Add(diffs);
-        while (!diffs.All(x => x == 0))
-        {
-            diffs = GetDiffsForList(diffs);
-            histories.Add(diffs);
-        }
-        for (int i = histories.Count - 1; i > 0; i--)
-        {
-            int a = histories[i].Last();
-            List<int> nextHistory = histories[i - 1];
-            int toApp = a + nextHistory.Last();
-            nextHistory.Add(toApp);
-
-        }
-        return histories[0].Last();
+        var firstHist = histories[0];
+        return (firstHist.First(), firstHist.Last());
     }
     private static void Main(string[] args)
     {
@@ -63,8 +48,9 @@
                 List<int> lineNums = new();
                 foreach (string s in split)
                     lineNums.Add(int.Parse(s));
-                part1 += GetNextNumberForList(lineNums);
-                part2 += GetPrevNumberForList(lineNums);
+                (int prev, int next) = GetPrevAndNextNumberForList(lineNums);
+                part1 += next;
+                part2 += prev;
                 line = reader.ReadLine();
             }
         }
