@@ -13,21 +13,18 @@
     private static int GetPrevNumberForList(List<int> nums)
     {
         List<List<int>> histories = new();
-        List<int> diffs = new(nums);
-        List<int> lastHistory = new(nums);
-        histories.Add(lastHistory);
+        List<int> diffs = nums;
+        histories.Add(diffs);
         while (!diffs.All(x => x == 0))
         {
-            diffs = GetDiffsForList(lastHistory);
-            lastHistory = new List<int>(diffs);
-            histories.Add(lastHistory);
+            diffs = GetDiffsForList(diffs);
+            histories.Add(diffs);
         }
-        lastHistory.Insert(0, 0);
         for (int i = histories.Count - 1; i > 0; i--)
         {
-            List<int> history = histories[i];
+            int a = histories[i].First();
             List<int> nextHistory = histories[i - 1];
-            int toApp = nextHistory.First() - history.First();
+            int toApp = nextHistory.First() - a;
             nextHistory.Insert(0, toApp);
 
         }
