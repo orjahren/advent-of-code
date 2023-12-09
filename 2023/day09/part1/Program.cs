@@ -28,6 +28,8 @@
         List<int> diffs = new(nums);
         List<int> lastHistory = new(nums);
 
+        histories.Add(lastHistory);
+
         while (!diffs.All(x => x == 0))
         {
             diffs = GetDiffsForList(lastHistory);
@@ -36,15 +38,39 @@
             lastHistory = new List<int>(diffs);
             histories.Add(lastHistory);
         }
-
-
-
-        int sum = 0;
-        foreach (int i in nums)
+        lastHistory.Add(0);
+        for (int i = histories.Count - 1; i > 0; i--)
         {
-            sum += i;
+            List<int> history = histories[i];
+            Console.WriteLine("Skal behandle denne historyen: ");
+            PrintIntList(history);
+            Console.WriteLine("Neste for den er: ");
+            List<int> nextHistory = histories[i - 1];
+            PrintIntList(nextHistory);
+
+            int toApp = history.Last() + nextHistory.Last();
+            Console.WriteLine("\t Legger til: " + toApp);
+            nextHistory.Add(toApp);
+
         }
-        return sum;
+        Console.WriteLine("-----------------------------------------------");
+        return histories[0].Last();
+
+        /*
+                // sum last values of each history
+                Console.WriteLine("The final histories: ");
+                int sum = 0;
+                foreach (List<int> history in histories)
+                {
+                    PrintIntList(history);
+                    sum += history.Last();
+                }
+                Console.WriteLine("\tSum: " + sum);
+                Console.WriteLine("-----------------------------------------------");
+                return sum;
+         */
+
+
     }
     private static void Main(string[] args)
     {
