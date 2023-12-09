@@ -14,8 +14,9 @@
     {
         foreach (int i in nums)
         {
-            Console.WriteLine(i);
+            Console.Write(i + " ");
         }
+        Console.Write("\n");
     }
     private static int GetNextNumberForList(List<int> nums)
     {
