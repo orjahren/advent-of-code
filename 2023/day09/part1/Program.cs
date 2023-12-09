@@ -14,20 +14,17 @@
     {
         List<List<int>> histories = new();
         List<int> diffs = new(nums);
-        List<int> lastHistory = new(nums);
-        histories.Add(lastHistory);
+        histories.Add(diffs);
         while (!diffs.All(x => x == 0))
         {
-            diffs = GetDiffsForList(lastHistory);
-            lastHistory = new List<int>(diffs);
-            histories.Add(lastHistory);
+            diffs = GetDiffsForList(diffs);
+            histories.Add(diffs);
         }
-        lastHistory.Add(0);
         for (int i = histories.Count - 1; i > 0; i--)
         {
-            List<int> history = histories[i];
+            int a = histories[i].Last();
             List<int> nextHistory = histories[i - 1];
-            int toApp = history.Last() + nextHistory.Last();
+            int toApp = a + nextHistory.Last();
             nextHistory.Add(toApp);
 
         }
