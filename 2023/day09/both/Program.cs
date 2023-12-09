@@ -12,14 +12,9 @@
     }
     private static (int, int) GetPrevAndNextNumberForList(List<int> nums)
     {
-        List<List<int>> histories = new();
-        List<int> diffs = nums;
-        histories.Add(diffs);
-        while (!diffs.All(x => x == 0))
-        {
-            diffs = GetDiffsForList(diffs);
-            histories.Add(diffs);
-        }
+        List<List<int>> histories = new() { nums };
+        while (!histories.Last().All(x => x == 0))
+            histories.Add(GetDiffsForList(histories.Last()));
         for (int i = histories.Count - 1; i > 0; i--)
         {
             List<int> currHist = histories[i];
@@ -32,8 +27,7 @@
             nextHistory.Add(appPost);
 
         }
-        var firstHist = histories[0];
-        return (firstHist.First(), firstHist.Last());
+        return (nums.First(), nums.Last());
     }
     private static void Main(string[] args)
     {
