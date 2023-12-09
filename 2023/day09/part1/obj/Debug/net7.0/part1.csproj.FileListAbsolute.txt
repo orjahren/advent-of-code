@@ -1,0 +1,15 @@
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/bin/Debug/net7.0/part1
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/bin/Debug/net7.0/part1.deps.json
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/bin/Debug/net7.0/part1.runtimeconfig.json
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/bin/Debug/net7.0/part1.dll
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/bin/Debug/net7.0/part1.pdb
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/part1.csproj.AssemblyReference.cache
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/part1.GeneratedMSBuildEditorConfig.editorconfig
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/part1.AssemblyInfoInputs.cache
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/part1.AssemblyInfo.cs
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/part1.csproj.CoreCompileInputs.cache
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/part1.dll
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/refint/part1.dll
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/part1.pdb
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/part1.genruntimeconfig.cache
+/home/oliverrj/Documents/advent-of-code/2023/day09/part1/obj/Debug/net7.0/ref/part1.dll
