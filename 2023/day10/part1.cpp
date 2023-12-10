@@ -102,19 +102,27 @@ void setEdgesForNode(Node *n, vector<vector<Node *>> &grid)
 void setEdgesForStartNode(Node *n, vector<vector<Node *>> &grid)
 {
     // add potentially missing edges because of them being undirected, particulary for the start node
-    if (n->posY > 0 && grid[n->posY - 1][n->posX]->val != '.')
+    if (n->posY > 0 && grid[n->posY - 1][n->posX]->val == '|')
     {
         n->edges.push_back(grid[n->posY - 1][n->posX]);
     }
-    if (n->posY < grid.size() - 1 && grid[n->posY + 1][n->posX]->val != '.')
+    if (n->posY < grid.size() - 1 && grid[n->posY + 1][n->posX]->val == '|')
     {
         n->edges.push_back(grid[n->posY + 1][n->posX]);
     }
-    if (n->posX > 0 && grid[n->posY][n->posX - 1]->val != '.')
+    if (n->posX > 0 && grid[n->posY][n->posX - 1]->val == '-')
     {
         n->edges.push_back(grid[n->posY][n->posX - 1]);
     }
-    if (n->posX < grid[n->posY].size() - 1 && grid[n->posY][n->posX + 1]->val != '.')
+    if (n->posX < grid[n->posY].size() - 1 && grid[n->posY][n->posX + 1]->val == '-')
+    {
+        n->edges.push_back(grid[n->posY][n->posX + 1]);
+    }
+    if (n->posX < grid[n->posY].size() - 1 && grid[n->posY][n->posX + 1]->val == 'L')
+    {
+        n->edges.push_back(grid[n->posY][n->posX + 1]);
+    }
+    if (n->posX < grid[n->posY].size() - 1 && grid[n->posY][n->posX + 1]->val == 'J')
     {
         n->edges.push_back(grid[n->posY][n->posX + 1]);
     }
@@ -207,3 +215,4 @@ int main()
     cout << "Part 1: " << part1 << endl;
 }
 // First res: 6710. Too low
+// 2nd res: 6867. Correct
