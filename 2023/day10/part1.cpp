@@ -22,47 +22,79 @@ void setEdgesForNode(Node *n, vector<vector<Node *>> &grid)
     */
     if (n->val == '|')
     {
-        if (n->posY > 0 && grid[n->posY - 1][n->posX]->val == '|')
+        if (n->posY > 0)
         {
             n->edges.push_back(grid[n->posY - 1][n->posX]);
         }
-        if (n->posY < grid.size() - 1 && grid[n->posY + 1][n->posX]->val == '|')
+        if (n->posY < grid.size() - 1)
         {
             n->edges.push_back(grid[n->posY + 1][n->posX]);
         }
     }
     else if (n->val == '-')
     {
-        if (n->posX > 0 && grid[n->posY][n->posX - 1]->val == '-')
+        if (n->posX > 0)
         {
             n->edges.push_back(grid[n->posY][n->posX - 1]);
         }
-        if (n->posX < grid[n->posY].size() - 1 && grid[n->posY][n->posX + 1]->val == '-')
+        if (n->posX < grid[n->posY].size() - 1)
         {
             n->edges.push_back(grid[n->posY][n->posX + 1]);
         }
     }
     else if (n->val == 'L')
     {
-        if (n->posY > 0 && grid[n->posY - 1][n->posX]->val == 'L')
+        if (n->posY > 0)
         {
             n->edges.push_back(grid[n->posY - 1][n->posX]);
         }
-        if (n->posX < grid[n->posY].size() - 1 && grid[n->posY][n->posX + 1]->val == 'L')
+        if (n->posX < grid[n->posY].size() - 1)
         {
             n->edges.push_back(grid[n->posY][n->posX + 1]);
         }
     }
     else if (n->val == 'J')
     {
-        if (n->posY > 0 && grid[n->posY - 1][n->posX]->val == 'J')
+        if (n->posY > 0)
         {
             n->edges.push_back(grid[n->posY - 1][n->posX]);
         }
-        if (n->posX > 0 && grid[n->posY][n->posX - 1]->val == 'J')
+        if (n->posX > 0)
         {
             n->edges.push_back(grid[n->posY][n->posX - 1]);
         }
+    }
+    else if (n->val == '7')
+    {
+        if (n->posY < grid.size() - 1)
+        {
+            n->edges.push_back(grid[n->posY + 1][n->posX]);
+        }
+        if (n->posX > 0)
+        {
+            n->edges.push_back(grid[n->posY][n->posX - 1]);
+        }
+    }
+    else if (n->val == 'F')
+    {
+        if (n->posY < grid.size() - 1)
+        {
+            n->edges.push_back(grid[n->posY + 1][n->posX]);
+        }
+        if (n->posX < grid[n->posY].size() - 1)
+        {
+            n->edges.push_back(grid[n->posY][n->posX + 1]);
+        }
+    }
+    else if (n->val == 'S')
+    {
+        // do nothing
+        // TODO: Burde veldig muligens merge inn start-node edge-case hit
+    }
+    else
+    {
+        cout << "Unknown node value: " << n->val << endl;
+        exit(1);
     }
 }
 
@@ -104,7 +136,7 @@ int main()
     int posY = 0;
     vector<Node *> allNodes;
     vector<vector<Node *>> grid;
-    Node *startNode;
+    Node *startNode = NULL;
     while (cin >> s && ++posY)
     {
         cout << s << endl;
@@ -121,11 +153,16 @@ int main()
                 allNodes.push_back(n);
                 if (s[i] == 'S')
                 {
-                    cout << "found S" << endl;
+                    // cout << "found S" << endl;
                     startNode = n;
                 }
             }
         }
+    }
+    if (startNode == NULL)
+    {
+        cout << "No start node found, aborting" << endl;
+        return 0;
     }
     cout << "allNodes.size() = " << allNodes.size() << endl;
     setEdgesForNodes(allNodes, grid);
