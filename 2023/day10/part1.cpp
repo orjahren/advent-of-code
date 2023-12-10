@@ -5,6 +5,7 @@ struct Node
     char val;
     int posX, posY;
     vector<Node *> edges;
+    bool visited = false;
 };
 
 void setEdgesForNode(Node *n, vector<vector<Node *>> &grid)
@@ -130,6 +131,35 @@ void setEdgesForNodes(vector<Node *> nodes, vector<vector<Node *>> &grid)
     }
 }
 
+int distanceToFurthestNodeInCycle(Node *startNode)
+{
+    cout << "Skal finne avstand til lengste node fra startnode..." << endl;
+    int maxDistance = 0;
+    queue<pair<Node *, int>> q;
+    q.push(make_pair(startNode, 0));
+    while (!q.empty())
+    {
+        pair<Node *, int> p = q.front();
+        q.pop();
+        Node *n = p.first;
+        int distance = p.second;
+        if (n->visited)
+        {
+            continue;
+        }
+        n->visited = true;
+        if (distance > maxDistance)
+        {
+            maxDistance = distance;
+        }
+        for (auto &x : n->edges)
+        {
+            q.push(make_pair(x, distance + 1));
+        }
+    }
+    return maxDistance;
+}
+
 int main()
 {
     string s;
@@ -168,4 +198,12 @@ int main()
     setEdgesForNodes(allNodes, grid);
     setEdgesForStartNode(startNode, grid);
     cout << "The start node has edges to " << startNode->edges.size() << " other nodes" << endl;
+    // the start node has edges to these nodes
+    for (auto &x : startNode->edges)
+    {
+        cout << "The start node has an edge to node with value " << x->val << " on (" << x->posX << ", " << x->posY << ")" << endl;
+    }
+    int part1 = distanceToFurthestNodeInCycle(startNode);
+    cout << "Part 1: " << part1 << endl;
 }
+// First res: 6710. Too low
