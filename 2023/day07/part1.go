@@ -17,15 +17,15 @@ func handle(err error) {
 func parseHand(line string) Hand {
 	spl := strings.Split(line, " ")
 	hand := Hand{}
-	hand.bid, _ = strconv.Atoi(spl[0])
-	for _, sym := range spl[1] {
-		hand.symnols = append(hand.symnols, rune(sym))
+	hand.bid, _ = strconv.Atoi(spl[1])
+	for _, sym := range spl[0] {
+		hand.symbols = append(hand.symbols, rune(sym))
 	}
 	return hand
 }
 
 type Hand struct {
-	symnols []rune
+	symbols []rune
 	bid     int
 }
 
@@ -39,8 +39,8 @@ func main() {
 	hands := make([]Hand, 0)
 	for line != "" {
 		stripped := strings.TrimSpace(line)
-		hands = append(hands, parseHand(stripped))
 		fmt.Println(stripped)
+		hands = append(hands, parseHand(stripped))
 		line, _ = reader.ReadString('\n')
 	}
 	fmt.Println(hands)
