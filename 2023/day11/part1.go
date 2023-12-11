@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 	"strings"
 )
@@ -37,24 +36,14 @@ func getDistanceWithRecgardToSomeRowsAndColumnsCountingDouble(from, to Point, ro
 	}
 	//fmt.Println("Rows between", rowsBetween)
 	//fmt.Println("Cols between", colsBetween)
-	return manhattanDistance + (rowsBetween * 2) + (colsBetween * 2)
+	return manhattanDistance + (rowsBetween * 1) + (colsBetween * 1)
 
 }
 
-func getDistanceToClosestPoint(a Point, points []Point, ch chan int, rowsOfOnlyDots, colsOfOnlyDots []int) {
-	minDistance := int(math.Inf(1))
-	var closestPoint Point
-	for _, b := range points {
-		if a != b {
-			distance := getDistanceWithRecgardToSomeRowsAndColumnsCountingDouble(a, b, rowsOfOnlyDots, colsOfOnlyDots)
-			if distance < minDistance {
-				minDistance = distance
-				closestPoint = b
-			}
-		}
-	}
-	fmt.Println("Closest point to", a, "is", closestPoint, "with distance", minDistance)
-	ch <- minDistance
+func findAndPropogateDistaceToPoint(from, to Point, ch chan int, rowsOfOnlyDots, colsOfOnlyDots []int) {
+	distance := getDistanceWithRecgardToSomeRowsAndColumnsCountingDouble(from, to, rowsOfOnlyDots, colsOfOnlyDots)
+	fmt.Println("From", from, "to", to, "distance", distance)
+	ch <- distance
 	//return minDistance
 }
 
@@ -107,20 +96,42 @@ func main() {
 	fmt.Println(rowsOfOnlyDots)
 	fmt.Println(colsOfOnlyDots)
 
-	ch := make(chan int)
-	numsToExpect := 0
+	allPairsOfPoints := make([][]Point, 0)
 	for _, from := range points {
+		for _, to := range points {
+			if from != to {
+				// check for duplicates
+				alreadyExists := false
+				for _, pair := range allPairsOfPoints {
+					if pair[0] == to && pair[1] == from || pair[0] == from && pair[1] == to {
+						alreadyExists = true
+					}
+				}
+				if alreadyExists {
+					continue
+				}
+
+				allPairsOfPoints = append(allPairsOfPoints, []Point{from, to})
+			}
+		}
+	}
+	fmt.Println(allPairsOfPoints)
+
+	ch := make(chan int)
+	//numsToExpect := (len(points) * len(points)) - len(points)
+	for _, pair := range allPairsOfPoints {
 		//fmt.Println("From", from, "to", to)
-		go getDistanceToClosestPoint(from, points, ch, rowsOfOnlyDots, colsOfOnlyDots)
-		numsToExpect++
+		from := pair[0]
+		to := pair[1]
+		go findAndPropogateDistaceToPoint(from, to, ch, rowsOfOnlyDots, colsOfOnlyDots)
 
 	}
-	fmt.Println("Expecting", numsToExpect, "numbers")
 	part1 := 0
-	for i := 0; i < numsToExpect; i++ {
-		fmt.Println("Waiting for", i, "number")
+	for i := 0; i < len(allPairsOfPoints); i++ {
+		//fmt.Println("Waiting for", i, "number")
 		part1 += <-ch
 	}
+	fmt.Println("Number of pairs", len(allPairsOfPoints))
 	fmt.Println("Part 1:", part1)
 
 }
