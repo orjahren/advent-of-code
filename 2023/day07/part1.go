@@ -25,30 +25,7 @@ func parseHand(line string) Hand {
 	return hand
 }
 
-func sliceContains4Twos(arr []int) bool {
-	count := 0
-	for _, val := range arr {
-		if val == 2 {
-			count++
-		}
-	}
-	return count == 4
-}
 func classifyHand(hand Hand) int {
-	/*
-			Every hand is exactly one type. From strongest to weakest, they are:
-
-		Five of a
-		kind, where all five cards have the same label: AAAAA
-		Four of a kind, where four cards have the same label and one card has a different label: AA8AA
-		Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
-		Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
-		Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
-		One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
-		High card, where all cards' labels are distinct: 23456
-		Hands are primarily ordered based on type; for example, every full house is stronger than any three of a kind.
-	*/
-
 	countsMap := make(map[rune]int)
 	for _, sym := range hand.symbols {
 		countsMap[sym]++
@@ -57,6 +34,15 @@ func classifyHand(hand Hand) int {
 	for _, sym := range hand.symbols {
 		countsArr = append(countsArr, countsMap[sym])
 	}
+	sliceContains4Twos := (func(arr []int) bool {
+		count := 0
+		for _, val := range arr {
+			if val == 2 {
+				count++
+			}
+		}
+		return count == 4
+	})(countsArr)
 	if slices.Contains(countsArr, 5) {
 		return 6
 	}
@@ -69,7 +55,7 @@ func classifyHand(hand Hand) int {
 		}
 		return 3
 	}
-	if sliceContains4Twos(countsArr) {
+	if sliceContains4Twos {
 		return 2
 	}
 	if slices.Contains(countsArr, 2) {
@@ -89,9 +75,8 @@ func sortHandsByRank(hands []Hand) []Hand {
 	}
 	handsByRank := make([][]Hand, 7)
 	for _, hand := range hands {
-
 		for i, sym := range hand.symbols {
-			if sym == 'T' || sym == 'J' || sym == 'Q' || sym == 'K' || sym == 'A' {
+			if rewrite_map[sym] != 0 {
 				hand.symbols[i] = rewrite_map[sym]
 			}
 		}
@@ -112,7 +97,6 @@ func sortHandsByRank(hands []Hand) []Hand {
 		}))
 		ret = append(ret, handsByRank[i]...)
 	}
-
 	return ret
 }
 
@@ -123,7 +107,6 @@ type Hand struct {
 
 func main() {
 	file, err := os.Open("input")
-	//file, err := os.Open("example")
 	handle(err)
 	defer file.Close()
 	reader := bufio.NewReader(file)
@@ -131,26 +114,13 @@ func main() {
 	hands := make([]Hand, 0)
 	for line != "" {
 		stripped := strings.TrimSpace(line)
-		fmt.Println(stripped)
 		hands = append(hands, parseHand(stripped))
 		line, _ = reader.ReadString('\n')
 	}
-	fmt.Println(hands)
 	sorted := sortHandsByRank(hands)
-	fmt.Println(sorted)
-
-	values := make([]int, 0)
-	bids := make([]int, 0)
-	for i, hand := range sorted {
-		values = append(values, (i+1)*hand.bid)
-		bids = append(bids, hand.bid)
-	}
-	fmt.Println(values)
 	part1 := 0
-	for _, val := range values {
-		part1 += val
+	for i, hand := range sorted {
+		part1 += (i + 1) * hand.bid
 	}
 	fmt.Println("Part 1:", part1)
-	fmt.Println("Bids:", bids)
-
 }
