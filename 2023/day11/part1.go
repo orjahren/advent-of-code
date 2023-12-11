@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strings"
 )
@@ -25,12 +26,12 @@ func getDistanceWithRecgardToSomeRowsAndColumnsCountingDouble(from, to Point, ro
 	rowsBetween := 0
 	colsBetween := 0
 	for _, row := range rowsOfOnlyDots {
-		if row > from.y && row < to.y {
+		if math.Max(float64(to.y), float64(from.y)) > float64(row) && math.Min(float64(from.y), float64(to.y)) < float64(row) {
 			rowsBetween++
 		}
 	}
 	for _, col := range colsOfOnlyDots {
-		if col > from.x && col < to.x {
+		if math.Max(float64(to.x), float64(from.x)) > float64(col) && math.Min(float64(from.x), float64(to.x)) < float64(col) {
 			colsBetween++
 		}
 	}
@@ -52,7 +53,8 @@ type Point struct {
 }
 
 func main() {
-	file, _ := os.Open("example")
+	//file, _ := os.Open("example")
+	file, _ := os.Open("input")
 	reader := bufio.NewReader(file)
 	line, _ := reader.ReadString('\n')
 
