@@ -19,10 +19,8 @@ func getTaxiCabDistance(x1, y1, x2, y2 int) int {
 	return abs(x1-x2) + abs(y1-y2)
 }
 
-func getDistanceWithRecgardToSomeRowsAndColumnsCountingDouble(from, to Point, rowsOfOnlyDots, colsOfOnlyDots []int) int {
+func findAndPropogateDistaceToPoint(from, to Point, part1ch, part2ch chan int, rowsOfOnlyDots, colsOfOnlyDots []int) {
 	manhattanDistance := getTaxiCabDistance(from.x, from.y, to.x, to.y)
-
-	// how many rows and cols are between from and to on the only dot cols and rows
 	rowsBetween := 0
 	colsBetween := 0
 	for _, row := range rowsOfOnlyDots {
@@ -35,21 +33,12 @@ func getDistanceWithRecgardToSomeRowsAndColumnsCountingDouble(from, to Point, ro
 			colsBetween++
 		}
 	}
-	//fmt.Println("Rows between", rowsBetween)
-	//fmt.Println("Cols between", colsBetween)
 	part2Fac := 1000000
-	//part2Fac := 10
+	//part2Fac = 10
 	//part2Fac = 100
-	//part2Fac = 100
-	return manhattanDistance + (rowsBetween * (part2Fac - 1)) + (colsBetween * (part2Fac - 1))
+	part1ch <- manhattanDistance + rowsBetween + colsBetween
+	part2ch <- manhattanDistance + (rowsBetween * (part2Fac - 1)) + (colsBetween * (part2Fac - 1))
 
-}
-
-func findAndPropogateDistaceToPoint(from, to Point, ch chan int, rowsOfOnlyDots, colsOfOnlyDots []int) {
-	distance := getDistanceWithRecgardToSomeRowsAndColumnsCountingDouble(from, to, rowsOfOnlyDots, colsOfOnlyDots)
-	fmt.Println("From", from, "to", to, "distance", distance)
-	ch <- distance
-	//return minDistance
 }
 
 type Point struct {
@@ -123,21 +112,24 @@ func main() {
 	}
 	fmt.Println(allPairsOfPoints)
 
-	ch := make(chan int)
+	part1ch := make(chan int)
+	part2ch := make(chan int)
 	//numsToExpect := (len(points) * len(points)) - len(points)
 	for _, pair := range allPairsOfPoints {
-		//fmt.Println("From", from, "to", to)
 		from := pair[0]
 		to := pair[1]
-		go findAndPropogateDistaceToPoint(from, to, ch, rowsOfOnlyDots, colsOfOnlyDots)
+		fmt.Println("From", from, "to", to)
+		go findAndPropogateDistaceToPoint(from, to, part1ch, part2ch, rowsOfOnlyDots, colsOfOnlyDots)
 
 	}
-	part2 := 0
+	var part1, part2 int
 	for i := 0; i < len(allPairsOfPoints); i++ {
 		//fmt.Println("Waiting for", i, "number")
-		part2 += <-ch
+		part1 += <-part1ch
+		part2 += <-part2ch
 	}
 	fmt.Println("Number of pairs", len(allPairsOfPoints))
+	fmt.Println("Part 1:", part1)
 	fmt.Println("Part 2:", part2)
 
 }
