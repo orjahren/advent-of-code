@@ -35,11 +35,8 @@ func findAndPropogateDistaceToPoint(pair Pair, part1ch, part2ch chan int, rowsOf
 			colsBetween++
 		}
 	}
-	part2Fac := 1000000
-	//part2Fac = 10
-	//part2Fac = 100
 	part1ch <- manhattanDistance + rowsBetween + colsBetween
-	part2ch <- manhattanDistance + (rowsBetween * (part2Fac - 1)) + (colsBetween * (part2Fac - 1))
+	part2ch <- manhattanDistance + (rowsBetween * 99999) + (colsBetween * 99999)
 
 }
 
@@ -51,7 +48,6 @@ type Pair struct {
 }
 
 func main() {
-	//file, _ := os.Open("example")
 	file, _ := os.Open("input")
 	reader := bufio.NewReader(file)
 	line, _ := reader.ReadString('\n')
@@ -59,7 +55,8 @@ func main() {
 	points := make([]Point, 0)
 	rowCounter := 0
 	rowsOfOnlyDots := make([]int, 0)
-	colsOfOnlyDots := make([]int, 0)
+
+	colHasPointsFlags := make([]int, len(line))
 
 	for line != "" {
 		trimmedLine := strings.TrimSpace(line)
@@ -70,6 +67,7 @@ func main() {
 				p := Point{i, rowCounter, len(points) + 1}
 				points = append(points, p)
 				rowHasOnlyDots = false
+				colHasPointsFlags[i] = 1
 			}
 
 		}
@@ -78,15 +76,9 @@ func main() {
 		}
 		rowCounter++
 	}
-
-	for i := 0; i < rowCounter; i++ {
-		colHasOnlyDots := true
-		for _, point := range points {
-			if point.x == i {
-				colHasOnlyDots = false
-			}
-		}
-		if colHasOnlyDots {
+	colsOfOnlyDots := make([]int, 0)
+	for i, flag := range colHasPointsFlags {
+		if flag == 0 {
 			colsOfOnlyDots = append(colsOfOnlyDots, i)
 		}
 	}
