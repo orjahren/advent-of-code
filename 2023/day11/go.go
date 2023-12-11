@@ -92,7 +92,8 @@ func main() {
 	}
 
 	allPairsOfPoints := make(map[Pair]bool)
-	fmt.Println("Generating all pairs of points")
+	part1ch := make(chan int)
+	part2ch := make(chan int)
 	for _, from := range points {
 		for _, to := range points {
 			if from != to {
@@ -101,28 +102,16 @@ func main() {
 				if _, exists := allPairsOfPoints[pair]; exists || allPairsOfPoints[reversePair] {
 					continue
 				}
+				go findAndPropogateDistaceToPoint(pair, part1ch, part2ch, rowsOfOnlyDots, colsOfOnlyDots)
 				allPairsOfPoints[pair] = true
 			}
 		}
 	}
 
-	part1ch := make(chan int)
-	part2ch := make(chan int)
-	for pair := range allPairsOfPoints {
-		go findAndPropogateDistaceToPoint(pair, part1ch, part2ch, rowsOfOnlyDots, colsOfOnlyDots)
-
-	}
 	var part1, part2 int
 	for i := 0; i < len(allPairsOfPoints); i++ {
 		part1 += <-part1ch
 		part2 += <-part2ch
 	}
-	fmt.Println("Number of pairs", len(allPairsOfPoints))
-	fmt.Println("Part 1:", part1)
-	fmt.Println("Part 2:", part2)
-
+	fmt.Println("Part 1:", part1, "\nPart 2:", part2)
 }
-
-// First res: 904634704098. Too high.
-// 2nd res: 98262072. Too low.
-// 3rd: 904633799472. Corrcet.
