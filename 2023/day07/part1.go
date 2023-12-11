@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -23,7 +24,16 @@ func parseHand(line string) Hand {
 	}
 	return hand
 }
-func getRankOfHand(hand Hand, hands []Hand) int {
+func sliceContains4Twos(arr []int) bool {
+	count := 0
+	for _, val := range arr {
+		if val == 2 {
+			count++
+		}
+	}
+	return count == 4
+}
+func classifyHand(hand Hand) int {
 	/*
 			Every hand is exactly one type. From strongest to weakest, they are:
 
@@ -37,58 +47,48 @@ func getRankOfHand(hand Hand, hands []Hand) int {
 		High card, where all cards' labels are distinct: 23456
 		Hands are primarily ordered based on type; for example, every full house is stronger than any three of a kind.
 	*/
-	// 5 of a kind
-	if hand.symbols[0] == hand.symbols[1] && hand.symbols[1] == hand.symbols[2] && hand.symbols[2] == hand.symbols[3] && hand.symbols[3] == hand.symbols[4] {
+
+	rewrite_map := map[rune]rune{
+		'T': 'A',
+		'J': 'B',
+		'Q': 'C',
+		'K': 'D',
+		'A': 'E',
+	}
+
+	for i, sym := range hand.symbols {
+		if sym == 'T' || sym == 'J' || sym == 'Q' || sym == 'K' || sym == 'A' {
+			hand.symbols[i] = rewrite_map[sym]
+		}
+	}
+	//hand.symbols = slices.SortRunes(hand.symbols)
+
+	countsMap := make(map[rune]int)
+	for _, sym := range hand.symbols {
+		countsMap[sym]++
+	}
+	countsArr := make([]int, 0)
+	for _, sym := range hand.symbols {
+		countsArr = append(countsArr, countsMap[sym])
+	}
+	if slices.Contains(countsArr, 5) {
 		return 6
 	}
-	// 4 of a kind
-	if hand.symbols[0] == hand.symbols[1] && hand.symbols[1] == hand.symbols[2] && hand.symbols[2] == hand.symbols[3] {
+	if slices.Contains(countsArr, 4) {
 		return 5
 	}
-	if hand.symbols[1] == hand.symbols[2] && hand.symbols[2] == hand.symbols[3] && hand.symbols[3] == hand.symbols[4] {
-		return 5
-	}
-	// full house
-	if hand.symbols[0] == hand.symbols[1] && hand.symbols[1] == hand.symbols[2] && hand.symbols[3] == hand.symbols[4] {
-		return 4
-	}
-	if hand.symbols[0] == hand.symbols[1] && hand.symbols[2] == hand.symbols[3] && hand.symbols[3] == hand.symbols[4] {
-		return 4
-	}
-	// 3 of a kind
-	if hand.symbols[0] == hand.symbols[1] && hand.symbols[1] == hand.symbols[2] {
+	if slices.Contains(countsArr, 3) {
+		if slices.Contains(countsArr, 2) {
+			return 4
+		}
 		return 3
 	}
-	if hand.symbols[1] == hand.symbols[2] && hand.symbols[2] == hand.symbols[3] {
-		return 3
-	}
-	if hand.symbols[2] == hand.symbols[3] && hand.symbols[3] == hand.symbols[4] {
-		return 3
-	}
-	// 2 pair
-	if hand.symbols[0] == hand.symbols[1] && hand.symbols[2] == hand.symbols[3] {
+	if sliceContains4Twos(countsArr) {
 		return 2
 	}
-	if hand.symbols[0] == hand.symbols[1] && hand.symbols[3] == hand.symbols[4] {
-		return 2
-	}
-	if hand.symbols[1] == hand.symbols[2] && hand.symbols[3] == hand.symbols[4] {
-		return 2
-	}
-	// 1 pair
-	if hand.symbols[0] == hand.symbols[1] {
+	if slices.Contains(countsArr, 2) {
 		return 1
 	}
-	if hand.symbols[1] == hand.symbols[2] {
-		return 1
-	}
-	if hand.symbols[2] == hand.symbols[3] {
-		return 1
-	}
-	if hand.symbols[3] == hand.symbols[4] {
-		return 1
-	}
-	// high card
 	return 0
 
 }
@@ -128,9 +128,9 @@ func sortHandsByRank(hands []Hand) []Hand {
 	// 1 pair
 	// high card
 
-	handsByRank := make([][]Hand, 7)
+	handsByRank := make([][]Hand, 6)
 	for _, hand := range hands {
-		rank := getRankOfHand(hand, hands)
+		rank := classifyHand(hand)
 		handsByRank[rank] = append(handsByRank[rank], hand)
 	}
 	for i := 0; i < len(handsByRank); i++ {
@@ -168,8 +168,10 @@ func main() {
 	fmt.Println(sorted)
 
 	values := make([]int, 0)
+	bids := make([]int, 0)
 	for i, hand := range sorted {
 		values = append(values, (i+1)*hand.bid)
+		bids = append(bids, hand.bid)
 	}
 	fmt.Println(values)
 	part1 := 0
@@ -177,5 +179,6 @@ func main() {
 		part1 += val
 	}
 	fmt.Println("Part 1:", part1)
+	fmt.Println("Bids:", bids)
 
 }
