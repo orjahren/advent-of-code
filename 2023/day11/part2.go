@@ -37,7 +37,11 @@ func getDistanceWithRecgardToSomeRowsAndColumnsCountingDouble(from, to Point, ro
 	}
 	//fmt.Println("Rows between", rowsBetween)
 	//fmt.Println("Cols between", colsBetween)
-	return manhattanDistance + (rowsBetween * 1) + (colsBetween * 1)
+	part2Fac := 1000000
+	//part2Fac := 10
+	//part2Fac = 100
+	//part2Fac = 100
+	return manhattanDistance + (rowsBetween * (part2Fac - 1)) + (colsBetween * (part2Fac - 1))
 
 }
 
@@ -128,12 +132,16 @@ func main() {
 		go findAndPropogateDistaceToPoint(from, to, ch, rowsOfOnlyDots, colsOfOnlyDots)
 
 	}
-	part1 := 0
+	part2 := 0
 	for i := 0; i < len(allPairsOfPoints); i++ {
 		//fmt.Println("Waiting for", i, "number")
-		part1 += <-ch
+		part2 += <-ch
 	}
 	fmt.Println("Number of pairs", len(allPairsOfPoints))
-	fmt.Println("Part 1:", part1)
+	fmt.Println("Part 2:", part2)
 
 }
+
+// First res: 904634704098. Too high.
+// 2nd res: 98262072. Too low.
+// 3rd: 904633799472. Corrcet.
