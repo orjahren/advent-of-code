@@ -82,7 +82,7 @@ func classifyHand(hand Hand) int {
 func sortHandsByRank(hands []Hand) []Hand {
 	rewrite_map := map[rune]rune{
 		'T': 'A',
-		'J': 'B',
+		'J': '.',
 		'Q': 'C',
 		'K': 'D',
 		'A': 'E',
@@ -122,8 +122,8 @@ type Hand struct {
 }
 
 func main() {
-	file, err := os.Open("input")
-	//file, err := os.Open("example")
+	//file, err := os.Open("input")
+	file, err := os.Open("example")
 	handle(err)
 	defer file.Close()
 	reader := bufio.NewReader(file)
@@ -146,11 +146,11 @@ func main() {
 		bids = append(bids, hand.bid)
 	}
 	fmt.Println(values)
-	part1 := 0
+	part2 := 0
 	for _, val := range values {
-		part1 += val
+		part2 += val
 	}
-	fmt.Println("Part 1:", part1)
+	fmt.Println("Part 2:", part2)
 	fmt.Println("Bids:", bids)
 
 }
