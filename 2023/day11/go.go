@@ -19,7 +19,9 @@ func getTaxiCabDistance(x1, y1, x2, y2 int) int {
 	return abs(x1-x2) + abs(y1-y2)
 }
 
-func findAndPropogateDistaceToPoint(from, to Point, part1ch, part2ch chan int, rowsOfOnlyDots, colsOfOnlyDots []int) {
+func findAndPropogateDistaceToPoint(pair Pair, part1ch, part2ch chan int, rowsOfOnlyDots, colsOfOnlyDots []int) {
+	from := pair.A
+	to := pair.B
 	manhattanDistance := getTaxiCabDistance(from.x, from.y, to.x, to.y)
 	rowsBetween := 0
 	colsBetween := 0
@@ -43,6 +45,9 @@ func findAndPropogateDistaceToPoint(from, to Point, part1ch, part2ch chan int, r
 
 type Point struct {
 	x, y, id int
+}
+type Pair struct {
+	A, B Point
 }
 
 func main() {
@@ -91,22 +96,18 @@ func main() {
 	fmt.Println(rowsOfOnlyDots)
 	fmt.Println(colsOfOnlyDots)
 
-	allPairsOfPoints := make([][]Point, 0)
+	allPairsOfPoints := make(map[Pair]bool)
+	fmt.Println("Generating all pairs of points")
 	for _, from := range points {
 		for _, to := range points {
 			if from != to {
+				pair := Pair{A: from, B: to}
+				reversePair := Pair{A: to, B: from}
 				// check for duplicates
-				alreadyExists := false
-				for _, pair := range allPairsOfPoints {
-					if pair[0] == to && pair[1] == from || pair[0] == from && pair[1] == to {
-						alreadyExists = true
-					}
-				}
-				if alreadyExists {
+				if _, exists := allPairsOfPoints[pair]; exists || allPairsOfPoints[reversePair] {
 					continue
 				}
-
-				allPairsOfPoints = append(allPairsOfPoints, []Point{from, to})
+				allPairsOfPoints[pair] = true
 			}
 		}
 	}
@@ -115,11 +116,11 @@ func main() {
 	part1ch := make(chan int)
 	part2ch := make(chan int)
 	//numsToExpect := (len(points) * len(points)) - len(points)
-	for _, pair := range allPairsOfPoints {
-		from := pair[0]
-		to := pair[1]
+	for pair := range allPairsOfPoints {
+		from := pair.A
+		to := pair.B
 		fmt.Println("From", from, "to", to)
-		go findAndPropogateDistaceToPoint(from, to, part1ch, part2ch, rowsOfOnlyDots, colsOfOnlyDots)
+		go findAndPropogateDistaceToPoint(pair, part1ch, part2ch, rowsOfOnlyDots, colsOfOnlyDots)
 
 	}
 	var part1, part2 int
