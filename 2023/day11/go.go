@@ -63,13 +63,11 @@ func main() {
 
 	for line != "" {
 		trimmedLine := strings.TrimSpace(line)
-		fmt.Println(trimmedLine)
 		line, _ = reader.ReadString('\n')
 		rowHasOnlyDots := true
 		for i, char := range trimmedLine {
 			if char == '#' {
 				p := Point{i, rowCounter, len(points) + 1}
-				fmt.Println(p)
 				points = append(points, p)
 				rowHasOnlyDots = false
 			}
@@ -92,9 +90,6 @@ func main() {
 			colsOfOnlyDots = append(colsOfOnlyDots, i)
 		}
 	}
-	// print what cols and rows have only dots
-	fmt.Println(rowsOfOnlyDots)
-	fmt.Println(colsOfOnlyDots)
 
 	allPairsOfPoints := make(map[Pair]bool)
 	fmt.Println("Generating all pairs of points")
@@ -103,7 +98,6 @@ func main() {
 			if from != to {
 				pair := Pair{A: from, B: to}
 				reversePair := Pair{A: to, B: from}
-				// check for duplicates
 				if _, exists := allPairsOfPoints[pair]; exists || allPairsOfPoints[reversePair] {
 					continue
 				}
@@ -111,21 +105,15 @@ func main() {
 			}
 		}
 	}
-	fmt.Println(allPairsOfPoints)
 
 	part1ch := make(chan int)
 	part2ch := make(chan int)
-	//numsToExpect := (len(points) * len(points)) - len(points)
 	for pair := range allPairsOfPoints {
-		from := pair.A
-		to := pair.B
-		fmt.Println("From", from, "to", to)
 		go findAndPropogateDistaceToPoint(pair, part1ch, part2ch, rowsOfOnlyDots, colsOfOnlyDots)
 
 	}
 	var part1, part2 int
 	for i := 0; i < len(allPairsOfPoints); i++ {
-		//fmt.Println("Waiting for", i, "number")
 		part1 += <-part1ch
 		part2 += <-part2ch
 	}
