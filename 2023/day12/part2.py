@@ -22,9 +22,12 @@ def count(cfg, nums):
     return result
 
 
-part1 = 0
+part2 = 0
 for line in open(0):
     cfg, nums = line.split()
+    cfg = "?".join([cfg] * 5)
     nums = tuple(map(int, nums.split(",")))
-    part1 += count(cfg, nums)
-print("Part 1:", part1)
+    nums *= 5
+    print(cfg)
+    part2 += count(cfg, nums)
+print("Part 2:", part2)
