@@ -34,15 +34,7 @@ func classifyHand(hand Hand) int {
 	for _, sym := range hand.symbols {
 		countsArr = append(countsArr, countsMap[sym])
 	}
-	sliceContains4Twos := (func(arr []int) bool {
-		count := 0
-		for _, val := range arr {
-			if val == 2 {
-				count++
-			}
-		}
-		return count == 4
-	})(countsArr)
+
 	if slices.Contains(countsArr, 5) {
 		return 6
 	}
@@ -55,7 +47,15 @@ func classifyHand(hand Hand) int {
 		}
 		return 3
 	}
-	if sliceContains4Twos {
+	if (func() bool {
+		count := 0
+		for _, val := range countsArr {
+			if val == 2 {
+				count++
+			}
+		}
+		return count == 4
+	})() {
 		return 2
 	}
 	if slices.Contains(countsArr, 2) {
