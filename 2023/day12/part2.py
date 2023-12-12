@@ -1,11 +1,9 @@
 # Stolen from https://github.com/hyper-neutrino/advent-of-code/blob/main/2023/day12p1.py
 
 from functools import cache
-import numba
 
 
 @cache
-# @numba
 def count(cfg, nums):
     if cfg == "":
         return 1 if nums == () else 0
@@ -33,7 +31,6 @@ part2 = 0
 for line in open(0):
     cfg, nums = line.split()
     cfg = "?".join([cfg] * 5)
-    nums = tuple(map(int, nums.split(",")))
-    nums *= 5
+    nums = tuple(map(int, nums.split(","))) * 5
     part2 += count(cfg, nums)
 print("Part 2:", part2)
