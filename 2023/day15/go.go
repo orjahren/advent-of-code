@@ -39,8 +39,7 @@ func main() {
 
 	line, _ := reader.ReadString('\n')
 	for line != "" {
-		spl := strings.Split(strings.Trim(line, "\n"), ",")
-		for _, s := range spl {
+		for _, s := range strings.Split(strings.Trim(line, "\n"), ",") {
 			if len(s) > 1 {
 				go part1Hash(s, part1Ch)
 				nAwaitPart1++
