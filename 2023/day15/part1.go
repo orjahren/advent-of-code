@@ -14,20 +14,16 @@ func processString(s string, ch chan int) {
 		current *= 17
 		current %= 256
 	}
-	fmt.Println(s, " -> ", current)
-
 	ch <- current
 }
 
 func main() {
-	//file, _ := os.Open("example")
 	file, _ := os.Open("input")
 	reader := bufio.NewReader(file)
 	ch := make(chan int)
 	nAwait := 0
 	line, _ := reader.ReadString('\n')
 	for line != "" {
-		fmt.Println(line)
 		spl := strings.Split(strings.Trim(line, "\n"), ",")
 		for _, s := range spl {
 			go processString(s, ch)
@@ -41,5 +37,4 @@ func main() {
 		nAwait--
 	}
 	fmt.Println("Part 1: ", part1)
-
 }
