@@ -19,9 +19,8 @@ func getHash(s string) int {
 }
 
 type Node struct {
-	value int
-	label string
-	hash  int
+	value, hash int
+	label       string
 }
 
 func part1Hash(s string, part1Ch chan int) {
@@ -31,11 +30,14 @@ func part1Hash(s string, part1Ch chan int) {
 func main() {
 	file, _ := os.Open("input")
 	reader := bufio.NewReader(file)
+
 	part1Ch := make(chan int)
-	line, _ := reader.ReadString('\n')
+	nAwaitPart1 := 0
+
 	part2Map := make([][]*Node, 256)
 	nodeMap := make(map[string]*Node)
-	nAwaitPart1 := 0
+
+	line, _ := reader.ReadString('\n')
 	for line != "" {
 		spl := strings.Split(strings.Trim(line, "\n"), ",")
 		for _, s := range spl {
@@ -61,7 +63,7 @@ func main() {
 					if other, nodeWithLabelExists := nodeMap[label]; nodeWithLabelExists {
 						other.value = val
 					} else {
-						node := Node{val, label, getHash(label)}
+						node := Node{val, getHash(label), label}
 						part2Map[node.hash] = append(part2Map[node.hash], &node)
 						nodeMap[label] = &node
 					}
@@ -89,8 +91,8 @@ func main() {
 			}
 		}
 		part2Res <- locPart2Res
-
 	})()
+
 	fmt.Println("Part 1: ", <-part1Res)
 	fmt.Println("Part 2: ", <-part2Res)
 }
