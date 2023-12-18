@@ -29,22 +29,8 @@ ll convHexToDec(string arg)
     stream >> hex >> y;
     return y;
 }
-int main()
+ll solveFromListOfPairs(vector<pair<ll, ll>> &borderPoints, ll b)
 {
-    char dir;
-    ll val;
-    string hash;
-    vector<pair<ll, ll>> borderPoints;
-    borderPoints.push_back(make_pair(0, 0));
-    ll b = 0;
-    while (cin >> dir >> val >> hash)
-    {
-        pair<ll, ll> dirPair = getDirFromHex(hash);
-        pair<ll, ll> &last = borderPoints.back();
-        ll num = convHexToDec(hash);
-        b += num;
-        borderPoints.push_back(make_pair(last.first + dirPair.first * num, last.second + dirPair.second * num));
-    }
     ll outerArea = 0;
     for (int i = 0; i < borderPoints.size(); i++)
     {
@@ -54,6 +40,36 @@ int main()
     }
     outerArea = abs(outerArea) / 2;
     ll innerArea = ceil((outerArea - (b / 2)) + 1);
-    ll part2 = innerArea + b;
+    return innerArea + b;
+}
+int main()
+{
+    char dir;
+    ll val;
+    string hash;
+    vector<pair<ll, ll>> part1Points;
+    vector<pair<ll, ll>> part2Points;
+    part1Points.push_back(make_pair(0, 0));
+    part2Points.push_back(make_pair(0, 0));
+    ll b1 = 0, b2 = 0;
+    while (cin >> dir >> val >> hash)
+    {
+        pair<ll, ll> part1Pair = getDirPairFromChar(dir);
+        pair<ll, ll> part2Pair = getDirFromHex(hash);
+
+        pair<ll, ll> &last1 = part1Points.back();
+        pair<ll, ll> &last2 = part2Points.back();
+
+        b1 += val;
+
+        ll num = convHexToDec(hash);
+        b2 += num;
+
+        part1Points.push_back(make_pair(last1.first + part1Pair.first * val, last1.second + part1Pair.second * val));
+        part2Points.push_back(make_pair(last2.first + part2Pair.first * num, last2.second + part2Pair.second * num));
+    }
+    ll part1 = solveFromListOfPairs(part1Points, b1);
+    ll part2 = solveFromListOfPairs(part2Points, b2);
+    cout << "Part 1: " << part1 << endl;
     cout << "Part 2: " << part2 << endl;
 }
