@@ -1,23 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
-pair<ll, ll> getDirPairFromChar(char c);
-pair<ll, ll> getDirFromHex(string arg)
-{
-    char c = arg[arg.size() - 2];
-    return getDirPairFromChar(c);
-}
-ll convHexToDec(string arg)
-{
-    string hexVal = arg.substr(2, arg.size() - 4);
-    cout << "hexVal = " << hexVal << endl;
-    stringstream stream;
-    stream << hexVal;
-    ll y;
-    stream >> hex >> y;
-    return y;
-}
-
 pair<ll, ll> getDirPairFromChar(char c)
 {
     pair<ll, ll> arr[] = {make_pair(0, 1), make_pair(1, 0), make_pair(0, -1), make_pair(-1, 0)};
@@ -32,7 +15,20 @@ pair<ll, ll> getDirPairFromChar(char c)
     cout << "Error: " << c << endl;
     exit(1);
 }
-
+pair<ll, ll> getDirFromHex(string arg)
+{
+    char c = arg[arg.size() - 2];
+    return getDirPairFromChar(c);
+}
+ll convHexToDec(string arg)
+{
+    string hexVal = arg.substr(2, arg.size() - 4);
+    stringstream stream;
+    stream << hexVal;
+    ll y;
+    stream >> hex >> y;
+    return y;
+}
 int main()
 {
     char dir;
@@ -43,12 +39,10 @@ int main()
     ll b = 0;
     while (cin >> dir >> val >> hash)
     {
-        cout << hash << endl;
         pair<ll, ll> dirPair = getDirFromHex(hash);
-        ll num = convHexToDec(hash);
-        cout << "num = " << num << endl;
-        b += num;
         pair<ll, ll> &last = borderPoints.back();
+        ll num = convHexToDec(hash);
+        b += num;
         borderPoints.push_back(make_pair(last.first + dirPair.first * num, last.second + dirPair.second * num));
     }
     ll outerArea = 0;
