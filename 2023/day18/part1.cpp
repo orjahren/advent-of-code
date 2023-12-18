@@ -3,40 +3,27 @@ using namespace std;
 int main()
 {
     char dir;
-    int val;
     string hash;
     vector<pair<int, int>> borderPoints;
-    int currX = 0, currY = 0;
+    int currX = 0, currY = 0, val;
     while (cin >> dir >> val >> hash)
-        switch (dir)
+        for (int i = 0; i < val; i++)
         {
-        case 'U':
-            for (int i = 0; i < val; i++)
+            switch (dir)
             {
+            case 'U':
                 currY--;
-                borderPoints.push_back(make_pair(currX, currY));
-            }
-            break;
-        case 'D':
-            for (int i = 0; i < val; i++)
-            {
+                break;
+            case 'D':
                 currY++;
-                borderPoints.push_back(make_pair(currX, currY));
-            }
-            break;
-        case 'R':
-            for (int i = 0; i < val; i++)
-            {
+                break;
+            case 'R':
                 currX++;
-                borderPoints.push_back(make_pair(currX, currY));
-            }
-            break;
-        case 'L':
-            for (int i = 0; i < val; i++)
-            {
+                break;
+            case 'L':
                 currX--;
-                borderPoints.push_back(make_pair(currX, currY));
             }
+            borderPoints.push_back(make_pair(currX, currY));
         }
     int minX = INT_MAX, maxX = INT_MIN, minY = INT_MAX, maxY = INT_MIN;
     for (auto point : borderPoints)
@@ -81,12 +68,7 @@ int main()
 
     int part1 = 0;
     for (int i = 0; i < maxX - minX + 1; i++)
-    {
         for (int j = 0; j < maxY - minY + 1; j++)
-        {
-            char c = hullMatrix[i][j];
-            part1 += (c == '#');
-        }
-    }
+            part1 += (hullMatrix[i][j] == '#');
     cout << "Part 1: " << part1 << endl;
 }
