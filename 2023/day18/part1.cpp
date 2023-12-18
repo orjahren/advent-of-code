@@ -120,7 +120,9 @@ int main()
     // flood fill
     queue<pair<int, int>> q;
     // q.push(make_pair(insideX, insideY));
-    q.push(make_pair(1, 1));
+    // q.push(make_pair(1, 1));
+    // q.push(make_pair(21, 6));
+    q.push(make_pair(6, 21));
     while (!q.empty())
     {
         pair<int, int> curr = q.front();
@@ -159,5 +161,7 @@ int main()
         }
         cout << endl;
     }
-    cout << "Part 1:" << part1 << endl;
+    cout << "Part 1: " << part1 << endl;
 }
+// First ans: 5796. Too low.
+// 2nd: 34329. Correct.
