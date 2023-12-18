@@ -16,7 +16,8 @@ char getDirFromHex(string arg)
 }
 ll convHexToDec(string arg)
 {
-    string hexVal = arg.substr(2, arg.size() - 2);
+    string hexVal = arg.substr(2, arg.size() - 4);
+    cout << "hexVal = " << hexVal << endl;
     stringstream stream;
     stream << hexVal;
     ll y;
@@ -35,7 +36,9 @@ int main()
     {
         cout << hash << endl;
         char properDir = getDirFromHex(hash);
-        for (ll i = 0; i < convHexToDec(hash); i++)
+        ll num = convHexToDec(hash);
+        cout << "num = " << num << endl;
+        for (ll i = 0; i < num; i++)
         {
             switch (properDir)
             {
