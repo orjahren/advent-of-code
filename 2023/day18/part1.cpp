@@ -2,5 +2,13 @@
 using namespace std;
 int main()
 {
-    cout << "Hello World!" << endl;
+    char dir;
+    int val;
+    string hash;
+    while (cin >> dir >> val >> hash)
+    {
+        cout << dir << endl;
+        cout << val << endl;
+        cout << hash << endl;
+    }
 }
