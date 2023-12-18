@@ -108,8 +108,8 @@ int main()
         {
             if (hullMatrix[i][j] == '#')
             {
-                insideX = i;
-                insideY = j;
+                insideY = i;
+                insideX = j;
                 break;
             }
         }
@@ -119,7 +119,8 @@ int main()
 
     // flood fill
     queue<pair<int, int>> q;
-    q.push(make_pair(insideX, insideY));
+    // q.push(make_pair(insideX, insideY));
+    q.push(make_pair(1, 1));
     while (!q.empty())
     {
         pair<int, int> curr = q.front();
@@ -130,10 +131,12 @@ int main()
         cout << "y = " << y << endl;
         if (x < 0 || x >= maxX - minX + 1 || y < 0 || y >= maxY - minY + 1)
         {
+            cout << "Continuer på første" << endl;
             continue;
         }
         if (hullMatrix[x][y] == '#')
         {
+            cout << "Continuer på andre" << endl;
             continue;
         }
         hullMatrix[x][y] = '#';
@@ -156,4 +159,5 @@ int main()
         }
         cout << endl;
     }
+    cout << "Part 1:" << part1 << endl;
 }
