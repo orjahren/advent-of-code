@@ -12,6 +12,7 @@ char getDirFromHex(string arg)
             return arr[i];
         }
     }
+    return -1;
 }
 ll convHexToDec(string arg)
 {
@@ -32,53 +33,31 @@ int main()
     int currX = 0, currY = 0;
     while (cin >> dir >> val >> hash)
     {
-        cout << dir << endl;
-        cout << val << endl;
         cout << hash << endl;
-        ll num = convHexToDec(hash);
         char properDir = getDirFromHex(hash);
-
-        val = num;
-        dir = properDir;
-        switch (dir)
+        for (ll i = 0; i < convHexToDec(hash); i++)
         {
-        case 'U':
-            for (int i = 0; i < val; i++)
+            switch (properDir)
             {
+            case 'U':
                 currY--;
-                borderPoints.push_back(make_pair(currX, currY));
-            }
-            break;
-        case 'D':
-            for (int i = 0; i < val; i++)
-            {
+                break;
+            case 'D':
                 currY++;
-                borderPoints.push_back(make_pair(currX, currY));
-            }
-            break;
-        case 'R':
-            for (int i = 0; i < val; i++)
-            {
+                break;
+            case 'R':
                 currX++;
-                borderPoints.push_back(make_pair(currX, currY));
-            }
-            break;
-        case 'L':
-            for (int i = 0; i < val; i++)
-            {
+                break;
+            case 'L':
                 currX--;
-                borderPoints.push_back(make_pair(currX, currY));
             }
-            break;
-
-        default:
-            cout << "Invalid direction" << endl;
-            break;
+            borderPoints.push_back(make_pair(currX, currY));
         }
     }
     cout << "borderPoints.size() = " << borderPoints.size() << endl;
 
     // find all points inside the border
+    cout << "Finding border points...";
     int minX = INT_MAX, maxX = INT_MIN, minY = INT_MAX, maxY = INT_MIN;
     for (auto point : borderPoints)
     {
@@ -87,15 +66,24 @@ int main()
         minY = min(minY, point.second);
         maxY = max(maxY, point.second);
     }
+    cout << "...done" << endl;
+    cout << "Creating hullMatrix...";
+    cout.flush();
     char **hullMatrix = new char *[maxX - minX + 1];
     for (int i = 0; i < maxX - minX + 1; i++)
         hullMatrix[i] = new char[maxY - minY + 1];
 
+    cout << "...done" << endl;
+    cout << "Tagging items...";
+    cout.flush();
     for (int i = 0; i < maxX - minX + 1; i++)
         for (int j = 0; j < maxY - minY + 1; j++)
             hullMatrix[i][j] = '.';
+    cout << "...done" << endl;
+    cout << "Marking borders...";
     for (auto point : borderPoints)
         hullMatrix[point.first - minX][point.second - minY] = '#';
+    cout << "...done" << endl;
 
     queue<pair<int, int>> q;
 
@@ -104,6 +92,7 @@ int main()
 
     // For prod-input:
     // q.push(make_pair(6, 21));
+    cout << "Starting flood fill...";
 
     while (!q.empty())
     {
@@ -119,6 +108,7 @@ int main()
         q.push(make_pair(x, y + 1));
         q.push(make_pair(x, y - 1));
     }
+    cout << "...done" << endl;
 
     int part2 = 0;
     for (int i = 0; i < maxX - minX + 1; i++)
