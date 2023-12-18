@@ -1,74 +1,56 @@
 #include <bits/stdc++.h>
 using namespace std;
+typedef long long ll;
+ll convHexToDec(string arg)
+{
+    string hexVal = arg.substr(2, arg.size() - 4);
+    cout << "hexVal = " << hexVal << endl;
+    stringstream stream;
+    stream << hexVal;
+    ll y;
+    stream >> hex >> y;
+    return y;
+}
+
+pair<int, int> getDirPairFromChar(char c)
+{
+    pair<int, int> arr[] = {make_pair(0, 1), make_pair(1, 0), make_pair(0, -1), make_pair(-1, 0)};
+    char chars[] = {'R', 'D', 'L', 'U'};
+    for (int i = 0; i < 4; i++)
+    {
+        if (c == chars[i] || c == i + '0')
+        {
+            return arr[i];
+        }
+    }
+    cout << "Error: " << c << endl;
+    exit(1);
+}
+
 int main()
 {
     char dir;
+    int val;
     string hash;
     vector<pair<int, int>> borderPoints;
-    int currX = 0, currY = 0, val;
+    borderPoints.push_back(make_pair(0, 0));
+    ll b = 0;
     while (cin >> dir >> val >> hash)
-        for (int i = 0; i < val; i++)
-        {
-            switch (dir)
-            {
-            case 'U':
-                currY--;
-                break;
-            case 'D':
-                currY++;
-                break;
-            case 'R':
-                currX++;
-                break;
-            case 'L':
-                currX--;
-            }
-            borderPoints.push_back(make_pair(currX, currY));
-        }
-    int minX = INT_MAX, maxX = INT_MIN, minY = INT_MAX, maxY = INT_MIN;
-    for (auto point : borderPoints)
     {
-        minX = min(minX, point.first);
-        maxX = max(maxX, point.first);
-        minY = min(minY, point.second);
-        maxY = max(maxY, point.second);
+        pair<int, int> dirPair = getDirPairFromChar(dir);
+        b += val;
+        pair<int, int> &last = borderPoints.back();
+        borderPoints.push_back(make_pair(last.first + dirPair.first * val, last.second + dirPair.second * val));
     }
-
-    char **hullMatrix = new char *[maxX - minX + 1];
-    for (int i = 0; i < maxX - minX + 1; i++)
-        hullMatrix[i] = new char[maxY - minY + 1];
-
-    for (int i = 0; i < maxX - minX + 1; i++)
-        for (int j = 0; j < maxY - minY + 1; j++)
-            hullMatrix[i][j] = '.';
-
-    for (auto point : borderPoints)
-        hullMatrix[point.first - minX][point.second - minY] = '#';
-    queue<pair<int, int>> q;
-
-    // Test
-    // q.push(make_pair(1, 1));
-
-    // Prod
-    q.push(make_pair(6, 21));
-    while (!q.empty())
+    ll outerArea = 0;
+    for (int i = 0; i < borderPoints.size(); i++)
     {
-        pair<int, int> curr = q.front();
-        q.pop();
-        int x = curr.first;
-        int y = curr.second;
-        if (x < 0 || x >= maxX - minX + 1 || y < 0 || y >= maxY - minY + 1 || hullMatrix[x][y] == '#')
-            continue;
-        hullMatrix[x][y] = '#';
-        q.push(make_pair(x + 1, y));
-        q.push(make_pair(x - 1, y));
-        q.push(make_pair(x, y + 1));
-        q.push(make_pair(x, y - 1));
+        pair<int, int> &px = i == 0 ? borderPoints.back() : borderPoints[i - 1];
+        pair<int, int> &py = borderPoints[(i + 1) % (borderPoints.size())];
+        outerArea += borderPoints[i].first * (px.second - py.second);
     }
-
-    int part1 = 0;
-    for (int i = 0; i < maxX - minX + 1; i++)
-        for (int j = 0; j < maxY - minY + 1; j++)
-            part1 += (hullMatrix[i][j] == '#');
+    outerArea = abs(outerArea) / 2;
+    ll innerArea = ceil((outerArea - (b / 2)) + 1);
+    ll part1 = innerArea + b;
     cout << "Part 1: " << part1 << endl;
 }
