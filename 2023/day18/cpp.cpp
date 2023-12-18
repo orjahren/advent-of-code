@@ -4,7 +4,7 @@ typedef long long ll;
 typedef pair<ll, ll> p;
 p getDirPairFromChar(char c)
 {
-    pair<ll, ll> arr[] = {make_pair(0, 1), make_pair(1, 0), make_pair(0, -1), make_pair(-1, 0)};
+    p arr[] = {make_pair(0, 1), make_pair(1, 0), make_pair(0, -1), make_pair(-1, 0)};
     char chars[] = {'R', 'D', 'L', 'U'};
     for (int i = 0; i < 4; i++)
     {
