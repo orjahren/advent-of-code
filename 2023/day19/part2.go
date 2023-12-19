@@ -272,9 +272,9 @@ func main() {
 	fmt.Println("------------ allWorkflowNames: ")
 	fmt.Println(allWorkflowNames)
 
-	part1 := 0
+	part2 := 0
 	for _, part := range parts {
-		part1 += getValueIfValid(workflowList, workflows, part)
+		part2 += getValueIfValid(workflowList, workflows, part)
 	}
-	fmt.Println("part1: " + strconv.Itoa(part1))
+	fmt.Println("part2: " + strconv.Itoa(part2))
 }
