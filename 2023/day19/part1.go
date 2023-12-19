@@ -73,9 +73,8 @@ func workflowFromLine(line string) Workflow {
 }
 
 type Part struct {
-	x, m, a, s int
-	sumValue   int
-	vals       map[rune]int
+	sumValue int
+	vals     map[rune]int
 }
 
 func ruleIsValidForPart(rule Rule, part Part) bool {
@@ -84,13 +83,11 @@ func ruleIsValidForPart(rule Rule, part Part) bool {
 	}
 	if rule.checkSign == '<' {
 		return part.vals[rule.checkChar] < rule.val
-	} else if rule.checkSign == '>' {
-		return part.vals[rule.checkChar] > rule.val
 	}
-	return false
+	return part.vals[rule.checkChar] > rule.val
 }
 
-func getValueIfValid(workFlows []*Workflow, workFlowMap map[string]*Workflow, part Part) int {
+func getValueIfValid(workFlowMap map[string]*Workflow, part Part) int {
 	currentWorkflow := workFlowMap["in"]
 	ruleIndex := 0
 	currentRule := currentWorkflow.rulesList[ruleIndex]
@@ -123,16 +120,13 @@ func parsePartForLine(line string) Part {
 	trimmed := strings.Trim(line, " \n{}")
 	spl := strings.Split(trimmed, ",")
 	ints := make([]int, 0)
+	p := Part{0, make(map[rune]int)}
 	for _, char := range spl {
 		parsed, _ := strconv.Atoi(char[2:])
-		ints = append(ints, int(parsed))
+		p.vals[rune(char[0])] = parsed
+		p.sumValue += parsed
+		ints = append(ints, parsed)
 	}
-	p := Part{ints[0], ints[1], ints[2], ints[3], 0, make(map[rune]int)}
-	p.sumValue = p.x + p.m + p.a + p.s
-	p.vals['x'] = p.x
-	p.vals['m'] = p.m
-	p.vals['a'] = p.a
-	p.vals['s'] = p.s
 	return p
 }
 
@@ -143,16 +137,12 @@ func main() {
 	line, _ := reader.ReadString('\n')
 
 	workflows := make(map[string]*Workflow)
-	workflowList := make([]*Workflow, 0)
-	allWorkflowNames := make([]string, 0)
 
 	for line != "\n" {
 		trimmed := strings.Trim(line, " \n")
 		if trimmed != "" {
 			workFlow := workflowFromLine(trimmed)
 			workflows[workFlow.name] = &workFlow
-			workflowList = append(workflowList, &workFlow)
-			allWorkflowNames = append(allWorkflowNames, workFlow.name)
 		}
 		line, _ = reader.ReadString('\n')
 
@@ -172,7 +162,7 @@ func main() {
 	}
 	part1 := 0
 	for _, part := range parts {
-		part1 += getValueIfValid(workflowList, workflows, part)
+		part1 += getValueIfValid(workflows, part)
 	}
 	fmt.Println("part1: ", part1)
 }
