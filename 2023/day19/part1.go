@@ -9,12 +9,14 @@ import (
 )
 
 type Rule struct {
-	val, checkSign rune
-	target         *Workflow
-	targetName     string
-	isRedirect     bool
-	isAcceptance   bool
-	isRejection    bool
+	checkSign, checkChar rune
+	val                  int
+	target               *Workflow
+	targetName           string
+	isBlindRedirect      bool
+	hasBool              bool
+	isAcceptance         bool
+	isRejection          bool
 }
 
 type Workflow struct {
@@ -26,17 +28,22 @@ type Workflow struct {
 func getRuleFromString(ruleStr string) Rule {
 	fmt.Println("ruleStr: ")
 	fmt.Println(ruleStr)
-	r := Rule{0, 0, nil, "", false, false, false}
+	r := Rule{0, 0, 0, nil, "", false, false, false, false}
 
 	colSplit := strings.Split(ruleStr, ":")
 	if len(colSplit) == 1 {
 		if colSplit[0] == "R" {
 			r.isRejection = true
+			fmt.Println("################# REJECTION")
 
 		} else if colSplit[0] == "A" {
+			fmt.Println("################# ACCEPTANCE")
 			r.isAcceptance = true
 		} else {
 			//panic("error with rule creation: " + colSplit[0])
+			fmt.Println("################# blind redirect")
+			r.isBlindRedirect = true
+			r.targetName = colSplit[0]
 		}
 	} else {
 		toParse := colSplit[0]
@@ -45,15 +52,21 @@ func getRuleFromString(ruleStr string) Rule {
 		fmt.Println("colSplit: ")
 		fmt.Println(colSplit)
 		r.targetName = colSplit[1]
+		var valSplit []string
 		if strings.Contains(toParse, "<") {
 			fmt.Println("toParse inneholder < ")
+			valSplit = strings.Split(toParse, "<")
 		} else if strings.Contains(toParse, ">") {
 			fmt.Println("toParse inneholder < ")
+			valSplit = strings.Split(toParse, ">")
 		}
+		parsedVal, _ := strconv.Atoi(valSplit[1])
+		r.val = parsedVal
 		checkSign := toParse[1]
 		r.checkSign = rune(checkSign)
+		r.checkChar = rune(toParse[0])
 	}
-	r.isRedirect = r.isAcceptance || r.isRejection
+	r.hasBool = r.isAcceptance || r.isRejection
 	fmt.Println("r: ")
 	fmt.Println(r)
 	return r
@@ -83,10 +96,102 @@ func workflowFromLine(line string) Workflow {
 
 type Part struct {
 	x, m, a, s int
+	sumValue   int
 }
 
 func ruleIsValidForPart(rule Rule, part Part) bool {
-	return true
+	if rule.isBlindRedirect {
+		return true
+	}
+
+	// TODO: Burde bruke hashmap for runes?
+	if rule.checkSign == '<' {
+		switch rule.checkChar {
+		case 'x':
+			return part.x < rule.val
+		case 'm':
+			return part.m < rule.val
+		case 'a':
+			return part.a < rule.val
+		case 's':
+			return part.s < rule.val
+		default:
+			panic("1 error with rule checkChar: " + string(rule.checkChar))
+		}
+	} else if rule.checkSign == '>' {
+		switch rule.checkChar {
+		case 'x':
+			return part.x > rule.val
+		case 'm':
+			return part.m > rule.val
+		case 'a':
+			return part.a > rule.val
+		case 's':
+			return part.s > rule.val
+		default:
+			panic("2 error with rule checkChar: " + string(rule.checkChar))
+		}
+
+	} else {
+		panic("3 error with rule checkSign: " + string(rule.checkSign))
+	}
+}
+
+func getValueIfValid(workFlows []*Workflow, workFlowMap map[string]*Workflow, part Part) int {
+	currentWorkflow := workFlowMap["in"]
+	fmt.Println("currentWorkflow: ")
+	fmt.Println(currentWorkflow)
+	ruleIndex := 0
+
+	currentRule := currentWorkflow.rulesList[ruleIndex]
+	fmt.Println("currentRule: ")
+	fmt.Println(currentRule)
+	for !currentRule.hasBool {
+		if ruleIsValidForPart(currentRule, part) {
+			fmt.Println("rule is valid")
+			ruleIndex = 0
+			/*
+				if currentRule.isBlindRedirect {
+					//fmt.Println("rule is blind redirect, breaker")
+					//break
+					fmt.Println("rule is blind redirect")
+				} else {
+					currentWorkflow = currentRule.target
+					currentRule = currentWorkflow.rulesList[ruleIndex]
+				}
+			*/
+			fmt.Println("Will go from workflow: ")
+			fmt.Println(currentWorkflow)
+			fmt.Println("With rule: ")
+			fmt.Println(currentRule)
+			if currentRule.targetName == "A" {
+				fmt.Println("currentRule.name == A")
+				currentRule.hasBool = true
+				currentRule.isAcceptance = true
+			} else {
+
+				currentWorkflow = currentRule.target
+				fmt.Println("currentWorkflow: ")
+				fmt.Println(currentWorkflow)
+				currentRule = currentWorkflow.rulesList[ruleIndex]
+				fmt.Println("Set current rule to next rule: ")
+				fmt.Println(currentRule)
+			}
+		} else {
+			fmt.Println("rule is NOT valid")
+			ruleIndex++
+			fmt.Println("ruleIndex: ")
+			fmt.Println(ruleIndex)
+			currentRule = currentWorkflow.rulesList[ruleIndex]
+			fmt.Println("Set current rule to next rule: ")
+			fmt.Println(currentRule)
+		}
+	}
+	if currentRule.isAcceptance {
+		return part.sumValue
+	} else {
+		return 0
+	}
 }
 
 func parsePartForLine(line string) Part {
@@ -106,7 +211,12 @@ func parsePartForLine(line string) Part {
 	}
 	fmt.Println("ints: ")
 	fmt.Println(ints)
-	return Part{ints[0], ints[1], ints[2], ints[3]}
+	p := Part{ints[0], ints[1], ints[2], ints[3], 0}
+	// set sum
+	p.sumValue = p.x + p.m + p.a + p.s
+	fmt.Println("p: ")
+	fmt.Println(p)
+	return p
 }
 
 func main() {
@@ -116,19 +226,22 @@ func main() {
 
 	workflows := make(map[string]*Workflow)
 	workflowList := make([]*Workflow, 0)
+	allWorkflowNames := make([]string, 0)
 
 	for line != "\n" {
 		fmt.Println(line)
-		workFlow := workflowFromLine(line)
-		workflows[workFlow.name] = &workFlow
-		workflowList = append(workflowList, &workFlow)
+		trimmed := strings.Trim(line, " \n")
+		if trimmed != "" {
+			workFlow := workflowFromLine(trimmed)
+			workflows[workFlow.name] = &workFlow
+			workflowList = append(workflowList, &workFlow)
+			allWorkflowNames = append(allWorkflowNames, workFlow.name)
+		}
 		line, _ = reader.ReadString('\n')
 
 	}
-
 	fmt.Println("------------")
 	line, _ = reader.ReadString('\n')
-
 	parts := make([]Part, 0)
 
 	for line != "" {
@@ -137,4 +250,26 @@ func main() {
 		parts = append(parts, part)
 		line, _ = reader.ReadString('\n')
 	}
+
+	// set targets for rules, for all workflow
+	for _, workflow := range workflows {
+		for i, rule := range workflow.rulesList {
+			fmt.Println("rule.targetName: ")
+			fmt.Println(rule.targetName)
+			fmt.Println(workflows[rule.targetName])
+			workflow.rulesList[i].target = workflows[rule.targetName]
+			fmt.Println(workflows[rule.targetName])
+		}
+
+	}
+
+	// print all names
+	fmt.Println("------------ allWorkflowNames: ")
+	fmt.Println(allWorkflowNames)
+
+	part1 := 0
+	for _, part := range parts {
+		part1 += getValueIfValid(workflowList, workflows, part)
+	}
+	fmt.Println("part1: " + strconv.Itoa(part1))
 }
