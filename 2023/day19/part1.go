@@ -168,6 +168,10 @@ func getValueIfValid(workFlows []*Workflow, workFlowMap map[string]*Workflow, pa
 				fmt.Println("currentRule.name == A")
 				currentRule.hasBool = true
 				currentRule.isAcceptance = true
+			} else if currentRule.targetName == "R" {
+				currentRule.hasBool = true
+				currentRule.isRejection = true
+
 			} else {
 
 				currentWorkflow = currentRule.target
@@ -220,7 +224,8 @@ func parsePartForLine(line string) Part {
 }
 
 func main() {
-	file, _ := os.Open("example")
+	//file, _ := os.Open("example")
+	file, _ := os.Open("input")
 	reader := bufio.NewReader(file)
 	line, _ := reader.ReadString('\n')
 
