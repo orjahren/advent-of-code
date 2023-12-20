@@ -56,7 +56,16 @@ class Part1 {
                 }
                 System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
                 Module m = moduleMap.get(outboundConnectionName);
-                m.receivePulse(pulseType, this.name);
+                /*
+                 * 
+                 * if(m == null) {
+                 * System.err.println("No module found with name: " + outboundConnectionName);
+                 * System.exit(1);
+                 * }
+                 */
+                if (m != null) {
+                    m.receivePulse(pulseType, this.name);
+                }
             }
         }
 
@@ -185,3 +194,4 @@ class Part1 {
         }
     }
 }
+// First res: 829159479. Too high.
