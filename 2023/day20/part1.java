@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 class Part1 {
-    final static char NOOP = 'x';
+    final private static char NOOP = 'x';
     private long nLowPulses = 0;
     private long nHighPulses = 0;
     final private Map<String, Module> moduleMap = new HashMap<String, Module>();
@@ -59,7 +59,6 @@ class Part1 {
         protected void actOnPulse() {
             this.lastSignal = pulseQue.pop();
             this.nameOfLastSender = namesQue.pop();
-
         }
     }
 
@@ -91,14 +90,14 @@ class Part1 {
     }
 
     class Conjunction extends Module {
-        Map<String, Boolean> inputSignals = new HashMap<String, Boolean>();
+        final private Map<String, Boolean> inputSignals = new HashMap<String, Boolean>();
 
         Conjunction(String line) {
             super(line, '&');
         }
 
         private boolean remembersHighForAll() {
-            for (String name : this.inputSignals.keySet()) {
+            for (final String name : this.inputSignals.keySet()) {
                 if (!this.inputSignals.get(name)) {
                     return false;
                 }
@@ -152,8 +151,8 @@ class Part1 {
             nLowPulses++;
             broadcaster.sendPulse(false);
             while (queOfModuleNamesToAct.size() > 0) {
-                String outboundConnectionName = queOfModuleNamesToAct.pop();
-                Module m = moduleMap.get(outboundConnectionName);
+                final String outboundConnectionName = queOfModuleNamesToAct.pop();
+                final Module m = moduleMap.get(outboundConnectionName);
                 if (m != null) {
                     m.actOnPulse();
                 }
