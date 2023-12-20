@@ -54,15 +54,16 @@ class Part1 {
                     System.out.println("Skipping output pulse");
                     return;
                 }
-                System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
+                // System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
                 Module m = moduleMap.get(outboundConnectionName);
-                /*
-                 * 
-                 * if(m == null) {
-                 * System.err.println("No module found with name: " + outboundConnectionName);
-                 * System.exit(1);
-                 * }
-                 */
+
+                System.out.println(this.name + " -" + pulseType + "-> " + m.name);
+
+                if (m == null) {
+                    System.err.println("No module found with name: " + outboundConnectionName);
+
+                    // System.exit(1);
+                }
                 if (m != null) {
                     m.receivePulse(pulseType, this.name);
                 }
@@ -150,6 +151,7 @@ class Part1 {
 
     void pressButtonNtimes(Module broadcaster, int n) {
         for (int i = 0; i < n; i++) {
+            System.out.println("------------- Pressing button for " + i + " time");
             nLowPulses++;
             broadcaster.sendPulse(PulseType.LOW);
         }
