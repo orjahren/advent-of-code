@@ -12,6 +12,8 @@ class Part1 {
     long nLowPulses = 0;
     long nHighPulses = 0;
     HashMap<String, Module> moduleMap = new HashMap<String, Module>();
+    // TODO: Bruk deque
+    List<String> queOfModuleNamesToAct = new ArrayList<String>();
 
     static protected enum PulseType {
         HIGH, LOW
@@ -20,10 +22,14 @@ class Part1 {
     abstract protected class Module {
 
         String name;
-        PulseType lastSignal = PulseType.LOW;
         List<String> outboundConnectionNames;
         char type = NOOP;
         protected boolean status = false;
+
+        List<PulseType> pulseQue = new ArrayList<PulseType>();
+        List<String> namesQue = new ArrayList<String>();
+        PulseType lastSignal = PulseType.LOW;
+        String nameOfLastSender;
 
         public boolean isOn() {
             return status;
@@ -47,6 +53,14 @@ class Part1 {
 
         public void sendPulse(PulseType pulseType) {
             for (String outboundConnectionName : this.outboundConnectionNames) {
+                Module m = moduleMap.get(outboundConnectionName);
+                if (m == null) {
+                    // System.err.println("No module found with name: " + outboundConnectionName);
+
+                    // System.exit(1);
+                }
+                String debugName = m != null ? m.name : "output";
+                System.out.println(this.name + " -" + pulseType + "-> " + debugName);
                 if (pulseType == PulseType.HIGH) {
                     // System.out.println("Sender en høy");
                     // System.out.println("For pulseType: " + pulseType);
@@ -60,39 +74,44 @@ class Part1 {
                     return;
                 }
                 // System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
-                Module m = moduleMap.get(outboundConnectionName);
 
-                if (m == null) {
-                    System.err.println("No module found with name: " + outboundConnectionName);
-
-                    // System.exit(1);
-                }
                 if (m != null) {
-                    System.out.println(this.name + " -" + pulseType + "-> " + m.name);
+                    queOfModuleNamesToAct.add(m.name);
                     m.receivePulse(pulseType, this.name);
                 }
             }
-            for (String outboundConnectionName : this.outboundConnectionNames) {
-                // System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
-                Module m = moduleMap.get(outboundConnectionName);
-
-                if (m == null) {
-                    System.err.println("No module found with name: " + outboundConnectionName);
-
-                    // System.exit(1);
-                }
-                if (m != null) {
-                    m.actOnPulse();
-                }
-            }
+            /*
+             * 
+             * // for (String outboundConnectionName : this.outboundConnectionNames) {
+             * while (queOfModuleNamesToAct.size() > 0) {
+             * // System.out.println("\t\t\tBroadcasting pulse to: " +
+             * outboundConnectionName);
+             * String outboundConnectionName = queOfModuleNamesToAct.remove(0);
+             * Module m = moduleMap.get(outboundConnectionName);
+             * 
+             * if (m == null) {
+             * System.err.println("No module found with name: " + outboundConnectionName);
+             * 
+             * // System.exit(1);
+             * }
+             * if (m != null) {
+             * m.actOnPulse();
+             * }
+             * }
+             */
         }
 
         public void receivePulse(PulseType pulseType, String nameOfSender) {
-            System.out.println(this.name + " <-" + pulseType + "- " + nameOfSender);
-            this.lastSignal = pulseType;
+            // System.out.println(this.name + " <-" + pulseType + "- " + nameOfSender);
+            this.pulseQue.add(pulseType);
+            this.namesQue.add(nameOfSender);
         }
 
-        public abstract void actOnPulse();
+        public void actOnPulse() {
+            this.lastSignal = pulseQue.remove(0);
+            this.nameOfLastSender = namesQue.remove(0);
+
+        }
 
         public boolean isConjunction() {
             return this.type == '&';
@@ -107,6 +126,7 @@ class Part1 {
 
         @Override
         public void actOnPulse() {
+            super.actOnPulse();
             this.sendPulse(this.lastSignal);
         }
     }
@@ -118,10 +138,12 @@ class Part1 {
 
         @Override
         public void actOnPulse() {
-            System.out.println("FlipFlop.actOnPulse() for signal " + this.lastSignal + " for " + this.name);
+            super.actOnPulse();
+            // System.out.println("FlipFlop.actOnPulse() for signal " + this.lastSignal + "
+            // for " + this.name);
             // Do nothing
             if (this.lastSignal == PulseType.HIGH) {
-                return;
+                // return;
             }
             if (this.lastSignal == PulseType.LOW) {
 
@@ -129,18 +151,17 @@ class Part1 {
                 // this.status = !this.isOn();
                 this.status = !this.status;
                 // System.out.println("FlipFlop: " + this.name + " is now " + this.isOn());
-                // this.sendPulse(this.isOn() ? PulseType.HIGH : PulseType.LOW);
                 this.sendPulse(this.isOn() ? PulseType.HIGH : PulseType.LOW);
             } else {
                 // System.err.println("Unknown pulse type: " + this.lastSignal);
                 // System.exit(1);
             }
+            // this.sendPulse(this.isOn() ? PulseType.HIGH : PulseType.LOW);
         }
     }
 
     class Conjunction extends Module {
         Map<String, PulseType> inputSignals = new HashMap<String, PulseType>();
-        String nameOfLastSender;
 
         Conjunction(String line) {
             super(line, '&');
@@ -163,8 +184,10 @@ class Part1 {
 
         @Override
         public void actOnPulse() {
+            super.actOnPulse();
+            System.out.println("Conjunction.actOnPulse() for signal " + this.lastSignal + " for " + this.name);
             if (!inputSignals.containsKey(nameOfLastSender)) {
-                inputSignals.put(nameOfLastSender, PulseType.LOW);
+                // inputSignals.put(nameOfLastSender, PulseType.LOW);
             }
             inputSignals.put(nameOfLastSender, this.lastSignal);
 
@@ -185,12 +208,27 @@ class Part1 {
         return new Broadcaster(line);
     }
 
-    void pressButtonNtimes(Module broadcaster, int n) {
+    void pressButtonNtimes(Module broadcaster, int n, int debugN) {
         for (int i = 0; i < n; i++) {
             System.out.println("------------- Pressing button for " + i + " time");
             nLowPulses++;
             broadcaster.sendPulse(PulseType.LOW);
-            return;
+            while (queOfModuleNamesToAct.size() > 0) {
+                // System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
+                String outboundConnectionName = queOfModuleNamesToAct.remove(0);
+                Module m = moduleMap.get(outboundConnectionName);
+
+                if (m == null) {
+                    System.err.println("No module found with name: " + outboundConnectionName);
+
+                    // System.exit(1);
+                }
+                if (m != null) {
+                    m.actOnPulse();
+                }
+            }
+            if (debugN > 0 && i >= debugN)
+                return;
         }
     }
 
@@ -220,7 +258,11 @@ class Part1 {
         for (String name : conjunctionNames) {
             Conjunction c = (Conjunction) moduleMap.get(name);
             for (String moduleName : moduleNames) {
-                c.inputSignals.put(moduleName, PulseType.LOW);
+                Module candMod = moduleMap.get(moduleName);
+                if (candMod.outboundConnectionNames.contains(name)) {
+                    c.inputSignals.put(moduleName, PulseType.LOW);
+                }
+                // c.inputSignals.put(moduleName, PulseType.LOW);
             }
         }
 
@@ -229,7 +271,8 @@ class Part1 {
             System.err.println("No broadcaster found");
             System.exit(1);
         }
-        pressButtonNtimes(broadcaster, n);
+        // pressButtonNtimes(broadcaster, n, 4);
+        pressButtonNtimes(broadcaster, n, -1);
         System.out.println("nHighPulses: " + nHighPulses);
         System.out.println("nLowPulses: " + nLowPulses);
 
