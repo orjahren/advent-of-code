@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +20,14 @@ class Part1 {
     abstract protected class Module {
 
         String name;
-        PulseType lastSignal;
+        PulseType lastSignal = PulseType.LOW;
         List<String> outboundConnectionNames;
         char type = NOOP;
-        boolean isOn = false;
+        protected boolean status = false;
+
+        public boolean isOn() {
+            return status;
+        }
 
         Module(String line, char type) {
             this.type = type;
@@ -57,7 +62,19 @@ class Part1 {
                 // System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
                 Module m = moduleMap.get(outboundConnectionName);
 
-                System.out.println(this.name + " -" + pulseType + "-> " + m.name);
+                if (m == null) {
+                    System.err.println("No module found with name: " + outboundConnectionName);
+
+                    // System.exit(1);
+                }
+                if (m != null) {
+                    System.out.println(this.name + " -" + pulseType + "-> " + m.name);
+                    m.receivePulse(pulseType, this.name);
+                }
+            }
+            for (String outboundConnectionName : this.outboundConnectionNames) {
+                // System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
+                Module m = moduleMap.get(outboundConnectionName);
 
                 if (m == null) {
                     System.err.println("No module found with name: " + outboundConnectionName);
@@ -65,20 +82,33 @@ class Part1 {
                     // System.exit(1);
                 }
                 if (m != null) {
-                    m.receivePulse(pulseType, this.name);
+                    m.actOnPulse();
                 }
             }
         }
 
         public void receivePulse(PulseType pulseType, String nameOfSender) {
-            this.sendPulse(pulseType);
+            System.out.println(this.name + " <-" + pulseType + "- " + nameOfSender);
             this.lastSignal = pulseType;
         }
 
-        protected void setOn(boolean val) {
-            this.isOn = val;
+        public abstract void actOnPulse();
+
+        public boolean isConjunction() {
+            return this.type == '&';
         }
 
+    }
+
+    class Broadcaster extends Module {
+        Broadcaster(String line) {
+            super(line, NOOP);
+        }
+
+        @Override
+        public void actOnPulse() {
+            this.sendPulse(this.lastSignal);
+        }
     }
 
     class FlipFlop extends Module {
@@ -87,22 +117,30 @@ class Part1 {
         }
 
         @Override
-        public void receivePulse(PulseType pulseType, String nameOfSender) {
-            if (pulseType == PulseType.HIGH) {
+        public void actOnPulse() {
+            System.out.println("FlipFlop.actOnPulse() for signal " + this.lastSignal + " for " + this.name);
+            // Do nothing
+            if (this.lastSignal == PulseType.HIGH) {
                 return;
             }
-            if (pulseType == PulseType.LOW) {
-                this.isOn = !this.isOn;
-                this.sendPulse(this.isOn ? PulseType.HIGH : PulseType.LOW);
+            if (this.lastSignal == PulseType.LOW) {
+
+                // System.out.println("FlipFlop: " + this.name + " was " + this.isOn());
+                // this.status = !this.isOn();
+                this.status = !this.status;
+                // System.out.println("FlipFlop: " + this.name + " is now " + this.isOn());
+                // this.sendPulse(this.isOn() ? PulseType.HIGH : PulseType.LOW);
+                this.sendPulse(this.isOn() ? PulseType.HIGH : PulseType.LOW);
             } else {
-                System.err.println("Unknown pulse type: " + pulseType);
-                System.exit(1);
+                // System.err.println("Unknown pulse type: " + this.lastSignal);
+                // System.exit(1);
             }
         }
     }
 
     class Conjunction extends Module {
         Map<String, PulseType> inputSignals = new HashMap<String, PulseType>();
+        String nameOfLastSender;
 
         Conjunction(String line) {
             super(line, '&');
@@ -110,7 +148,7 @@ class Part1 {
 
         private boolean remembersHighForAll() {
             for (String name : this.inputSignals.keySet()) {
-                if (this.inputSignals.get(name) == PulseType.LOW) {
+                if (this.inputSignals.get(name) == PulseType.LOW && !name.equals(this.name)) {
                     return false;
                 }
             }
@@ -119,24 +157,22 @@ class Part1 {
 
         @Override
         public void receivePulse(PulseType pulseType, String nameOfSender) {
-            if (!inputSignals.containsKey(nameOfSender)) {
-                inputSignals.put(nameOfSender, PulseType.LOW);
+            super.receivePulse(pulseType, nameOfSender);
+            this.nameOfLastSender = nameOfSender;
+        }
+
+        @Override
+        public void actOnPulse() {
+            if (!inputSignals.containsKey(nameOfLastSender)) {
+                inputSignals.put(nameOfLastSender, PulseType.LOW);
             }
-            inputSignals.put(nameOfSender, pulseType);
+            inputSignals.put(nameOfLastSender, this.lastSignal);
 
             if (this.remembersHighForAll()) {
                 this.sendPulse(PulseType.LOW);
             } else {
                 this.sendPulse(PulseType.HIGH);
             }
-
-            this.lastSignal = pulseType;
-        }
-    }
-
-    class Broadcaster extends Module {
-        Broadcaster(String line) {
-            super(line, NOOP);
         }
     }
 
@@ -154,22 +190,38 @@ class Part1 {
             System.out.println("------------- Pressing button for " + i + " time");
             nLowPulses++;
             broadcaster.sendPulse(PulseType.LOW);
+            return;
         }
     }
 
     long solve(int n) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String line = br.readLine();
+        final List<String> moduleNames = new ArrayList<>();
+        final List<String> conjunctionNames = new ArrayList<>();
         while (line != null) {
             System.out.println(line);
             Module m = moduleFromLine(line);
             moduleMap.put(m.name, m);
+            moduleNames.add(m.name);
+            if (m.isConjunction()) {
+                conjunctionNames.add(m.name);
+            }
+
             line = br.readLine();
         }
         System.out.println("Made " + moduleMap.size() + " modules");
         // print names:
         for (String name : moduleMap.keySet()) {
             System.out.println(name);
+        }
+
+        // set defaults for all conjunctions:
+        for (String name : conjunctionNames) {
+            Conjunction c = (Conjunction) moduleMap.get(name);
+            for (String moduleName : moduleNames) {
+                c.inputSignals.put(moduleName, PulseType.LOW);
+            }
         }
 
         Module broadcaster = moduleMap.get("broadcaster");
