@@ -3,7 +3,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +14,7 @@ class Part1 {
     long nLowPulses = 0;
     long nHighPulses = 0;
     HashMap<String, Module> moduleMap = new HashMap<String, Module>();
-    // TODO: Bruk deque
-    List<String> queOfModuleNamesToAct = new ArrayList<String>();
+    Deque<String> queOfModuleNamesToAct = new LinkedList<String>();
 
     static protected enum PulseType {
         HIGH, LOW
@@ -26,8 +27,8 @@ class Part1 {
         char type = NOOP;
         protected boolean status = false;
 
-        List<PulseType> pulseQue = new ArrayList<PulseType>();
-        List<String> namesQue = new ArrayList<String>();
+        Deque<PulseType> pulseQue = new LinkedList<PulseType>();
+        Deque<String> namesQue = new LinkedList<String>();
         PulseType lastSignal = PulseType.LOW;
         String nameOfLastSender;
 
@@ -64,8 +65,8 @@ class Part1 {
         }
 
         public void actOnPulse() {
-            this.lastSignal = pulseQue.remove(0);
-            this.nameOfLastSender = namesQue.remove(0);
+            this.lastSignal = pulseQue.pop();
+            this.nameOfLastSender = namesQue.pop();
 
         }
 
@@ -146,7 +147,7 @@ class Part1 {
             nLowPulses++;
             broadcaster.sendPulse(PulseType.LOW);
             while (queOfModuleNamesToAct.size() > 0) {
-                String outboundConnectionName = queOfModuleNamesToAct.remove(0);
+                String outboundConnectionName = queOfModuleNamesToAct.pop();
                 Module m = moduleMap.get(outboundConnectionName);
                 if (m != null) {
                     m.actOnPulse();
@@ -194,7 +195,7 @@ class Part1 {
         final Part1 p = new Part1();
         try {
             final long result = p.solve(1000);
-            System.out.println("Part1: " + result);
+            System.out.println("Part 1: " + result);
         } catch (IOException e) {
             System.err.println("IO error: " + e.getMessage());
             e.printStackTrace();
