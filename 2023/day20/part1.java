@@ -24,17 +24,13 @@ class Part1 {
 
         String name;
         List<String> outboundConnectionNames;
-        char type = NOOP;
-        protected boolean status = false;
+        char type;
+        protected boolean isOn = false;
 
         Deque<PulseType> pulseQue = new LinkedList<PulseType>();
         Deque<String> namesQue = new LinkedList<String>();
-        PulseType lastSignal = PulseType.LOW;
+        PulseType lastSignal;
         String nameOfLastSender;
-
-        public boolean isOn() {
-            return status;
-        }
 
         Module(String line, char type) {
             this.type = type;
@@ -97,8 +93,8 @@ class Part1 {
         public void actOnPulse() {
             super.actOnPulse();
             if (this.lastSignal == PulseType.LOW) {
-                this.status = !this.status;
-                this.sendPulse(this.isOn() ? PulseType.HIGH : PulseType.LOW);
+                this.isOn = !this.isOn;
+                this.sendPulse(this.isOn ? PulseType.HIGH : PulseType.LOW);
             }
         }
     }
@@ -120,12 +116,6 @@ class Part1 {
         }
 
         @Override
-        public void receivePulse(PulseType pulseType, String nameOfSender) {
-            super.receivePulse(pulseType, nameOfSender);
-            this.nameOfLastSender = nameOfSender;
-        }
-
-        @Override
         public void actOnPulse() {
             super.actOnPulse();
             inputSignals.put(nameOfLastSender, this.lastSignal);
@@ -134,35 +124,20 @@ class Part1 {
     }
 
     Module moduleFromLine(String line) {
-        if (line.contains("%")) {
-            return new FlipFlop(line);
-        } else if (line.contains("&")) {
-            return new Conjunction(line);
+        switch (line.charAt(0)) {
+            case '%':
+                return new FlipFlop(line);
+            case '&':
+                return new Conjunction(line);
         }
         return new Broadcaster(line);
     }
 
-    void pressButtonNtimes(Module broadcaster, int n, int debugN) {
-        for (int i = 0; i < n; i++) {
-            nLowPulses++;
-            broadcaster.sendPulse(PulseType.LOW);
-            while (queOfModuleNamesToAct.size() > 0) {
-                String outboundConnectionName = queOfModuleNamesToAct.pop();
-                Module m = moduleMap.get(outboundConnectionName);
-                if (m != null) {
-                    m.actOnPulse();
-                }
-            }
-            if (debugN > 0 && i >= debugN)
-                return;
-        }
-    }
-
     long solve(int n) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String line = br.readLine();
         final List<String> moduleNames = new ArrayList<>();
         final List<String> conjunctionNames = new ArrayList<>();
+        String line = br.readLine();
         while (line != null) {
             Module m = moduleFromLine(line);
             moduleMap.put(m.name, m);
@@ -170,7 +145,6 @@ class Part1 {
             if (m.isConjunction()) {
                 conjunctionNames.add(m.name);
             }
-
             line = br.readLine();
         }
         for (String name : conjunctionNames) {
@@ -182,24 +156,23 @@ class Part1 {
                 }
             }
         }
-
         Module broadcaster = moduleMap.get("broadcaster");
-        pressButtonNtimes(broadcaster, n, -1);
-        System.out.println("nHighPulses: " + nHighPulses);
-        System.out.println("nLowPulses: " + nLowPulses);
-
+        for (int i = 0; i < n; i++) {
+            nLowPulses++;
+            broadcaster.sendPulse(PulseType.LOW);
+            while (queOfModuleNamesToAct.size() > 0) {
+                String outboundConnectionName = queOfModuleNamesToAct.pop();
+                Module m = moduleMap.get(outboundConnectionName);
+                if (m != null) {
+                    m.actOnPulse();
+                }
+            }
+        }
         return nHighPulses * nLowPulses;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         final Part1 p = new Part1();
-        try {
-            final long result = p.solve(1000);
-            System.out.println("Part 1: " + result);
-        } catch (IOException e) {
-            System.err.println("IO error: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }
+        System.out.println("Part 1: " + p.solve(1000));
     }
 }
