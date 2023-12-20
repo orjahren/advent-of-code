@@ -11,26 +11,22 @@ import java.util.Map;
 
 class Part1 {
     final static char NOOP = 'x';
-    long nLowPulses = 0;
-    long nHighPulses = 0;
-    HashMap<String, Module> moduleMap = new HashMap<String, Module>();
-    Deque<String> queOfModuleNamesToAct = new LinkedList<String>();
+    private long nLowPulses = 0;
+    private long nHighPulses = 0;
+    final private Map<String, Module> moduleMap = new HashMap<String, Module>();
+    final private Deque<String> queOfModuleNamesToAct = new LinkedList<String>();
 
-    static protected enum PulseType {
-        HIGH, LOW
-    }
+    abstract private class Module {
 
-    abstract protected class Module {
+        private String name;
+        private List<String> outboundConnectionNames;
+        public char type;
+        protected boolean isOn;
 
-        String name;
-        List<String> outboundConnectionNames;
-        char type;
-        protected boolean isOn = false;
-
-        Deque<PulseType> pulseQue = new LinkedList<PulseType>();
-        Deque<String> namesQue = new LinkedList<String>();
-        PulseType lastSignal;
-        String nameOfLastSender;
+        private Deque<Boolean> pulseQue = new LinkedList<Boolean>();
+        private Deque<String> namesQue = new LinkedList<String>();
+        protected boolean lastSignal;
+        protected String nameOfLastSender;
 
         Module(String line, char type) {
             this.type = type;
@@ -40,36 +36,31 @@ class Part1 {
             this.name = type == NOOP ? stem : stem.substring(1);
         }
 
-        public void sendPulse(PulseType pulseType) {
-            for (String outboundConnectionName : this.outboundConnectionNames) {
-                if (pulseType == PulseType.HIGH) {
+        public void sendPulse(Boolean pulseType) {
+            for (String outboundConnectionName : outboundConnectionNames) {
+                if (pulseType) {
                     nHighPulses++;
                 } else {
                     nLowPulses++;
                 }
-                Module m = moduleMap.get(outboundConnectionName);
-                if (m != null && !outboundConnectionName.equals("output")) {
+                if (moduleMap.containsKey(outboundConnectionName)) {
+                    Module m = moduleMap.get(outboundConnectionName);
                     queOfModuleNamesToAct.add(m.name);
-                    m.receivePulse(pulseType, this.name);
+                    m.receivePulse(pulseType, name);
                 }
             }
         }
 
-        public void receivePulse(PulseType pulseType, String nameOfSender) {
+        private void receivePulse(boolean pulseType, String nameOfSender) {
             this.pulseQue.add(pulseType);
             this.namesQue.add(nameOfSender);
         }
 
-        public void actOnPulse() {
+        protected void actOnPulse() {
             this.lastSignal = pulseQue.pop();
             this.nameOfLastSender = namesQue.pop();
 
         }
-
-        public boolean isConjunction() {
-            return this.type == '&';
-        }
-
     }
 
     class Broadcaster extends Module {
@@ -80,7 +71,7 @@ class Part1 {
         @Override
         public void actOnPulse() {
             super.actOnPulse();
-            this.sendPulse(this.lastSignal);
+            this.sendPulse(lastSignal);
         }
     }
 
@@ -92,15 +83,15 @@ class Part1 {
         @Override
         public void actOnPulse() {
             super.actOnPulse();
-            if (this.lastSignal == PulseType.LOW) {
+            if (!this.lastSignal) {
                 this.isOn = !this.isOn;
-                this.sendPulse(this.isOn ? PulseType.HIGH : PulseType.LOW);
+                this.sendPulse(this.isOn);
             }
         }
     }
 
     class Conjunction extends Module {
-        Map<String, PulseType> inputSignals = new HashMap<String, PulseType>();
+        Map<String, Boolean> inputSignals = new HashMap<String, Boolean>();
 
         Conjunction(String line) {
             super(line, '&');
@@ -108,7 +99,7 @@ class Part1 {
 
         private boolean remembersHighForAll() {
             for (String name : this.inputSignals.keySet()) {
-                if (this.inputSignals.get(name) == PulseType.LOW && !name.equals(this.name)) {
+                if (!this.inputSignals.get(name)) {
                     return false;
                 }
             }
@@ -118,8 +109,8 @@ class Part1 {
         @Override
         public void actOnPulse() {
             super.actOnPulse();
-            inputSignals.put(nameOfLastSender, this.lastSignal);
-            this.sendPulse(remembersHighForAll() ? PulseType.LOW : PulseType.HIGH);
+            inputSignals.put(nameOfLastSender, lastSignal);
+            sendPulse(!remembersHighForAll());
         }
     }
 
@@ -139,27 +130,27 @@ class Part1 {
         final List<String> conjunctionNames = new ArrayList<>();
         String line = br.readLine();
         while (line != null) {
-            Module m = moduleFromLine(line);
+            final Module m = moduleFromLine(line);
             moduleMap.put(m.name, m);
             moduleNames.add(m.name);
-            if (m.isConjunction()) {
+            if (m.type == '&') {
                 conjunctionNames.add(m.name);
             }
             line = br.readLine();
         }
         for (String name : conjunctionNames) {
-            Conjunction c = (Conjunction) moduleMap.get(name);
+            final Conjunction c = (Conjunction) moduleMap.get(name);
             for (String moduleName : moduleNames) {
-                Module candMod = moduleMap.get(moduleName);
+                final Module candMod = moduleMap.get(moduleName);
                 if (candMod.outboundConnectionNames.contains(name)) {
-                    c.inputSignals.put(moduleName, PulseType.LOW);
+                    c.inputSignals.put(moduleName, false);
                 }
             }
         }
-        Module broadcaster = moduleMap.get("broadcaster");
+        final Module broadcaster = moduleMap.get("broadcaster");
         for (int i = 0; i < n; i++) {
             nLowPulses++;
-            broadcaster.sendPulse(PulseType.LOW);
+            broadcaster.sendPulse(false);
             while (queOfModuleNamesToAct.size() > 0) {
                 String outboundConnectionName = queOfModuleNamesToAct.pop();
                 Module m = moduleMap.get(outboundConnectionName);
