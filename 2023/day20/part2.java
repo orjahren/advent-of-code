@@ -7,13 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Part1 {
+class Part2 {
     final static char NOOP = 'x';
     long nLowPulses = 0;
     long nHighPulses = 0;
     HashMap<String, Module> moduleMap = new HashMap<String, Module>();
     // TODO: Bruk deque
     List<String> queOfModuleNamesToAct = new ArrayList<String>();
+    boolean rxHasPulse = false;
 
     static protected enum PulseType {
         HIGH, LOW
@@ -51,8 +52,7 @@ class Part1 {
                     nLowPulses++;
                 }
                 Module m = moduleMap.get(outboundConnectionName);
-                String debugName = m != null ? m.name : "output";
-                System.out.println(this.name + " -" + pulseType + "-> " + debugName);
+                // System.out.println("Sending pulse to: " + outboundConnectionName);
                 if (outboundConnectionName.equals("output")) {
                     return;
                 }
@@ -69,6 +69,9 @@ class Part1 {
         }
 
         public void actOnPulse() {
+            if (this.name.equals("rx")) {
+                rxHasPulse = true;
+            }
             this.lastSignal = pulseQue.remove(0);
             this.nameOfLastSender = namesQue.remove(0);
 
@@ -146,30 +149,6 @@ class Part1 {
         return new Broadcaster(line);
     }
 
-    void pressButtonNtimes(Module broadcaster, int n, int debugN) {
-        for (int i = 0; i < n; i++) {
-            System.out.println("------------- Pressing button for " + i + " time");
-            nLowPulses++;
-            broadcaster.sendPulse(PulseType.LOW);
-            while (queOfModuleNamesToAct.size() > 0) {
-                // System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
-                String outboundConnectionName = queOfModuleNamesToAct.remove(0);
-                Module m = moduleMap.get(outboundConnectionName);
-
-                if (m == null) {
-                    System.err.println("No module found with name: " + outboundConnectionName);
-
-                    // System.exit(1);
-                }
-                if (m != null) {
-                    m.actOnPulse();
-                }
-            }
-            if (debugN > 0 && i >= debugN)
-                return;
-        }
-    }
-
     long solve(int n) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String line = br.readLine();
@@ -210,18 +189,36 @@ class Part1 {
             System.exit(1);
         }
         // pressButtonNtimes(broadcaster, n, 4);
-        pressButtonNtimes(broadcaster, n, -1);
+        long part2 = 0;
+        while (!rxHasPulse) {
+            part2++;
+            nLowPulses++;
+            broadcaster.sendPulse(PulseType.LOW);
+            while (queOfModuleNamesToAct.size() > 0) {
+                // System.out.println("\t\t\tBroadcasting pulse to: " + outboundConnectionName);
+                String outboundConnectionName = queOfModuleNamesToAct.remove(0);
+                Module m = moduleMap.get(outboundConnectionName);
+
+                if (m == null) {
+                    System.err.println("No module found with name: " + outboundConnectionName);
+
+                    // System.exit(1);
+                }
+                if (m != null) {
+                    m.actOnPulse();
+                }
+            }
+        }
         System.out.println("nHighPulses: " + nHighPulses);
         System.out.println("nLowPulses: " + nLowPulses);
-
-        return nHighPulses * nLowPulses;
+        return part2;
     }
 
     public static void main(String[] args) {
-        final Part1 p = new Part1();
+        final Part2 p = new Part2();
         try {
             final long result = p.solve(1000);
-            System.out.println("Part1: " + result);
+            System.out.println("Part 2: " + result);
         } catch (IOException e) {
             System.err.println("IO error: " + e.getMessage());
             e.printStackTrace();
@@ -229,4 +226,3 @@ class Part1 {
         }
     }
 }
-// First res: 829159479. Too high.
