@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 )
 
 type Pos struct {
@@ -16,7 +17,7 @@ func posIsOpen(pos Pos, grid [][]rune) bool {
 		return false
 	}
 	//fmt.Println(pos, grid[pos.x][pos.y])
-	return grid[pos.x][pos.y] == '.'
+	return grid[pos.x][pos.y] != '#'
 }
 
 func charIsArrow(c rune) bool {
@@ -27,13 +28,28 @@ func isSamePos(a, b Pos) bool {
 	return a.x == b.x && a.y == b.y
 }
 
-func travrseRec(currPath []Pos, grid [][]rune, pos, target Pos, ch chan int) {
+func hasVisitedThisPos(pos Pos, path []Pos) bool {
+	for _, p := range path {
+		if isSamePos(p, pos) {
+			return true
+		}
+	}
+	return false
+}
+
+func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target Pos, ch chan int) {
+	fmt.Println("traversing", pos)
+	wg.Add(1)
+	defer wg.Done()
 	if isSamePos(pos, target) {
+		println("found target!!")
 		ch <- len(currPath)
+		//wg.Done()
 		return
 	}
 
 	if charIsArrow(grid[pos.x][pos.y]) {
+		fmt.Print("arrow: ", pos, " ", string(grid[pos.x][pos.y]), " -> ")
 		// we are at an arrow
 		currPath = append(currPath, pos)
 		switch grid[pos.x][pos.y] {
@@ -46,26 +62,46 @@ func travrseRec(currPath []Pos, grid [][]rune, pos, target Pos, ch chan int) {
 		case '<':
 			pos.x--
 		}
-		go travrseRec(currPath, grid, pos, target, ch)
+		fmt.Println(pos)
+		newPath := make([]Pos, len(currPath))
+		copy(newPath, currPath)
+		travrseRec(wg, newPath, grid, pos, target, ch)
 	} else {
 		// we are at a junction
 		currPath = append(currPath, pos)
 		// go all ways except the way we came from
 		for _, newPos := range []Pos{{pos.x, pos.y - 1}, {pos.x + 1, pos.y}, {pos.x, pos.y + 1}, {pos.x - 1, pos.y}} {
-			if !isSamePos(newPos, currPath[len(currPath)-1]) {
+			// if !isSamePos(newPos, currPath[len(currPath)-1]) {
+			if !hasVisitedThisPos(newPos, currPath) {
+				fmt.Println("junction: ", pos, " -> ", newPos)
+				if isSamePos(newPos, target) {
+					println("found target!!")
+					ch <- len(currPath)
+					//wg.Done()
+					return
+				}
 				if posIsOpen(newPos, grid) {
-					go travrseRec(currPath, grid, newPos, target, ch)
+					fmt.Println("junction: ", pos, " -> ", newPos, " is open")
+					newPath := make([]Pos, len(currPath))
+					copy(newPath, currPath)
+					travrseRec(wg, newPath, grid, newPos, target, ch)
+				} else {
+					//fmt.Println("junction: ", pos, " -> ", newPos, " is closed because newPos is ", string(grid[newPos.x][newPos.y]))
 				}
 			}
 		}
 	}
+	//wg.Done()
 }
 
-func traverse(grid [][]rune, startPos, endPos Pos, ch chan int) {
+func traverse(wg *sync.WaitGroup, grid [][]rune, startPos, endPos Pos, ch chan int) {
 	currPath := make([]Pos, 0)
 	currPath = append(currPath, startPos)
-	travrseRec(currPath, grid, startPos, endPos, ch)
+	wg.Add(1)
+	travrseRec(wg, currPath, grid, startPos, endPos, ch)
 	ch <- -1
+	wg.Done()
+	//close(ch)
 }
 
 func main() {
@@ -97,11 +133,14 @@ func main() {
 	fmt.Println(grid)
 
 	results := make([]int, 0)
-	traverse(grid, startPos, endPos, part1Ch)
+	var wg sync.WaitGroup
+	go traverse(&wg, grid, startPos, endPos, part1Ch)
+	wg.Wait()
 	// while ch is open
 	for {
 		select {
 		case res := <-part1Ch:
+			println("received result: ", res)
 			if res != -1 {
 				results = append(results, res)
 			} else {
@@ -113,5 +152,6 @@ func main() {
 		}
 	}
 	// print results
+	fmt.Println("All results:")
 	fmt.Println(results)
 }
