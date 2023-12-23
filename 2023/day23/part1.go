@@ -37,13 +37,15 @@ func hasVisitedThisPos(pos Pos, path []Pos) bool {
 	return false
 }
 
-func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target Pos, ch chan int) {
+func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target Pos, ch chan int, pathCh chan []Pos) {
 	fmt.Println("traversing", pos)
 	wg.Add(1)
 	defer wg.Done()
+	currPath = append(currPath, pos)
 	if isSamePos(pos, target) {
-		println("found target!!")
+		println("\t\t\t found target!!")
 		ch <- len(currPath)
+		pathCh <- currPath
 		//wg.Done()
 		return
 	}
@@ -51,7 +53,6 @@ func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target P
 	if charIsArrow(grid[pos.x][pos.y]) {
 		fmt.Print("arrow: ", pos, " ", string(grid[pos.x][pos.y]), " -> ")
 		// we are at an arrow
-		currPath = append(currPath, pos)
 		switch grid[pos.x][pos.y] {
 		case '^':
 			pos.y--
@@ -65,43 +66,63 @@ func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target P
 		fmt.Println(pos)
 		newPath := make([]Pos, len(currPath))
 		copy(newPath, currPath)
-		travrseRec(wg, newPath, grid, pos, target, ch)
+		travrseRec(wg, newPath, grid, pos, target, ch, pathCh)
 	} else {
 		// we are at a junction
-		currPath = append(currPath, pos)
 		// go all ways except the way we came from
 		for _, newPos := range []Pos{{pos.x, pos.y - 1}, {pos.x + 1, pos.y}, {pos.x, pos.y + 1}, {pos.x - 1, pos.y}} {
-			// if !isSamePos(newPos, currPath[len(currPath)-1]) {
+			fmt.Println("junction: ", pos, " -> ", newPos)
+			if isSamePos(newPos, target) {
+				println("\t\t\t hack: found target!!")
+				ch <- len(currPath) + 1
+				currPath = append(currPath, newPos)
+				pathCh <- currPath
+				//wg.Done()
+				return
+			}
 			if !hasVisitedThisPos(newPos, currPath) {
-				fmt.Println("junction: ", pos, " -> ", newPos)
-				if isSamePos(newPos, target) {
-					println("found target!!")
-					ch <- len(currPath)
-					//wg.Done()
-					return
-				}
 				if posIsOpen(newPos, grid) {
 					fmt.Println("junction: ", pos, " -> ", newPos, " is open")
 					newPath := make([]Pos, len(currPath))
 					copy(newPath, currPath)
-					travrseRec(wg, newPath, grid, newPos, target, ch)
+					travrseRec(wg, newPath, grid, newPos, target, ch, pathCh)
 				} else {
 					//fmt.Println("junction: ", pos, " -> ", newPos, " is closed because newPos is ", string(grid[newPos.x][newPos.y]))
 				}
 			}
 		}
 	}
-	//wg.Done()
 }
 
-func traverse(wg *sync.WaitGroup, grid [][]rune, startPos, endPos Pos, ch chan int) {
+func traverse(wg *sync.WaitGroup, grid [][]rune, startPos, endPos Pos, ch chan int, pathCh chan []Pos) {
 	currPath := make([]Pos, 0)
-	currPath = append(currPath, startPos)
 	wg.Add(1)
-	travrseRec(wg, currPath, grid, startPos, endPos, ch)
+	travrseRec(wg, currPath, grid, startPos, endPos, ch, pathCh)
 	ch <- -1
 	wg.Done()
 	//close(ch)
+}
+
+func getGridWithPath(grid [][]rune, path []Pos) [][]rune {
+	newGrid := make([][]rune, len(grid))
+	for i, line := range grid {
+		newGrid[i] = make([]rune, len(line))
+		copy(newGrid[i], line)
+	}
+	for _, pos := range path {
+		newGrid[pos.x][pos.y] = 'X'
+	}
+	return newGrid
+
+}
+
+func drawGrid(grid [][]rune) {
+	for _, line := range grid {
+		for _, c := range line {
+			print(string(c))
+		}
+		println()
+	}
 }
 
 func main() {
@@ -133,8 +154,11 @@ func main() {
 	fmt.Println(grid)
 
 	results := make([]int, 0)
+	allPaths := make([][]Pos, 0)
+	pathCh := make(chan []Pos)
+
 	var wg sync.WaitGroup
-	go traverse(&wg, grid, startPos, endPos, part1Ch)
+	go traverse(&wg, grid, startPos, endPos, part1Ch, pathCh)
 	wg.Wait()
 	// while ch is open
 	for {
@@ -143,6 +167,8 @@ func main() {
 			println("received result: ", res)
 			if res != -1 {
 				results = append(results, res)
+				path := <-pathCh
+				allPaths = append(allPaths, path)
 			} else {
 				part1Ch = nil
 			}
@@ -154,4 +180,9 @@ func main() {
 	// print results
 	fmt.Println("All results:")
 	fmt.Println(results)
+
+	pathToShow := allPaths[0]
+	println("\n")
+	println("A path of length ", len(pathToShow), " is:")
+	drawGrid(getGridWithPath(grid, pathToShow))
 }
