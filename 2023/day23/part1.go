@@ -21,6 +21,8 @@ func posIsOpen(pos Pos, grid [][]rune) bool {
 }
 
 func charIsArrow(c rune) bool {
+	//return c == '^' || c == '>' || c == 'v' || c == '<'
+	//return c == '^' || c == '>' || c == 'V' || c == '<'
 	return c == '^' || c == '>' || c == 'v' || c == '<'
 }
 
@@ -40,8 +42,7 @@ func hasVisitedThisPos(pos Pos, path []Pos) bool {
 func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target Pos, ch chan int, pathCh chan []Pos) {
 	fmt.Println("traversing", pos)
 	wg.Add(1)
-	defer wg.Done()
-	currPath = append(currPath, pos)
+	//defer wg.Done()
 	if isSamePos(pos, target) {
 		println("\t\t\t found target!!")
 		ch <- len(currPath)
@@ -49,6 +50,11 @@ func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target P
 		//wg.Done()
 		return
 	}
+	if hasVisitedThisPos(pos, currPath) {
+		fmt.Println("already visited ", pos)
+		return
+	}
+	currPath = append(currPath, pos)
 
 	if charIsArrow(grid[pos.x][pos.y]) {
 		fmt.Print("arrow: ", pos, " ", string(grid[pos.x][pos.y]), " -> ")
@@ -66,26 +72,35 @@ func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target P
 		fmt.Println(pos)
 		newPath := make([]Pos, len(currPath))
 		copy(newPath, currPath)
-		travrseRec(wg, newPath, grid, pos, target, ch, pathCh)
+		wg.Add(1)
+		go travrseRec(wg, newPath, grid, pos, target, ch, pathCh)
+		wg.Done()
 	} else {
 		// we are at a junction
 		// go all ways except the way we came from
 		for _, newPos := range []Pos{{pos.x, pos.y - 1}, {pos.x + 1, pos.y}, {pos.x, pos.y + 1}, {pos.x - 1, pos.y}} {
 			fmt.Println("junction: ", pos, " -> ", newPos)
-			if isSamePos(newPos, target) {
-				println("\t\t\t hack: found target!!")
-				ch <- len(currPath) + 1
-				currPath = append(currPath, newPos)
-				pathCh <- currPath
-				//wg.Done()
-				return
-			}
+			/*
+				if isSamePos(newPos, target) {
+
+					println("\t\t\t hack: found target!!")
+					ch <- len(currPath) + 1
+					currPath = append(currPath, newPos)
+					pathCh <- currPath
+					//wg.Done()
+					return
+
+				}
+			*/
 			if !hasVisitedThisPos(newPos, currPath) {
 				if posIsOpen(newPos, grid) {
 					fmt.Println("junction: ", pos, " -> ", newPos, " is open")
 					newPath := make([]Pos, len(currPath))
 					copy(newPath, currPath)
-					travrseRec(wg, newPath, grid, newPos, target, ch, pathCh)
+					wg.Add(1)
+					go travrseRec(wg, newPath, grid, newPos, target, ch, pathCh)
+					wg.Done()
+					return
 				} else {
 					//fmt.Println("junction: ", pos, " -> ", newPos, " is closed because newPos is ", string(grid[newPos.x][newPos.y]))
 				}
@@ -96,10 +111,13 @@ func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target P
 
 func traverse(wg *sync.WaitGroup, grid [][]rune, startPos, endPos Pos, ch chan int, pathCh chan []Pos) {
 	currPath := make([]Pos, 0)
-	wg.Add(1)
+	fmt.Println("waiting for traverse to finish")
 	travrseRec(wg, currPath, grid, startPos, endPos, ch, pathCh)
-	ch <- -1
-	wg.Done()
+	wg.Wait()
+	fmt.Println("traverse finished")
+	close(pathCh)
+	close(ch)
+	//ch <- -1
 	//close(ch)
 }
 
@@ -110,7 +128,8 @@ func getGridWithPath(grid [][]rune, path []Pos) [][]rune {
 		copy(newGrid[i], line)
 	}
 	for _, pos := range path {
-		newGrid[pos.x][pos.y] = 'X'
+		//newGrid[pos.x][pos.y] = 'O'
+		newGrid[pos.y][pos.x] = 'O'
 	}
 	return newGrid
 
@@ -138,8 +157,10 @@ func main() {
 	}
 	startPos := Pos{1, 0}
 	// endPos is the position of the last character in the last line
-	endPos := Pos{len(lines[0]) - 1, len(lines) - 1}
+	endPos := Pos{len(lines[0]) - 2, len(lines) - 1}
 	println(lines[len(lines)-1])
+	println(len(lines[len(lines)-1]))
+	println(lines[len(lines)-1][len(lines[0])-2])
 	fmt.Println(startPos, endPos)
 
 	part1Ch := make(chan int)
@@ -158,24 +179,13 @@ func main() {
 	pathCh := make(chan []Pos)
 
 	var wg sync.WaitGroup
-	go traverse(&wg, grid, startPos, endPos, part1Ch, pathCh)
-	wg.Wait()
+	traverse(&wg, grid, startPos, endPos, part1Ch, pathCh)
 	// while ch is open
-	for {
-		select {
-		case res := <-part1Ch:
-			println("received result: ", res)
-			if res != -1 {
-				results = append(results, res)
-				path := <-pathCh
-				allPaths = append(allPaths, path)
-			} else {
-				part1Ch = nil
-			}
-		}
-		if part1Ch == nil {
-			break
-		}
+	for res := range part1Ch {
+		println("received result: ", res)
+		results = append(results, res)
+		path := <-pathCh
+		allPaths = append(allPaths, path)
 	}
 	// print results
 	fmt.Println("All results:")
