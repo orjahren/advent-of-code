@@ -132,7 +132,6 @@ func getLines(fileName string) []string {
 	defer file.Close()
 	reader := bufio.NewReader(file)
 	line, _ := reader.ReadString('\n')
-	println(line)
 	lines := make([]string, 0)
 	for line != "" {
 		line = strings.Trim(line, "\n")
@@ -144,12 +143,12 @@ func getLines(fileName string) []string {
 
 func main() {
 	lines := getLines("example")
-	startPos := Pos{1, 0}
+	startPos := Pos{0, 1}
 	// endPos is the position of the last character in the last line
-	endPos := Pos{len(lines[0]) - 2, len(lines) - 1}
+	//endPos := Pos{len(lines[0]) - 2, len(lines) - 1}
+	endPos := Pos{len(lines) - 1, len(lines[0]) - 2}
+	fmt.Println("Last liene:")
 	println(lines[len(lines)-1])
-	println(len(lines[len(lines)-1]))
-	println(lines[len(lines)-1][len(lines[0])-2])
 	fmt.Println(startPos, endPos)
 
 	part1Ch := make(chan int)
@@ -161,6 +160,9 @@ func main() {
 			grid[i][j] = c
 		}
 	}
+	// print chars in grid
+	fmt.Println(grid[startPos.x][startPos.y])
+	fmt.Println(grid[endPos.x][endPos.y])
 	fmt.Println(grid)
 
 	results := make([]int, 0)
