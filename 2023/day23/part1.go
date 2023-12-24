@@ -21,8 +21,6 @@ func posIsOpen(pos Pos, grid [][]rune) bool {
 }
 
 func charIsArrow(c rune) bool {
-	//return c == '^' || c == '>' || c == 'v' || c == '<'
-	//return c == '^' || c == '>' || c == 'V' || c == '<'
 	return c == '^' || c == '>' || c == 'v' || c == '<'
 }
 
@@ -72,38 +70,27 @@ func travrseRec(wg *sync.WaitGroup, currPath []Pos, grid [][]rune, pos, target P
 		fmt.Println(pos)
 		newPath := make([]Pos, len(currPath))
 		copy(newPath, currPath)
-		wg.Add(1)
-		go travrseRec(wg, newPath, grid, pos, target, ch, pathCh)
-		wg.Done()
+		travrseRec(wg, newPath, grid, pos, target, ch, pathCh)
 	} else {
 		// we are at a junction
 		// go all ways except the way we came from
 		for _, newPos := range []Pos{{pos.x, pos.y - 1}, {pos.x + 1, pos.y}, {pos.x, pos.y + 1}, {pos.x - 1, pos.y}} {
 			fmt.Println("junction: ", pos, " -> ", newPos)
-			/*
-				if isSamePos(newPos, target) {
+			if isSamePos(newPos, target) {
 
+				/*
 					println("\t\t\t hack: found target!!")
 					ch <- len(currPath) + 1
-					currPath = append(currPath, newPos)
-					pathCh <- currPath
+					pathCh <- append(currPath, newPos)
 					//wg.Done()
 					return
+				*/
 
-				}
-			*/
-			if !hasVisitedThisPos(newPos, currPath) {
-				if posIsOpen(newPos, grid) {
-					fmt.Println("junction: ", pos, " -> ", newPos, " is open")
-					newPath := make([]Pos, len(currPath))
-					copy(newPath, currPath)
-					wg.Add(1)
-					go travrseRec(wg, newPath, grid, newPos, target, ch, pathCh)
-					wg.Done()
-					return
-				} else {
-					//fmt.Println("junction: ", pos, " -> ", newPos, " is closed because newPos is ", string(grid[newPos.x][newPos.y]))
-				}
+			}
+			if posIsOpen(newPos, grid) {
+				fmt.Println("junction: ", pos, " -> ", newPos, " is open")
+				travrseRec(wg, currPath, grid, newPos, target, ch, pathCh)
+				//return
 			}
 		}
 	}
@@ -113,12 +100,9 @@ func traverse(wg *sync.WaitGroup, grid [][]rune, startPos, endPos Pos, ch chan i
 	currPath := make([]Pos, 0)
 	fmt.Println("waiting for traverse to finish")
 	travrseRec(wg, currPath, grid, startPos, endPos, ch, pathCh)
-	wg.Wait()
 	fmt.Println("traverse finished")
 	close(pathCh)
 	close(ch)
-	//ch <- -1
-	//close(ch)
 }
 
 func getGridWithPath(grid [][]rune, path []Pos) [][]rune {
@@ -128,7 +112,6 @@ func getGridWithPath(grid [][]rune, path []Pos) [][]rune {
 		copy(newGrid[i], line)
 	}
 	for _, pos := range path {
-		//newGrid[pos.x][pos.y] = 'O'
 		newGrid[pos.y][pos.x] = 'O'
 	}
 	return newGrid
@@ -144,8 +127,9 @@ func drawGrid(grid [][]rune) {
 	}
 }
 
-func main() {
-	file, _ := os.Open("example")
+func getLines(fileName string) []string {
+	file, _ := os.Open(fileName)
+	defer file.Close()
 	reader := bufio.NewReader(file)
 	line, _ := reader.ReadString('\n')
 	println(line)
@@ -155,6 +139,11 @@ func main() {
 		lines = append(lines, line)
 		line, _ = reader.ReadString('\n')
 	}
+	return lines
+}
+
+func main() {
+	lines := getLines("example")
 	startPos := Pos{1, 0}
 	// endPos is the position of the last character in the last line
 	endPos := Pos{len(lines[0]) - 2, len(lines) - 1}
@@ -178,21 +167,35 @@ func main() {
 	allPaths := make([][]Pos, 0)
 	pathCh := make(chan []Pos)
 
+	hackCh := make(chan int)
 	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		println("starter anonym venting ")
+		<-hackCh
+		println(" anonym venting er ferdig")
+		for res := range part1Ch {
+			println("received result: ", res)
+			results = append(results, res)
+			path := <-pathCh
+			allPaths = append(allPaths, path)
+		}
+		fmt.Println("part1Ch is closed")
+		hackCh <- 1
+	}()
 	traverse(&wg, grid, startPos, endPos, part1Ch, pathCh)
+	hackCh <- 1
+	fmt.Println("traverse har returnert")
+	<-hackCh
 	// while ch is open
-	for res := range part1Ch {
-		println("received result: ", res)
-		results = append(results, res)
-		path := <-pathCh
-		allPaths = append(allPaths, path)
-	}
 	// print results
 	fmt.Println("All results:")
 	fmt.Println(results)
 
-	pathToShow := allPaths[0]
-	println("\n")
-	println("A path of length ", len(pathToShow), " is:")
-	drawGrid(getGridWithPath(grid, pathToShow))
+	if len(results) > 0 {
+		pathToShow := allPaths[0]
+		println("\n")
+		println("A path of length ", len(pathToShow), " is:")
+		drawGrid(getGridWithPath(grid, pathToShow))
+	}
 }
