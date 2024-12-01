@@ -10,7 +10,10 @@ Focus: trying to use C, Go and Rust.
 
 ## 2023
 
+<details>
+<summary>
 Focus: Haskell.
+</summary>
 
 In practice a lot of C++ and Go because of skill issues.
 
@@ -62,3 +65,5 @@ Only completed part 1.
 ### Day 9
 
 - [C#](./2023/day09/both/Program.cs)
+
+</deatils>
