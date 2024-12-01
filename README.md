@@ -67,3 +67,5 @@ Only completed part 1.
 - [C#](./2023/day09/both/Program.cs)
 
 </deatils>
+
+## 2024
