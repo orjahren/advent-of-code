@@ -9,22 +9,36 @@ import (
 	"strings"
 )
 
+func getIntSliceWithoutIdx(arr []int, idx int) []int {
+	ret := make([]int, len(arr)-1)
+	pos := 0
+	for i := range arr {
+		if i != idx {
+			ret[pos] = arr[i]
+			pos++
+		}
+	}
+	return ret
+}
+
 func diffOk(a, b int) bool {
 	diff := math.Abs(float64(a - b))
 	return diff >= 1 && diff <= 3
 }
 
 func diffsAreOk(report []int) bool {
-	diffStatus := true
 	for i := range report {
 		if (i + 1) >= len(report) {
 			break
 		}
 		a := report[i]
 		b := report[i+1]
-		diffStatus = diffStatus && diffOk(a, b)
+
+		if !diffOk(a, b) {
+			return false
+		}
 	}
-	return diffStatus
+	return true
 }
 
 func allSameDirection(report []int) bool {
@@ -38,7 +52,6 @@ func allSameDirection(report []int) bool {
 			}
 		}
 		return true
-
 	} else {
 		for i := range report {
 			if (i + 1) >= len(report) {
@@ -57,55 +70,34 @@ func reportIsSafe(report []int) bool {
 	return diffsAreOk(report) && allSameDirection(report)
 }
 
-func getScoreP1(report string, ch chan int) {
+func reportToIntSlice(report string) []int {
 	spl := strings.Split(report, " ")
 	reportInts := make([]int, len(spl))
 	for i := range reportInts {
 		reportInts[i], _ = strconv.Atoi(string(spl[i]))
 	}
-	if reportIsSafe(reportInts) {
-		ch <- 1
-	} else {
-		ch <- 0
-	}
+	return reportInts
 }
 
-func getIntSliceWithoutIdx(arr []int, idx int) []int {
-	ret := make([]int, len(arr)-1)
-	pos := 0
-	for i := range arr {
-		if i != idx {
-			ret[pos] = arr[i]
-			pos++
-		}
-	}
-	return ret
-}
-
-func getScoreP2(report string, ch chan int) {
-	spl := strings.Split(report, " ")
-	reportInts := make([]int, len(spl))
-	for i := range reportInts {
-		reportInts[i], _ = strconv.Atoi(string(spl[i]))
-	}
-	if reportIsSafe(reportInts) {
-		ch <- 1
-	} else {
-		// Pro gamer move time
-		for i := range reportInts {
-			cand := getIntSliceWithoutIdx(reportInts, i)
-			if reportIsSafe(cand) {
-				ch <- 1
-				return
-			}
-		}
-		ch <- 0
-	}
-}
 func part2(reports []string) int {
 	ch := make(chan int)
 	for _, report := range reports {
-		go getScoreP2(report, ch)
+		go func() {
+			reportInts := reportToIntSlice(report)
+			if reportIsSafe(reportInts) {
+				ch <- 1
+			} else {
+				// Pro gamer move time
+				for i := range reportInts {
+					cand := getIntSliceWithoutIdx(reportInts, i)
+					if reportIsSafe(cand) {
+						ch <- 1
+						return
+					}
+				}
+				ch <- 0
+			}
+		}()
 	}
 	res := 0
 	for range reports {
@@ -117,7 +109,13 @@ func part2(reports []string) int {
 func part1(reports []string) int {
 	ch := make(chan int)
 	for _, report := range reports {
-		go getScoreP1(report, ch)
+		go func() {
+			if reportIsSafe(reportToIntSlice((report))) {
+				ch <- 1
+			} else {
+				ch <- 0
+			}
+		}()
 	}
 	res := 0
 	for range reports {
