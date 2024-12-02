@@ -60,7 +60,12 @@ func allSameDirection(report []int) bool {
 	}
 }
 
-func getScore(report string, ch chan int) {
+func reportIsSafe(report []int) bool {
+	// TODO: Kan kjøre disse paralellt
+	return diffsAreOk(report) && allSameDirection(report)
+}
+
+func getScoreP1(report string, ch chan int) {
 	println("Getting score for ", report)
 	spl := strings.Split(report, " ")
 	reportInts := make([]int, len(spl))
@@ -68,8 +73,7 @@ func getScore(report string, ch chan int) {
 		reportInts[i], _ = strconv.Atoi(string(spl[i]))
 	}
 	fmt.Println(reportInts)
-	// TODO: Kan kjøre disse paralellt
-	if diffsAreOk(reportInts) && allSameDirection(reportInts) {
+	if reportIsSafe(reportInts) {
 		println("\t\t", report, " ER SAFE")
 		ch <- 1
 	} else {
@@ -78,12 +82,67 @@ func getScore(report string, ch chan int) {
 	}
 }
 
+func getIntSliceWithoutIdx(arr []int, idx int) []int {
+	fmt.Println("SKAL SLICE ", idx, "FRA ", arr)
+	ret := make([]int, len(arr)-1)
+	pos := 0
+	for i := range arr {
+		if i != idx {
+			ret[pos] = arr[i]
+			pos++
+		}
+
+	}
+	return ret
+}
+
+func getScoreP2(report string, ch chan int) {
+	println("Getting score for ", report)
+	spl := strings.Split(report, " ")
+	reportInts := make([]int, len(spl))
+	for i := range reportInts {
+		reportInts[i], _ = strconv.Atoi(string(spl[i]))
+	}
+	fmt.Println(reportInts)
+	if reportIsSafe(reportInts) {
+		println("\t\t", report, " ER SAFE")
+		ch <- 1
+	} else {
+		println("\t\t", report, " ER UNSAFE i original state")
+		// Pro gamer move time
+		println("Brute forcer...")
+		for i := range reportInts {
+			cand := getIntSliceWithoutIdx(reportInts, i)
+			if reportIsSafe(cand) {
+				ch <- 1
+				return
+			}
+		}
+
+		ch <- 0
+	}
+}
+func part2(reports []string) int {
+	ch := make(chan int)
+
+	for _, report := range reports {
+		println(report)
+		go getScoreP2(report, ch)
+	}
+	res := 0
+	for range reports {
+		res += <-ch
+	}
+
+	return res
+}
+
 func part1(reports []string) int {
 	ch := make(chan int)
 
 	for _, report := range reports {
 		println(report)
-		go getScore(report, ch)
+		go getScoreP1(report, ch)
 	}
 	res := 0
 	for range reports {
@@ -110,4 +169,6 @@ func main() {
 
 	p1 := part1(reports)
 	fmt.Println("Part 1:", p1)
+	p2 := part2(reports)
+	fmt.Println("Part 2:", p2)
 }
