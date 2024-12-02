@@ -134,8 +134,18 @@ func main() {
 			reports = append(reports, line)
 		}
 	}
-	p1 := part1(reports)
+	ch := make(chan int)
+	var p1, p2 int
+	go func() {
+		p1 = part1(reports)
+		ch <- 1
+	}()
+	go func() {
+		p2 = part2(reports)
+		ch <- 1
+	}()
+	<-ch
+	<-ch
 	fmt.Println("Part 1:", p1)
-	p2 := part2(reports)
 	fmt.Println("Part 2:", p2)
 }
