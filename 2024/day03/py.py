@@ -15,14 +15,11 @@ def part1():
 
 
 def part2():
-    res = 0
-    flag = True
-
+    f = 1
     ex = r"(do\(\))|(don't\(\))|(do_not\(\))|(mul\(\d{1,3},\d{1,3}\))"
-    for do, dont, donot, mul in re.findall(ex, s):
-        if (flag := do and (not (dont or donot)) or (mul and flag)) and not do:
-            res += eval_hit(mul)
-    return res
+    return sum(((f := do and (not (dont or donot)) or (mul and f))
+                and not do and eval_hit(mul) or 0)
+               for do, dont, donot, mul in re.findall(ex, s))
 
 
 print("Part 1:", part1())
