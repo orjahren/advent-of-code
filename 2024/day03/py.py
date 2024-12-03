@@ -21,10 +21,10 @@ def part2():
     res = 0
     should_mul = True
 
-    for hit in hits:
-        should_mul = hit[0] and (not (hit[1] or hit[2])) or (hit[3] and should_mul)
-        if should_mul and not hit[0]:
-            res += eval_hit(hit[3])
+    for do, dont, donot, mul in hits:
+        should_mul = do and (not (dont or donot)) or (mul and should_mul)
+        if should_mul and not do:
+            res += eval_hit(mul)
     return res
 
 
