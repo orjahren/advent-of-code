@@ -11,7 +11,6 @@ def eval_hit(hit: str) -> int:
 def part1():
     ex = r"mul\(\d{1,3},\d{1,3}\)"
     hits = re.findall(ex, s)
-
     return sum(eval_hit(hit) for hit in hits)
 
 
@@ -23,15 +22,9 @@ def part2():
     should_mul = True
 
     for hit in hits:
-        if hit[1] or hit[2]:
-            should_mul = False
-        elif hit[0]:
-            should_mul = True
-            continue
-
-        if should_mul:
+        should_mul = hit[0] and (not (hit[1] or hit[2])) or (hit[3] and should_mul)
+        if should_mul and not hit[0]:
             res += eval_hit(hit[3])
-
     return res
 
 
