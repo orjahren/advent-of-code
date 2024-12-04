@@ -1,23 +1,17 @@
 from typing import Dict, List, Set, Tuple
 
-Path = List[Tuple[int, int]]
+type Path = List[Tuple[int, int]]
 TARGET_STR = "XMAS"
 
 
-def cand_is_in_bounds(x: int, y: int, grid) -> bool:
-    return x >= 0 and x < len(grid) and y >= 0 and y < len(grid[0])
-
-
 def get_neighbor(x: int, y: int, direction: Tuple[int, int], grid) -> Tuple[int, int]:
+    def cand_is_in_bounds(x: int, y: int) -> bool:
+        return x >= 0 and x < len(grid) and y >= 0 and y < len(grid[0])
     xp, yp = direction
     cand = x + xp, y + yp
-    if cand_is_in_bounds(*cand, grid):
+    if cand_is_in_bounds(*cand):
         return cand
     return None
-
-
-def path_to_str(path: List[Tuple[int, int]], grid) -> str:
-    return "".join([grid[x][y] for x, y in path])
 
 
 def recurse(
@@ -30,9 +24,8 @@ def recurse(
 ) -> None:
     is_finished = len(path) == len(TARGET_STR)
     nei = get_neighbor(*tup, direction, grid)
-    if (nei in visited_set) or is_finished:
-        if is_finished and path_to_str(path, grid) == TARGET_STR:
-            target.append(path)
+    if is_finished:
+        target.append(path)
         return
     if not nei:
         return
