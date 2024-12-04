@@ -32,26 +32,11 @@ def part1(grid):
 
 
 def part2(grid):
-    res = 0
-    for r, c in get_letter_pos(grid, "A"):
-        vals = []
-        for dr, dc in ((-1, -1), (-1, 1), (1, 1), (1, -1)):
-            xr = r + dr
-            xc = c + dc
-            if cand_is_in_bounds(xr, xc, grid):
-                vals.append(grid[xr][xc])
-        if len(vals) == 4:
-            join = "".join(vals)
-            if join in ("MMSS", "SSMM", "SMMS", "MSSM"):
-                res += 1
-
-    return res
+    return sum(("MMSS", "SSMM", "SMMS", "MSSM").count("".join([grid[r + dr][c + dc]for dr, dc in ((-1, -1), (-1, 1), (1, 1), (1, -1))if cand_is_in_bounds(r + dr, c + dc, grid)]))for r, c in get_letter_pos(grid, "A"))
 
 
 def main():
     grid = [list(y) for x in open(0).readlines() if (y := x.strip())]
     print("Part1:", part1(grid))
     print("Part2:", part2(grid))
-
-
 main()
