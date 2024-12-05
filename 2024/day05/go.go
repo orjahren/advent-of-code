@@ -84,9 +84,14 @@ func getMiddleValueOfUpdate(u Update) int {
 }
 
 func getLegality(update Update, rules []Rule) bool {
-	// TODO: Kan sjekke alle regler samtidig
+	ruleCh := make(chan bool)
 	for _, rule := range rules {
-		if !updateIsLegalUnderRule(update, rule) {
+		go func() {
+			ruleCh <- updateIsLegalUnderRule(update, rule)
+		}()
+	}
+	for range rules {
+		if !<-ruleCh {
 			return false
 		}
 	}
@@ -158,26 +163,24 @@ func main() {
 	p2Ch := make(chan int)
 
 	p1 := 0
-	illegalUpdates := make([]Update, 0)
+	numIllegal := 0
 	for range updates {
 		u := <-ch
 		if u.legal != nil {
 			mid := getMiddleValueOfUpdate(u.legal)
 			p1 += mid
 		} else {
-			illegalUpdates = append(illegalUpdates, u.illegal)
+			numIllegal++
+			go func() {
+				v := correctOrder(u.illegal, rules)
+				p2Ch <- getMiddleValueOfUpdate(v)
+			}()
 		}
 	}
 
-	for _, u := range illegalUpdates {
-		go func() {
-			v := correctOrder(u, rules)
-			p2Ch <- getMiddleValueOfUpdate(v)
-		}()
-	}
 	fmt.Println("Part 1:", p1)
 	p2 := 0
-	for range illegalUpdates {
+	for range numIllegal {
 		p2 += <-p2Ch
 	}
 	fmt.Println("Part 2:", p2)
