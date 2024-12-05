@@ -84,6 +84,7 @@ func getMiddleValueOfUpdate(u Update) int {
 }
 
 func getLegality(update Update, rules []Rule) bool {
+	// TODO: Kan sjekke alle regler samtidig
 	for _, rule := range rules {
 		if !updateIsLegalUnderRule(update, rule) {
 			return false
@@ -136,9 +137,7 @@ func buildGraph(update []int, rules []Rule) (map[int][]int, map[int]int) {
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	rules := readRules(scanner)
-	println("Read", len(rules), "rules")
 	updates := readUpdates(scanner)
-	println("Read", len(updates), "updates")
 
 	ch := make(chan Pair)
 	for _, update := range updates {
@@ -152,6 +151,12 @@ func main() {
 		}()
 	}
 
+	println("Parsed", len(rules), "rules")
+	println("Parsed", len(updates), "updates")
+
+	defer close(ch)
+	p2Ch := make(chan int)
+
 	p1 := 0
 	illegalUpdates := make([]Update, 0)
 	for range updates {
@@ -164,11 +169,16 @@ func main() {
 		}
 	}
 
+	for _, u := range illegalUpdates {
+		go func() {
+			v := correctOrder(u, rules)
+			p2Ch <- getMiddleValueOfUpdate(v)
+		}()
+	}
 	fmt.Println("Part 1:", p1)
 	p2 := 0
-	for _, u := range illegalUpdates {
-		v := correctOrder(u, rules)
-		p2 += getMiddleValueOfUpdate(v)
+	for range illegalUpdates {
+		p2 += <-p2Ch
 	}
 	fmt.Println("Part 2:", p2)
 }
