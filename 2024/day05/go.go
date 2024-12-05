@@ -14,8 +14,11 @@ type Rule struct {
 }
 
 type Update = []int
+type Pair struct {
+	legal, illegal Update
+}
 
-func lineToPair(line string, id int) Rule {
+func lineToRule(line string, id int) Rule {
 	spl := strings.Split(line, "|")
 	a, _ := strconv.Atoi(spl[0])
 	b, _ := strconv.Atoi(spl[1])
@@ -31,7 +34,7 @@ func readRules(scanner *bufio.Scanner) []Rule {
 		if len(stripped) == 0 {
 			return pairs
 		}
-		p := lineToPair(stripped, id)
+		p := lineToRule(stripped, id)
 		id++
 		pairs = append(pairs, p)
 
@@ -62,7 +65,7 @@ func readUpdates(scanner *bufio.Scanner) []Update {
 	return updates
 }
 
-func updateIsLegalUnderRule(update Update, rule Rule, ruleCh chan bool) {
+func updateIsLegalUnderRule(update Update, rule Rule) bool {
 	idxX := slices.Index(update, rule.x)
 	idxY := slices.Index(update, rule.y)
 
@@ -70,148 +73,64 @@ func updateIsLegalUnderRule(update Update, rule Rule, ruleCh chan bool) {
 
 	if hasBoth {
 		isLegal := idxX < idxY
-		ruleCh <- isLegal
-		return
+		return isLegal
 	}
 
-	ruleCh <- true
+	return true
 }
-
-func getUpdateIfLegalP1(update Update, rules []Rule, p1Ch chan Update) {
-	ruleCh := make(chan bool)
-	defer close(ruleCh)
-
-	for _, rule := range rules {
-		go updateIsLegalUnderRule(update, rule, ruleCh)
-	}
-
-	isLegal := true
-	for range rules {
-		tv := <-ruleCh
-		if !tv {
-			isLegal = false
-		}
-	}
-
-	if isLegal {
-		p1Ch <- update
-	} else {
-		p1Ch <- nil
-	}
-}
-func getUpdateIfIllegal(update Update, rules []Rule, p2Ch chan Update) {
-	ruleCh := make(chan bool)
-	defer close(ruleCh)
-
-	for _, rule := range rules {
-		go updateIsLegalUnderRule(update, rule, ruleCh)
-	}
-
-	isLegal := true
-	for range rules {
-		tv := <-ruleCh
-		if !tv {
-			isLegal = false
-		}
-	}
-
-	if !isLegal {
-		p2Ch <- update
-	} else {
-		p2Ch <- nil
-	}
-}
-
 func getMiddleValueOfUpdate(u Update) int {
 	mid := len(u) / 2
 	return u[mid]
 }
 
-// permute generates all permutations of the input array
-func permute(arr Update) []Update {
-	var result [][]int
-	generatePermutations(arr, 0, &result)
-	return result
+func getLegality(update Update, rules []Rule) bool {
+	for _, rule := range rules {
+		if !updateIsLegalUnderRule(update, rule) {
+			return false
+		}
+	}
+	return true
 }
 
-// generatePermutations is a helper function to generate permutations using backtracking
-func generatePermutations(arr Update, start int, result *[]Update) {
-	if start == len(arr)-1 {
-		// Make a copy of arr to avoid modification in future permutations
-		permutation := make([]int, len(arr))
-		copy(permutation, arr)
-		*result = append(*result, permutation)
-		return
+// https://github.com/LinuxFanboy/advent-of-code/blob/main/aoc_2024/Day_05/solution.go
+func correctOrder(update []int, rules []Rule) []int {
+	graph, indegree := buildGraph(update, rules)
+	queue, sorted := []int{}, []int{}
+
+	for page, degree := range indegree {
+		if degree == 0 {
+			queue = append(queue, page)
+		}
 	}
 
-	for i := start; i < len(arr); i++ {
-		// Swap element at start with element at i
-		arr[start], arr[i] = arr[i], arr[start]
-		// Recurse on the remaining elements
-		generatePermutations(arr, start+1, result)
-		// Swap back to restore the original array
-		arr[start], arr[i] = arr[i], arr[start]
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		sorted = append(sorted, cur)
+		for _, neighbor := range graph[cur] {
+			if indegree[neighbor]--; indegree[neighbor] == 0 {
+				queue = append(queue, neighbor)
+			}
+		}
 	}
+	return sorted
 }
 
-func part2(rules []Rule, updates []Update) int {
-
-	illegalUpdates := make([]Update, 0)
-
-	// Extract all illegal updates (TODO: Burde gjøres som en del av part1)
-	illegalUpdatesCh := make(chan Update)
-	for _, baseUpdate := range updates {
-		go getUpdateIfIllegal(baseUpdate, rules, illegalUpdatesCh)
+// https://github.com/LinuxFanboy/advent-of-code/blob/main/aoc_2024/Day_05/solution.go
+func buildGraph(update []int, rules []Rule) (map[int][]int, map[int]int) {
+	graph := make(map[int][]int)
+	indegree := make(map[int]int)
+	for _, page := range update {
+		graph[page] = []int{}
+		indegree[page] = 0
 	}
-	for range updates {
-		v := <-illegalUpdatesCh
-		if v != nil {
-			illegalUpdates = append(illegalUpdates, v)
+	for _, rule := range rules {
+		if slices.Contains(update, rule.x) && slices.Contains(update, rule.y) {
+			graph[rule.x] = append(graph[rule.x], rule.y)
+			indegree[rule.y]++
 		}
 	}
-
-	exp := 0
-	bruteForcedCh := make(chan Update)
-	for _, baseUpdate := range illegalUpdates {
-		for _, perm := range permute(baseUpdate) {
-			exp++
-			go getUpdateIfLegalP1(perm, rules, bruteForcedCh)
-
-		}
-	}
-	p2 := 0
-	for range exp {
-		v := <-bruteForcedCh
-		if v != nil {
-			mid := getMiddleValueOfUpdate(v)
-			p2 += mid
-		}
-	}
-
-	return p2
-}
-
-func part1(rules []Rule, updates []Update) int {
-	p1Ch := make(chan Update, len(updates))
-
-	for _, u := range updates {
-		go getUpdateIfLegalP1(u, rules, p1Ch)
-	}
-
-	legalUpdates := make([]Update, 0)
-	for range updates {
-		u := <-p1Ch
-		if u != nil {
-			legalUpdates = append(legalUpdates, u)
-		}
-	}
-
-	p1 := 0
-	for _, u := range legalUpdates {
-		mid := getMiddleValueOfUpdate(u)
-		p1 += mid
-	}
-	return p1
+	return graph, indegree
 }
 
 func main() {
@@ -221,9 +140,42 @@ func main() {
 	updates := readUpdates(scanner)
 	println("Read", len(updates), "updates")
 
-	p1 := part1(rules, updates)
-	fmt.Println("Part 1:", p1)
+	ch := make(chan Pair)
+	for _, update := range updates {
+		go func() {
+			isLegal := getLegality(update, rules)
+			if isLegal {
+				ch <- Pair{update, nil}
+			} else {
+				ch <- Pair{nil, update}
+			}
+		}()
+	}
 
-	p2 := part2(rules, updates)
+	p1 := 0
+	illegalUpdates := make([]Update, 0)
+	for range updates {
+		u := <-ch
+		if u.legal != nil {
+			mid := getMiddleValueOfUpdate(u.legal)
+			p1 += mid
+		} else {
+			illegalUpdates = append(illegalUpdates, u.illegal)
+		}
+	}
+
+	fmt.Println("Part 1:", p1)
+	fmt.Println("Antall ugyldige updates:", len(illegalUpdates))
+
+	p2 := 0
+	for _, u := range illegalUpdates {
+		v := correctOrder(u, rules)
+		if v != nil && len(v) > 0 {
+			if getLegality(v, rules) {
+				p2 += getMiddleValueOfUpdate(v)
+			}
+		}
+
+	}
 	fmt.Println("Part 2:", p2)
 }
