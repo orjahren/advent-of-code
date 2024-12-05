@@ -81,58 +81,30 @@ func updateIsLegalUnderRule(update Update, rule Rule, ruleCh chan bool) {
 
 		if isLegal {
 			ruleCh <- true
-			return
-		}
-	}
-
-	ruleCh <- false
-}
-func updateIsLegalUnderRuleSEQ(update Update, rule Rule) bool {
-	idxX := slices.Index(update, rule.x)
-	idxY := slices.Index(update, rule.y)
-	fmt.Println("Verifiserer gyldighet av", rule, "på", update, ", Indeces er:", idxX, idxY)
-
-	hasBoth := idxX != -1 && idxY != -1
-
-	if hasBoth {
-		isLegal := idxX < idxY
-
-		if isLegal {
-			println("LOV")
-			return true
 		} else {
-
-			println("IKKE lov")
-			return false
+			ruleCh <- false
 		}
+		return
 	}
 
-	return true
+	ruleCh <- true
 }
 
 func getUpdateIfLegal(update Update, rules []Rule, retCh chan Update) {
+	ruleCh := make(chan bool)
 	for _, rule := range rules {
-		if !updateIsLegalUnderRuleSEQ(update, rule) {
+		go updateIsLegalUnderRule(update, rule, ruleCh)
+	}
+	for range rules {
+		tv := <-ruleCh
+		if !tv {
 			retCh <- nil
 			return
 		}
 	}
+	// If not retrned above^, this update must be legal
 	retCh <- update
-	if false {
-		ruleCh := make(chan bool)
-		for _, rule := range rules {
-			go updateIsLegalUnderRule(update, rule, ruleCh)
-		}
-		for range rules {
-			tv := <-ruleCh
-			if !tv {
-				retCh <- nil
-				return
-			}
-		}
-		// If not retrned above^, this update must be legal
-		retCh <- update
-	}
+
 }
 
 func getMiddleValueOfUpdate(u Update) int {
