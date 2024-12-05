@@ -165,17 +165,10 @@ func main() {
 	}
 
 	fmt.Println("Part 1:", p1)
-	fmt.Println("Antall ugyldige updates:", len(illegalUpdates))
-
 	p2 := 0
 	for _, u := range illegalUpdates {
 		v := correctOrder(u, rules)
-		if v != nil && len(v) > 0 {
-			if getLegality(v, rules) {
-				p2 += getMiddleValueOfUpdate(v)
-			}
-		}
-
+		p2 += getMiddleValueOfUpdate(v)
 	}
 	fmt.Println("Part 2:", p2)
 }
