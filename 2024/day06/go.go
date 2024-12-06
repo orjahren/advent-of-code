@@ -40,12 +40,26 @@ func readInput(scanner *bufio.Scanner) [][]Coordinate {
 	return coordinates
 }
 
+func getStartPosition(coordinates [][]Coordinate) Coordinate {
+	for _, row := range coordinates {
+		for _, cor := range row {
+			if cor.value == '^' {
+				return cor
+			}
+		}
+	}
+	panic("No start position found")
+}
+
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	coordinates := readInput(scanner)
 	fmt.Println(coordinates)
 	fmt.Println("Rows:", len(coordinates))
 	fmt.Println("Columns:", len(coordinates[0]))
+
+	startPos := getStartPosition(coordinates)
+	fmt.Println("Start position:", startPos)
 
 	p1 := -1
 	fmt.Println("Part 1:", p1)
