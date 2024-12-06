@@ -13,12 +13,15 @@ type Coordinate struct {
 }
 
 func lineToCor(line string, rowCount int) []Coordinate {
-	/*
-		spl := strings.Split(line, "")
-		a, _ := strconv.Atoi(spl[0])
-		b, _ := strconv.Atoi(spl[1])
-	*/
-	return nil
+	spl := strings.Split(line, "")
+	ret := make([]Coordinate, len(spl))
+	for colIdx, x := range spl {
+		fmt.Println(colIdx, x)
+
+		c := Coordinate{rowCount, colIdx, rune(x[0])}
+		ret[colIdx] = c
+	}
+	return ret
 }
 
 func readInput(scanner *bufio.Scanner) [][]Coordinate {
@@ -41,6 +44,8 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	coordinates := readInput(scanner)
 	fmt.Println(coordinates)
+	fmt.Println("Rows:", len(coordinates))
+	fmt.Println("Columns:", len(coordinates[0]))
 
 	p1 := -1
 	fmt.Println("Part 1:", p1)
