@@ -10,7 +10,6 @@ import (
 type Coordinate struct {
 	row, column int
 	value       rune
-	visitCount  int
 }
 type Pair struct {
 	block Coordinate
@@ -30,9 +29,8 @@ const (
 	LEFT
 )
 
-var directions = []Direction{UP, RIGHT, DOWN, LEFT}
-
 func getNextDirection(currentDirection Direction) Direction {
+	var directions = []Direction{UP, RIGHT, DOWN, LEFT}
 	for i, dir := range directions {
 		if dir == currentDirection {
 			return directions[(i+1)%len(directions)]
@@ -45,7 +43,7 @@ func lineToCor(line string, rowCount int) []Coordinate {
 	spl := strings.Split(line, "")
 	ret := make([]Coordinate, len(spl))
 	for colIdx, x := range spl {
-		c := Coordinate{rowCount, colIdx, rune(x[0]), 0}
+		c := Coordinate{rowCount, colIdx, rune(x[0])}
 		ret[colIdx] = c
 	}
 	return ret
@@ -78,50 +76,6 @@ func getStartPosition(coordinates [][]Coordinate) Coordinate {
 	panic("No start position found")
 }
 
-func printGrid(coordinates [][]Coordinate) {
-	for _, row := range coordinates {
-		for _, cor := range row {
-			fmt.Print(string(cor.value))
-		}
-		fmt.Println()
-	}
-}
-
-func printGridWithPath(coordinates [][]Coordinate, path []Coordinate) {
-	for _, row := range coordinates {
-		for _, cor := range row {
-			for _, p := range path {
-				if cor.row == p.row && cor.column == p.column {
-					fmt.Print("O")
-					goto next
-				}
-			}
-			fmt.Print(string(cor.value))
-		next:
-		}
-		fmt.Println()
-	}
-}
-func printGridWithPathAndSpecial(coordinates [][]Coordinate, path []Coordinate, special Coordinate) {
-	for _, row := range coordinates {
-		for _, cor := range row {
-			for _, p := range path {
-				if special.row == p.row && special.column == p.column {
-					fmt.Print("X")
-					goto next
-				}
-				if cor.row == p.row && cor.column == p.column {
-					fmt.Print("O")
-					goto next
-				}
-			}
-			fmt.Print(string(cor.value))
-		next:
-		}
-		fmt.Println()
-	}
-}
-
 func coordinateIsWithinBounds(cor Coordinate, coordinates [][]Coordinate) bool {
 	return cor.row >= 0 && cor.row < len(coordinates) && cor.column >= 0 && cor.column < len(coordinates[0])
 }
@@ -145,7 +99,7 @@ func getPath(startPos Coordinate, coordinates [][]Coordinate, isP2 bool) []Coord
 	direction := UP
 	currentPos := startPos
 	for {
-		nextPos := Coordinate{currentPos.row, currentPos.column, currentPos.value, currentPos.visitCount}
+		nextPos := Coordinate{currentPos.row, currentPos.column, currentPos.value}
 		switch direction {
 		case UP:
 			nextPos.row--
@@ -156,7 +110,6 @@ func getPath(startPos Coordinate, coordinates [][]Coordinate, isP2 bool) []Coord
 		case LEFT:
 			nextPos.column--
 		}
-		nextPos.visitCount++
 		if !coordinateIsWithinBounds(nextPos, coordinates) {
 			break
 		}
@@ -197,21 +150,19 @@ func getUniqueCoordinatesInPath(path []Coordinate) []Coordinate {
 	return unique
 }
 
-func part2(grid [][]Coordinate) {
+func part2(startPos Coordinate, grid [][]Coordinate) int {
 	exp := 0
 	ch := make(chan Pair)
-	startPos := getStartPosition(grid)
 	for i, row := range grid {
 		for j, cor := range row {
 			if cor.value == '.' {
 				exp++
 				go func() {
 					newGrid := make([][]Coordinate, len(grid))
-
 					for i, row := range grid {
 						newGrid[i] = make([]Coordinate, len(row))
 						for j, inner := range row {
-							newGrid[i][j] = Coordinate{inner.row, inner.column, inner.value, 0}
+							newGrid[i][j] = Coordinate{inner.row, inner.column, inner.value}
 						}
 					}
 					newGrid[i][j].value = '#'
@@ -221,44 +172,28 @@ func part2(grid [][]Coordinate) {
 			}
 		}
 	}
-	allPaths := make([][]Coordinate, exp)
-	uniqueStartingPoints := make([]Coordinate, 0)
+	p2 := 0
 	for range exp {
 		rep := <-ch
 		if rep.path != nil {
-			allPaths = append(allPaths, rep.path)
-			uniqueStartingPoints = append(uniqueStartingPoints, rep.block)
+			p2++
 		}
 	}
-	p2 := len(uniqueStartingPoints)
-
-	fmt.Println("Part 2:", p2)
+	return p2
 }
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	coordinates := readInput(scanner)
-	fmt.Println(coordinates)
-	fmt.Println("Rows:", len(coordinates))
-	fmt.Println("Columns:", len(coordinates[0]))
 
-	/*
-		p1 := func() int {
-			startPos := getStartPosition(coordinates)
-			fmt.Println("Start position:", startPos)
+	startPos := getStartPosition(coordinates)
+	p1 := func() int {
+		path := getPath(startPos, coordinates, false)
+		uniqueCoordinates := getUniqueCoordinatesInPath(path)
+		return len(uniqueCoordinates)
+	}()
+	fmt.Println("Part 1:", p1)
 
-			path := getPath(startPos, coordinates, false)
-			uniqueCoordinates := getUniqueCoordinatesInPath(path)
-
-			printGrid(coordinates)
-			fmt.Println("Path:", path)
-			fmt.Println("Path len:", len(path))
-
-			printGridWithPath(coordinates, path)
-			return len(uniqueCoordinates)
-		}()
-		fmt.Println("Part 1:", p1)
-	*/
-
-	part2(coordinates)
+	p2 := part2(startPos, coordinates)
+	fmt.Println("Part 2:", p2)
 }
