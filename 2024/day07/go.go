@@ -15,7 +15,6 @@ type Equation struct {
 
 func parseLine(line string) Equation {
 	spl := strings.Split(line, " ")
-	fmt.Println(spl)
 	nums := make([]int64, len(spl)-1)
 	for numIdx := 1; numIdx < len(spl); numIdx++ {
 		x, _ := strconv.Atoi(spl[numIdx])
@@ -42,24 +41,24 @@ func readInput(scanner *bufio.Scanner) []Equation {
 	return lines
 }
 
-func solveEquationP1(equation Equation, curr, numIdx int) int {
+func solveEquationP1(equation Equation, curr, numIdx int64) int64 {
 	operators := []string{"+", "*"}
 	if int(numIdx) == len(equation.numbers) {
-		if curr == int(equation.value) {
+		if curr == equation.value {
 			return curr
 		}
 		return 0
 	}
 	for _, op := range operators {
 		if op == "+" {
-			x := solveEquationP1(equation, curr+int(equation.numbers[numIdx]), numIdx+1)
-			if x != -1 {
-				return int(equation.value)
+			x := solveEquationP1(equation, curr+equation.numbers[numIdx], numIdx+1)
+			if x != 0 {
+				return equation.value
 			}
 		} else {
-			x := solveEquationP1(equation, curr*int(equation.numbers[numIdx]), numIdx+1)
-			if x != -1 {
-				return int(equation.value)
+			x := solveEquationP1(equation, curr*equation.numbers[numIdx], numIdx+1)
+			if x != 0 {
+				return equation.value
 			}
 		}
 	}
@@ -88,10 +87,7 @@ func getBaseRep(num, base int) string {
 
 const testTarget = 7290
 
-func solveEquationP2(equation Equation) int {
-	if equation.value == testTarget {
-		fmt.Println("[top] Origial equation: ", equation)
-	}
+func solveEquationP2(equation Equation, ch chan int64) {
 	slots := len(equation.numbers) - 1
 	for p := 0; p < raise(3, slots); p++ {
 		res := equation.numbers[0]
@@ -113,32 +109,37 @@ func solveEquationP2(equation Equation) int {
 		}
 
 		if res == equation.value {
-			return int(equation.value)
+			ch <- equation.value
+			return
 		}
 	}
 
-	return 0
+	ch <- 0
+	return
 }
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	equations := readInput(scanner)
-	fmt.Println(equations)
 
-	p1 := 0
+	var p1 int64
+	var p2 int64
+	p1Ch := make(chan int64)
+	p2Ch := make(chan int64)
 	for _, eq := range equations {
-		p1 += solveEquationP1(eq, 0, 0)
+		go func() {
+			x := solveEquationP1(eq, 0, 0)
+			p1Ch <- x
+		}()
+		go solveEquationP2(eq, p2Ch)
 	}
 
+	for range equations {
+		a := <-p1Ch
+		p1 += a
+		b := <-p2Ch
+		p2 += b
+	}
 	fmt.Println("Part 1:", p1)
-
-	p2 := 0
-	for _, eq := range equations {
-		x := solveEquationP2(eq)
-		if x != 0 {
-			p2 += int(x)
-		}
-	}
 	fmt.Println("Part 2:", p2)
-
 }
