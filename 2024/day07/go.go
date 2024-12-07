@@ -41,12 +41,44 @@ func readInput(scanner *bufio.Scanner) []Equation {
 	return lines
 }
 
+func solveEquation(equation Equation, curr, numIdx int) int {
+	operators := []string{"+", "*"}
+	if numIdx == len(equation.numbers) {
+		if curr == equation.value {
+			return 1
+		}
+		return -1
+	}
+	for _, op := range operators {
+		if op == "+" {
+			x := solveEquation(equation, curr+equation.numbers[numIdx], numIdx+1)
+			if x != -1 {
+				return equation.value
+			}
+		} else {
+			x := solveEquation(equation, curr*equation.numbers[numIdx], numIdx+1)
+			if x != -1 {
+				return equation.value
+			}
+		}
+	}
+	return -1
+}
+
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	equations := readInput(scanner)
 	fmt.Println(equations)
 
-	p1 := -1
+	p1 := 0
+	for _, eq := range equations {
+		fmt.Println(eq)
+		x := solveEquation(eq, 0, 0)
+		if x != -1 {
+			p1 += x
+
+		}
+	}
 
 	fmt.Println("Part 1:", p1)
 
