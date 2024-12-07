@@ -4,26 +4,29 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
-type Line struct {
+type Equation struct {
 	value   int
 	numbers []int
 }
 
-func parseLine(line string) Line {
-	spl := strings.Split(line, "")
-	ret := make([]Line, len(spl))
-	for colIdx := range spl {
-		c := Line{colIdx, []int{}}
-		ret[colIdx] = c
+func parseLine(line string) Equation {
+	spl := strings.Split(line, " ")
+	fmt.Println(spl)
+	nums := make([]int, len(spl)-1)
+	for numIdx := 1; numIdx < len(spl); numIdx++ {
+		nums[numIdx-1], _ = strconv.Atoi(spl[numIdx])
 	}
-	return Line{}
+	spl[0] = strings.Replace(spl[0], ":", "", -1)
+	val, _ := strconv.Atoi(spl[0])
+	return Equation{val, nums}
 }
 
-func readInput(scanner *bufio.Scanner) []Line {
-	lines := make([]Line, 0)
+func readInput(scanner *bufio.Scanner) []Equation {
+	lines := make([]Equation, 0)
 	i := 0
 	for scanner.Scan() {
 		text := scanner.Text()
@@ -40,8 +43,8 @@ func readInput(scanner *bufio.Scanner) []Line {
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	lines := readInput(scanner)
-	fmt.Println(lines)
+	equations := readInput(scanner)
+	fmt.Println(equations)
 
 	p1 := -1
 
