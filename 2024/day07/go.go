@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
+	"math/big"
 	"os"
 	"strconv"
 	"strings"
@@ -20,7 +22,7 @@ func parseLine(line string) Equation {
 		x, _ := strconv.Atoi(spl[numIdx])
 		nums[numIdx-1] = int64(x)
 	}
-	spl[0] = strings.Replace(spl[0], ":", "", -1)
+	spl[0] = strings.Replace(spl[0], ":", "", 1)
 	val, _ := strconv.Atoi(spl[0])
 	return Equation{int64(val), nums}
 }
@@ -65,33 +67,11 @@ func solveEquationP1(equation Equation, curr, numIdx int64) int64 {
 	return 0
 }
 
-func raise(base, exp int) int {
-	result := 1
-	for i := 0; i < exp; i++ {
-		result *= base
-	}
-	return result
-}
-
-func getBaseRep(num, base int) string {
-	if num == 0 {
-		return "0"
-	}
-	res := ""
-	for num > 0 {
-		res = strconv.FormatInt(int64(num%base), 10) + res
-		num /= base
-	}
-	return res
-}
-
-const testTarget = 7290
-
 func solveEquationP2(equation Equation, ch chan int64) {
 	slots := len(equation.numbers) - 1
-	for p := 0; p < raise(3, slots); p++ {
+	for p := 0; p < int(math.Pow(3, float64(slots))); p++ {
 		res := equation.numbers[0]
-		s := getBaseRep(p, 3)
+		s := big.NewInt(int64(p)).Text(3)
 		l := len(s)
 
 		for b := 0; b < slots; b++ {
@@ -113,9 +93,7 @@ func solveEquationP2(equation Equation, ch chan int64) {
 			return
 		}
 	}
-
 	ch <- 0
-	return
 }
 
 func main() {
@@ -133,12 +111,9 @@ func main() {
 		}()
 		go solveEquationP2(eq, p2Ch)
 	}
-
 	for range equations {
-		a := <-p1Ch
-		p1 += a
-		b := <-p2Ch
-		p2 += b
+		p1 += <-p1Ch
+		p2 += <-p2Ch
 	}
 	fmt.Println("Part 1:", p1)
 	fmt.Println("Part 2:", p2)
