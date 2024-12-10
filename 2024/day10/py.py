@@ -28,24 +28,18 @@ grid = [list(y) for x in open(0).readlines() if (y := x.strip())]
 
 
 def get_trailhood_score(trailhead):
-    q = [trailhead]
-    p1, p2 = 0, {}
+    q, p1, p2 = [trailhead], 0, {}
     while len(q):
         curr = q.pop()
         if is_target(curr):
             if not curr in p2:
                 p1 += 1
-            p2[curr] = p2.get(curr, 0) + 1
-        for neighbor in get_neighbors(*curr):
-            if neighbor_is_ok(curr, neighbor):
-                q.append(neighbor)
+                p2[curr] = 0
+            p2[curr] += 1
+        q.extend([neighbor for neighbor in get_neighbors(*curr) if neighbor_is_ok(curr, neighbor)])
     return p1, sum(p2.values())
 
 
-part1, part2 = 0, 0
-for trailhead in get_letter_pos("0"):
-    p1, p2 = get_trailhood_score(trailhead)
-    part1 += p1
-    part2 += p2
+part1, part2 = map(sum, zip(*[get_trailhood_score(trailhead) for trailhead in get_letter_pos("0")]))
 print("Part1:", part1)
 print("Part2:", part2)
