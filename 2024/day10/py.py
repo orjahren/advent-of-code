@@ -10,18 +10,13 @@ def get_neighbors(r, c):
     yield from ((nr, nc) for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1))if cand_is_in_bounds((nr := r + dr), (nc := c + dc), grid) and int(grid[nr][nc]) - int(grid[r][c]) == 1)
 
 
-def is_target(tup):
-    r, c = tup
-    return grid[r][c] == "9"
-
-
 def solve(trailhead):
     q, d = [trailhead], {}
     while len(q):
-        curr = q.pop()
-        if is_target(curr):
-            d[curr] = d.get(curr, 0) + 1
-        q.extend(neighbor for neighbor in get_neighbors(*curr))
+        r, c = q.pop()
+        if grid[r][c] == "9":
+            d[r, c] = d.get((r, c), 0) + 1
+        q += get_neighbors(r, c)
     return len(d.keys()), sum(d.values())
 
 
