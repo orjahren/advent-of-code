@@ -7,20 +7,15 @@ def cand_is_in_bounds(x: int, y: int, grid) -> bool:
 
 
 def get_neighbors(r, c):
-    yield from ((r + dr, c + dc) for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1))if cand_is_in_bounds(r + dr, c + dc, grid) and diff((r, c), (r+dr,c+dc)) == 1)
+    yield from ((nr, nc) for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1))if cand_is_in_bounds((nr := r + dr), (nc := c + dc), grid) and int(grid[nr][nc]) - int(grid[r][c]) == 1)
 
-
-def diff(_from, to):
-    fr, fc = _from
-    tr, tc = to
-    return int(grid[tr][tc]) - int(grid[fr][fc])
 
 def is_target(tup):
     r, c = tup
     return grid[r][c] == "9"
 
 
-def get_trailhood_score(trailhead):
+def solve(trailhead):
     q, d = [trailhead], {}
     while len(q):
         curr = q.pop()
@@ -31,6 +26,6 @@ def get_trailhood_score(trailhead):
 
 
 grid = [list(y) for x in open(0).readlines() if (y := x.strip())]
-p1, p2 = map(sum, zip(*[get_trailhood_score(trailhead)for trailhead in get_letter_pos("0")]))
+p1, p2 = map(sum, zip(*[solve(trailhead)for trailhead in get_letter_pos("0")]))
 print("Part1:", p1)
 print("Part2:", p2)
