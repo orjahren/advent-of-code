@@ -39,15 +39,13 @@ def get_trailhood_score(trailhead):
     print("0:", r, c)
     q = [(r, c)]
     # visited = set(q[0])
-    rs = set()
+    rs = {}
     while len(q):
         print(q)
         curr = q.pop()
         if is_target(curr):
             print("\t**** FOUND MATCH")
-            if curr not in rs:
-                res += 1
-            rs.add(curr)
+            rs[curr] = rs.get(curr, 0) + 1
 
             continue
         for neighbor in get_neighbors(*curr):
@@ -67,7 +65,7 @@ def get_trailhood_score(trailhead):
     """
     trailhead_ress.append(res)
     # print(l)
-    return res
+    return rs
 
 
 trailheads = list(get_letter_pos("0"))
@@ -76,5 +74,6 @@ part1 = 0
 for trailhead in trailheads:
     print(trailhead)
     ts = get_trailhood_score(trailhead)
-    part1 += ts
+    print(ts)
+    part1 += sum(ts.values())
 print("Part1:", part1)
