@@ -10,25 +10,36 @@ def print_trie(trie, indent=0):
         print_trie(v, indent + 1)
 
 
-seen = set()
+cache = {}
 
 
-def patternCanBeMade(pattern, trie):
-    if pattern in seen:
-        return False
-    seen.add(pattern)
+def patternCanBeMade(pattern, root_trie):
+    if pattern in cache:
+        return cache[pattern]
+    cache[pattern] = ""
     print("**** checking pattern: ", pattern)
-    node = trie
+    node = root_trie
     print("pattern: ", pattern)
     for idx, c in enumerate(pattern):
         print("c: ", c)
         if c not in node:
-            return patternCanBeMade(pattern[idx:], trie)
-        # if canConsumeWithFinality(node, pattern[idx:]):
-        if '$' in node[c]:
-            print("node: ", node)
-            node = node[c]
-    return '$' in node
+            print("c not in node")
+            cache[pattern] = False
+            return False
+
+        node = node[c]
+        print("node: ", node)
+        # check if prefix is a complete word
+        if '$' in node:
+            print("prefix is a complete word")
+            if patternCanBeMade(pattern[idx + 1:], root_trie):
+                cache[pattern] = True
+                return True
+            print("prefix is a complete word but rest of pattern cannot be made")
+
+    cache[pattern] = "$" in node
+    return cache[pattern]
+    # return '$' in node
 
 
 def main():
@@ -38,34 +49,33 @@ def main():
     patterns = [y for x in sys.stdin.readlines() if (y := x.strip())]
     print(patterns)
 
-    trie = {}
+    root_trie = {}
     # create trie with exact prefixes
     for towel in towels:
         print("towel: ", towel)
-        node = trie
+        node = root_trie
         for c in towel:
             if c not in node:
                 node[c] = {}
             node = node[c]
         node['$'] = True
 
-    print("trie: ", trie)
-    print_trie(trie)
+    print("trie: ", root_trie)
+    print_trie(root_trie)
     # return
 
     # count patterns that can be made from towels
     count = 0
     for pattern in patterns:
-        seen.clear()
+        cache.clear()
         print("\tmain pattern: ", pattern)
-        if patternCanBeMade(pattern, trie):
+        if patternCanBeMade(pattern, root_trie):
             count += 1
             print(pattern, "can be made")
         else:
             print(pattern, "cannot be made")
 
     print("Part 1:", count)
-# 377 too high
 
 
 if __name__ == "__main__":
