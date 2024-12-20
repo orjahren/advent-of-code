@@ -55,51 +55,48 @@ int main()
   cout << "Start Row: " << startRow << " Start Col: " << startCol << endl;
   cout << "Target Row: " << targetRow << " Target Col: " << targetCol << endl;
 
+  int row = startRow;
+  int col = startCol;
+
   vector<vector<int>> distance(masterGrid.size(), vector<int>(masterGrid[0].size(), -1));
-  vector<vector<int>> visited(masterGrid.size(), vector<int>(masterGrid[0].size(), 0));
-  queue<pair<int, int>> q;
-  q.push({startRow, startCol});
-  visited[startRow][startCol] = 1;
-  distance[startRow][startCol] = 0;
-  while (!q.empty())
+  distance[row][col] = 0;
+  while (masterGrid[row][col] != 'E')
   {
-    auto [row, col] = q.front();
-    q.pop();
-    if (row == targetRow && col == targetCol)
+    for (auto [nr, nc] : vector<pair<int, int>>{{row + 1, col}, {row - 1, col}, {row, col + 1}, {row, col - 1}})
     {
-      break;
-    }
-    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-    for (auto [dx, dy] : directions)
-    {
-      int newRow = row + dx;
-      int newCol = col + dy;
-      if (newRow < 0 || newRow >= masterGrid.size() || newCol < 0 || newCol >= masterGrid[0].size())
+      if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[row].size())
       {
         continue;
       }
-      if (visited[newRow][newCol] == 0 && masterGrid[newRow][newCol] != '#')
+      if (masterGrid[nr][nc] == '#')
       {
-        visited[newRow][newCol] = 1;
-        distance[newRow][newCol] = distance[row][col] + 1;
-        q.push({newRow, newCol});
+        continue;
       }
+      if (distance[nr][nc] != -1)
+      {
+        continue;
+      }
+      distance[nr][nc] = distance[row][col] + 1;
+      row = nr;
+      col = nc;
     }
   }
 
   cout << "Saving" << endl;
 
   int part1 = 0;
-  for (int row = 0; row < distance.size(); row++)
+  int part2 = 0;
+  for (row = 0; row < distance.size(); row++)
   {
-    for (int col = 0; col < distance[0].size(); col++)
+    for (col = 0; col < distance[row].size(); col++)
     {
-      cout << distance[row][col] << " ";
       if (masterGrid[row][col] == '#')
       {
         continue;
       }
-
+      // cout << distance[row][col] << " ";
+      // cout << endl;
+      // Part 1
       for (auto [nr, nc] : vector<pair<int, int>>{{row + 2, col}, {row + 1, col + 1}, {row, col + 2}, {row - 1, col + 1}})
       {
         if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[0].size())
@@ -115,9 +112,38 @@ int main()
           part1++;
         }
       }
+      // Part 2
+      for (int rad = 2; rad <= 20; rad++)
+      {
+        for (int rowDist = 0; rowDist <= rad; rowDist++)
+        {
+          int colDist = rad - rowDist;
+
+          for (auto [nr, nc] : vector<pair<int, int>>{{row + rowDist, col + colDist}, {row + rowDist, col - colDist}, {row - rowDist, col + colDist}, {row - rowDist, col - colDist}})
+          {
+            if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[row].size())
+            {
+              continue;
+            }
+            if (masterGrid[nr][nc] == '#')
+            {
+              continue;
+            }
+            if ((distance[row][col] - distance[nr][nc]) >= (100 + rad))
+            {
+              part2++;
+              // cout << "nr: " << nr << ", nc: " << nc << ", distance[row][col]: " << distance[row][col] << ", distance[nr][nc]: " << distance[nr][nc] << ", part2: " << part2 << endl;
+            }
+          }
+        }
+      }
     }
-    cout << endl;
   }
   cout << "Part 1: " << part1 << endl;
+  cout << "Part 2: " << part2 << endl;
+  // 1094950 too high
+  // 1146285 too high
+  // 842467 too low
+  // 1039369 nondescript feil.
   return 0;
 }
