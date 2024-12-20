@@ -21,64 +21,103 @@ vector<vector<char>> getGridFromStdin()
   return grid;
 }
 
-struct triplet
-{
-  int x, y, distance;
-};
-int getDistanceBfs(vector<vector<char>> &grid, int trow, int tcol)
-{
-  queue<triplet> q;
-  q.push({0, 0, 0});
-  auto visited = vector<vector<bool>>(grid.size(), vector<bool>(grid.size(), false));
-  while (!q.empty())
-  {
-    auto [col, row, distance] = q.front();
-    q.pop();
-    if (col < 0 || col >= grid.size() || row < 0 || row >= grid.size() || grid[col][row] == '#' || visited[col][row])
-    {
-      continue;
-    }
-    if (col == trow && row == tcol)
-    {
-      return distance;
-    }
-    visited[col][row] = true;
-    q.push({col + 1, row, distance + 1});
-    q.push({col - 1, row, distance + 1});
-    q.push({col, row + 1, distance + 1});
-    q.push({col, row - 1, distance + 1});
-  }
-  return -1;
-}
-
-vector<vector<char>> taintGrid(vector<vector<char>> &grid, vector<pair<int, int>> &fallenBytes, int fallFrom, int fallTo)
-{
-  for (int i = fallFrom; i < fallTo; i++)
-  {
-    auto [col, row] = fallenBytes[i];
-    grid[col][row] = '#';
-  }
-
-  return grid;
-}
-
 int main()
 {
 
   auto masterGrid = getGridFromStdin();
+  int startRow, startCol, targetRow, targetCol;
 
   cout << "Master Grid" << endl;
-  // print size
   cout << "-----------" << endl;
   cout << masterGrid.size() << endl;
   cout << masterGrid[0].size() << endl;
   cout << "-----------" << endl;
-  for (auto row : masterGrid)
+  for (int i = 0; i < masterGrid.size(); i++)
   {
-    for (auto cell : row)
+    for (int j = 0; j < masterGrid[0].size(); j++)
     {
-      cout << cell;
+      if (masterGrid[i][j] == 'S')
+      {
+        startRow = i;
+        startCol = j;
+      }
+      else if (masterGrid[i][j] == 'E')
+      {
+        targetRow = i;
+        targetCol = j;
+      }
+
+      cout << masterGrid[i][j];
     }
     cout << endl;
   }
+
+  cout << "Start Row: " << startRow << " Start Col: " << startCol << endl;
+  cout << "Target Row: " << targetRow << " Target Col: " << targetCol << endl;
+
+  vector<vector<int>> distance(masterGrid.size(), vector<int>(masterGrid[0].size(), -1));
+  vector<vector<int>> visited(masterGrid.size(), vector<int>(masterGrid[0].size(), 0));
+  queue<pair<int, int>> q;
+  q.push({startRow, startCol});
+  visited[startRow][startCol] = 1;
+  distance[startRow][startCol] = 0;
+  while (!q.empty())
+  {
+    auto [row, col] = q.front();
+    q.pop();
+    if (row == targetRow && col == targetCol)
+    {
+      break;
+    }
+    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    for (auto [dx, dy] : directions)
+    {
+      int newRow = row + dx;
+      int newCol = col + dy;
+      if (newRow < 0 || newRow >= masterGrid.size() || newCol < 0 || newCol >= masterGrid[0].size())
+      {
+        continue;
+      }
+      if (visited[newRow][newCol] == 0 && masterGrid[newRow][newCol] != '#')
+      {
+        visited[newRow][newCol] = 1;
+        distance[newRow][newCol] = distance[row][col] + 1;
+        q.push({newRow, newCol});
+      }
+    }
+  }
+
+  cout << "Saving" << endl;
+
+  int part1 = 0;
+  for (int row = 0; row < distance.size(); row++)
+  {
+    for (int col = 0; col < distance[0].size(); col++)
+    {
+      cout << distance[row][col] << " ";
+      if (masterGrid[row][col] == '#')
+      {
+        continue;
+      }
+
+      for (auto [nr, nc] : vector<pair<int, int>>{{row + 2, col}, {row + 1, col + 1}, {row, col + 2}, {row - 1, col + 1}})
+      {
+        if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[0].size())
+        {
+          continue;
+        }
+        if (masterGrid[nr][nc] == '#')
+        {
+          continue;
+        }
+        if (abs(distance[row][col] - distance[nr][nc]) >= 102)
+        {
+          part1++;
+        }
+      }
+    }
+    cout << endl;
+  }
+  cout << "Part 1: " << part1 << endl;
+  return 0;
 }
