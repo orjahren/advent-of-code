@@ -119,6 +119,7 @@ int main()
         {
           int colDist = rad - rowDist;
 
+          set<pair<int, int>> seen;
           for (auto [nr, nc] : vector<pair<int, int>>{{row + rowDist, col + colDist}, {row + rowDist, col - colDist}, {row - rowDist, col + colDist}, {row - rowDist, col - colDist}})
           {
             if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[row].size())
@@ -129,6 +130,11 @@ int main()
             {
               continue;
             }
+            if (seen.count({nr, nc}))
+            {
+              continue;
+            }
+            seen.insert({nr, nc});
             if ((distance[row][col] - distance[nr][nc]) >= (100 + rad))
             {
               part2++;
