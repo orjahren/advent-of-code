@@ -122,24 +122,11 @@ int main()
           set<pair<int, int>> seen;
           for (auto [nr, nc] : vector<pair<int, int>>{{row + rowDist, col + colDist}, {row + rowDist, col - colDist}, {row - rowDist, col + colDist}, {row - rowDist, col - colDist}})
           {
-            if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[row].size())
-            {
+            if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[row].size() || masterGrid[nr][nc] == '#' || seen.count({nr, nc}))
               continue;
-            }
-            if (masterGrid[nr][nc] == '#')
-            {
-              continue;
-            }
-            if (seen.count({nr, nc}))
-            {
-              continue;
-            }
             seen.insert({nr, nc});
             if ((distance[row][col] - distance[nr][nc]) >= (100 + rad))
-            {
               part2++;
-              // cout << "nr: " << nr << ", nc: " << nc << ", distance[row][col]: " << distance[row][col] << ", distance[nr][nc]: " << distance[nr][nc] << ", part2: " << part2 << endl;
-            }
           }
         }
       }
@@ -147,9 +134,5 @@ int main()
   }
   cout << "Part 1: " << part1 << endl;
   cout << "Part 2: " << part2 << endl;
-  // 1094950 too high
-  // 1146285 too high
-  // 842467 too low
-  // 1039369 nondescript feil.
   return 0;
 }
