@@ -23,40 +23,20 @@ vector<vector<char>> getGridFromStdin()
 
 int main()
 {
-
   auto masterGrid = getGridFromStdin();
-  int startRow, startCol, targetRow, targetCol;
-
-  cout << "Master Grid" << endl;
-  cout << "-----------" << endl;
-  cout << masterGrid.size() << endl;
-  cout << masterGrid[0].size() << endl;
-  cout << "-----------" << endl;
-  for (int i = 0; i < masterGrid.size(); i++)
+  int row, col, part1, part2;
+  row = -1;
+  for (int i = 0; i < masterGrid.size() && row == -1; i++)
   {
     for (int j = 0; j < masterGrid[0].size(); j++)
     {
       if (masterGrid[i][j] == 'S')
       {
-        startRow = i;
-        startCol = j;
+        row = i;
+        col = j;
       }
-      else if (masterGrid[i][j] == 'E')
-      {
-        targetRow = i;
-        targetCol = j;
-      }
-
-      cout << masterGrid[i][j];
     }
-    cout << endl;
   }
-
-  cout << "Start Row: " << startRow << " Start Col: " << startCol << endl;
-  cout << "Target Row: " << targetRow << " Target Col: " << targetCol << endl;
-
-  int row = startRow;
-  int col = startCol;
 
   vector<vector<int>> distance(masterGrid.size(), vector<int>(masterGrid[0].size(), -1));
   distance[row][col] = 0;
@@ -82,35 +62,21 @@ int main()
     }
   }
 
-  cout << "Saving" << endl;
-
-  int part1 = 0;
-  int part2 = 0;
+  part1 = part2 = 0;
   for (row = 0; row < distance.size(); row++)
   {
     for (col = 0; col < distance[row].size(); col++)
     {
       if (masterGrid[row][col] == '#')
-      {
         continue;
-      }
-      // cout << distance[row][col] << " ";
-      // cout << endl;
+
       // Part 1
       for (auto [nr, nc] : vector<pair<int, int>>{{row + 2, col}, {row + 1, col + 1}, {row, col + 2}, {row - 1, col + 1}})
       {
-        if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[0].size())
-        {
+        if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[0].size() || masterGrid[nr][nc] == '#')
           continue;
-        }
-        if (masterGrid[nr][nc] == '#')
-        {
-          continue;
-        }
         if (abs(distance[row][col] - distance[nr][nc]) >= 102)
-        {
           part1++;
-        }
       }
       // Part 2
       for (int rad = 2; rad <= 20; rad++)
@@ -118,13 +84,10 @@ int main()
         for (int rowDist = 0; rowDist <= rad; rowDist++)
         {
           int colDist = rad - rowDist;
-
-          set<pair<int, int>> seen;
-          for (auto [nr, nc] : vector<pair<int, int>>{{row + rowDist, col + colDist}, {row + rowDist, col - colDist}, {row - rowDist, col + colDist}, {row - rowDist, col - colDist}})
+          for (auto [nr, nc] : set<pair<int, int>>{{row + rowDist, col + colDist}, {row + rowDist, col - colDist}, {row - rowDist, col + colDist}, {row - rowDist, col - colDist}})
           {
-            if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[row].size() || masterGrid[nr][nc] == '#' || seen.count({nr, nc}))
+            if (nr < 0 || nr >= masterGrid.size() || nc < 0 || nc >= masterGrid[row].size() || masterGrid[nr][nc] == '#')
               continue;
-            seen.insert({nr, nc});
             if ((distance[row][col] - distance[nr][nc]) >= (100 + rad))
               part2++;
           }
