@@ -30,7 +30,11 @@ type Monkey struct {
 
 func whereMonkeyHasDeltaSequence(monkey Monkey, sequence []int) int {
 	// TODO: Kan gjøre dette med builtins??
-	for i, delta := range monkey.deltas {
+	// TODO: Kan caches
+	// TODO: Kan hoppe typ 3 steg fremover hvis vi vet at det ikke er noen match
+	for i := 0; i < len(monkey.deltas); i++ {
+		delta := monkey.deltas[i]
+		//for i, delta := range monkey.deltas {
 		if delta == sequence[0] {
 			found := true
 			if i+len(sequence) > len(monkey.deltas) {
@@ -39,7 +43,9 @@ func whereMonkeyHasDeltaSequence(monkey Monkey, sequence []int) int {
 			for j, seqDelta := range sequence {
 				if monkey.deltas[i+j] != seqDelta {
 					found = false
+					i += j
 					break
+
 				}
 			}
 			if found {
@@ -51,24 +57,12 @@ func whereMonkeyHasDeltaSequence(monkey Monkey, sequence []int) int {
 }
 
 func getValueOfDeltaSequence(monkeys []Monkey, sequence []int) int {
-	ch := make(chan int)
-	defer close(ch)
-	for _, m := range monkeys {
-		go func() {
-			startIdx := whereMonkeyHasDeltaSequence(m, sequence)
-			if startIdx != -1 {
-
-				ch <- m.priceAtTime[startIdx+3]
-
-			} else {
-				ch <- 0
-			}
-		}()
-
-	}
 	sum := 0
-	for range monkeys {
-		sum += <-ch
+	for _, m := range monkeys {
+		startIdx := whereMonkeyHasDeltaSequence(m, sequence)
+		if startIdx != -1 {
+			sum += m.priceAtTime[startIdx+3]
+		}
 	}
 	return sum
 }
@@ -83,6 +77,7 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 	defer close(ch)
 	currMax := -1
 	var bestSequence []int
+	// indre løkke kjører 4 millioner ganger
 	for _, m := range monkeys {
 		for i := 0; i < 2000; i++ {
 			go func() {
@@ -99,8 +94,10 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 		}
 	}
 	deler := float64(len(monkeys))
+	// indre løkke kjører 4 millioner ganger
 	for counter := range monkeys {
 		percentage := float64(counter) / deler
+		fmt.Printf("Progress: %.2f%%\n", percentage*100)
 		for range 2000 {
 			res := <-ch
 			windowSum := res.value
@@ -110,7 +107,6 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 				bestSequence = seq
 			}
 		}
-		fmt.Printf("Progress: %.2f%%\n", percentage*100)
 	}
 	return bestSequence
 }
@@ -131,7 +127,6 @@ func getOptimalTimeToBuy(monkeys []Monkey) int {
 				ch <- 0
 			}
 		}()
-
 	}
 	res := 0
 	for range monkeys {
