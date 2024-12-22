@@ -83,7 +83,10 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 	defer close(ch)
 	currMax := -1
 	var bestSequence []int
-	for _, m := range monkeys {
+	for counter, m := range monkeys {
+		percentage := float64(counter) / float64(len(monkeys))
+		fmt.Printf("Progress: %.2f%%\n", percentage*100)
+
 		print("Skal sjekke monkey", m.secrets[0], "...")
 		for i := 0; i < 2000; i++ {
 			go func() {
