@@ -83,11 +83,7 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 	defer close(ch)
 	currMax := -1
 	var bestSequence []int
-	for counter, m := range monkeys {
-		percentage := float64(counter) / float64(len(monkeys))
-		fmt.Printf("Progress: %.2f%%\n", percentage*100)
-
-		print("Skal sjekke monkey", m.secrets[0], "...")
+	for _, m := range monkeys {
 		for i := 0; i < 2000; i++ {
 			go func() {
 				windowStart := i
@@ -98,11 +94,13 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 				}
 				seq := m.deltas[windowStart:windowEnd]
 				windowSum := getValueOfDeltaSequence(monkeys, seq)
-
 				ch <- SeqResult{seq, windowSum}
 			}()
 		}
-		print("...begynner å vente..")
+	}
+	deler := float64(len(monkeys))
+	for counter := range monkeys {
+		percentage := float64(counter) / deler
 		for range 2000 {
 			res := <-ch
 			windowSum := res.value
@@ -112,7 +110,7 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 				bestSequence = seq
 			}
 		}
-		println("..done")
+		fmt.Printf("Progress: %.2f%%\n", percentage*100)
 	}
 	return bestSequence
 }
