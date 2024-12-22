@@ -23,11 +23,25 @@ func readInput(scanner *bufio.Scanner) []int {
 }
 
 func getSecretNumber(n, k int) int {
-	res := n
+	secretNumber := n
 	for range k {
-		res = res * 252533 % 33554393
+		// step 1
+		tmp := secretNumber * 64
+		secretNumber ^= tmp
+		secretNumber %= 16777216
+
+		// step 2
+		tmp = secretNumber / 32
+		secretNumber ^= tmp
+		secretNumber %= 16777216
+
+		// step 3
+		tmp = secretNumber * 2048
+		secretNumber ^= tmp
+		secretNumber %= 16777216
+
 	}
-	return res
+	return secretNumber
 }
 
 func main() {
@@ -36,9 +50,11 @@ func main() {
 
 	p1 := 0
 	for _, x := range nums {
-		println(x)
+		print(x)
+		print(": ")
 		sn := getSecretNumber(x, 2000)
 		p1 += sn
+		println(sn)
 	}
 	fmt.Println("Part 1:", p1)
 
