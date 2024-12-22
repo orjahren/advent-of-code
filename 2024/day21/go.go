@@ -51,35 +51,65 @@ func whereMonkeyHasDeltaSequence(monkey Monkey, sequence []int) int {
 }
 
 func getValueOfDeltaSequence(monkeys []Monkey, sequence []int) int {
-	sum := 0
+	ch := make(chan int)
+	defer close(ch)
 	for _, m := range monkeys {
-		startIdx := whereMonkeyHasDeltaSequence(m, sequence)
-		if startIdx != -1 {
-			sum += m.priceAtTime[startIdx+3]
+		go func() {
+			startIdx := whereMonkeyHasDeltaSequence(m, sequence)
+			if startIdx != -1 {
 
-		}
+				ch <- m.priceAtTime[startIdx+3]
 
+			} else {
+				ch <- 0
+			}
+		}()
+
+	}
+	sum := 0
+	for range monkeys {
+		sum += <-ch
 	}
 	return sum
 }
 
+type SeqResult struct {
+	sequence []int
+	value    int
+}
+
 func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
+	ch := make(chan SeqResult)
+	defer close(ch)
 	currMax := -1
 	var bestSequence []int
 	for _, m := range monkeys {
+		print("Skal sjekke monkey", m.secrets[0], "...")
 		for i := 0; i < 2000; i++ {
-			windowStart := i
-			windowEnd := i + sequenceSize
-			if windowEnd > 2000 {
-				break
-			}
-			seq := m.deltas[windowStart:windowEnd]
-			windowSum := getValueOfDeltaSequence(monkeys, seq)
+			go func() {
+				windowStart := i
+				windowEnd := i + sequenceSize
+				if windowEnd > 2000 {
+					ch <- SeqResult{nil, -1}
+					return
+				}
+				seq := m.deltas[windowStart:windowEnd]
+				windowSum := getValueOfDeltaSequence(monkeys, seq)
+
+				ch <- SeqResult{seq, windowSum}
+			}()
+		}
+		print("...begynner å vente..")
+		for range 2000 {
+			res := <-ch
+			windowSum := res.value
+			seq := res.sequence
 			if windowSum > currMax {
 				currMax = windowSum
 				bestSequence = seq
 			}
 		}
+		println("..done")
 	}
 	return bestSequence
 }
@@ -88,13 +118,23 @@ func getOptimalTimeToBuy(monkeys []Monkey) int {
 	bestSequence := getBestDeltaSequence(monkeys, 4)
 	fmt.Println("Best sequence:", bestSequence)
 
-	res := 0
+	ch := make(chan int)
+	defer close(ch)
 	for _, m := range monkeys {
-		idx := whereMonkeyHasDeltaSequence(m, bestSequence)
-		if idx != -1 {
-			println("Monkey", m.secrets[0], " selger på index:", idx)
-			res += m.priceAtTime[idx+3]
-		}
+		go func() {
+			idx := whereMonkeyHasDeltaSequence(m, bestSequence)
+			if idx != -1 {
+				println("Monkey", m.secrets[0], " selger på index:", idx)
+				ch <- m.priceAtTime[idx+3]
+			} else {
+				ch <- 0
+			}
+		}()
+
+	}
+	res := 0
+	for range monkeys {
+		res += <-ch
 	}
 
 	return res
