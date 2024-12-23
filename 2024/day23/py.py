@@ -13,29 +13,26 @@ def p1(adjecency_list):
     print(graph)
 
     res = 0
-    seen = set()
+    used_sets = set()
+    results = []
     for node, edges in graph.items():
-        if node in seen:
-            continue
-        seen.add(node)
         print(node, edges)
-        edge_set = set(edges)
         for x in edges:
+            for y in graph[x]:
+                if y in edges:
+                    s = "".join(sorted([node, x, y]))
+                    print("Vurderer", node, x, y, s)
+                    if "t" in [v[0] for v in [node, x, y]]:
+                        if s not in used_sets:
+                            print("found", node, x, y)
+                            res += 1
+                            results.append((sorted([node, x, y])))
+                        used_sets.add(s)
 
-            if x in seen:
-                continue
-            seen.add(x)
-            neighbor_edges = graph[x]
-            neighbor_edge_set = set(neighbor_edges)
-
-            for y in neighbor_edges:
-                if y not in seen:
-                    continue
-                seen.add(y)
-
-                if y in edge_set:
-                    res += 1
-
+    print(used_sets)
+    print(results)
+    for x in sorted(results):
+        print(x)
     return res
 
 
@@ -45,6 +42,7 @@ def main():
 
     print("Part 1:", p1(adjecency_list))
     # 2490 too high
+    # 2298 too high
 
 
 if __name__ == "__main__":
