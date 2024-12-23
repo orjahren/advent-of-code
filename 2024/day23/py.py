@@ -25,31 +25,17 @@ def p2(graph):
             rec(x, required | {x})
     for node in graph:
         rec(node,  {node})
-
-    ret = max(res, key=len)
-    return ",".join(sorted(ret, key=lambda x: x))
+    return ",".join(sorted(max(res, key=len)))
 
 
-def main():
-    adjecency_list = [x.split("-") for x in open(0).read().splitlines() if x]
-    print(adjecency_list)
+graph = {}
+for a, b in [x.split("-") for x in open(0).read().splitlines() if x]:
+    if a not in graph:
+        graph[a] = []
+    if b not in graph:
+        graph[b] = []
+    graph[a].append(b)
+    graph[b].append(a)
 
-    graph = {}
-    for a, b in adjecency_list:
-        if a not in graph:
-            graph[a] = []
-        if b not in graph:
-            graph[b] = []
-        graph[a].append(b)
-        graph[b].append(a)
-    print(graph)
-
-    part1 = p1(graph)
-    print("Part 1:", part1)
-
-    part2 = p2(graph)
-    print("Part 2:", part2)
-
-
-if __name__ == "__main__":
-    main()
+print("Part 1:", p1(graph))
+print("Part 2:", p2(graph))
