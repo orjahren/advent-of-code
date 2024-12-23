@@ -28,24 +28,19 @@ type Monkey struct {
 	sellWhen                     int
 }
 
+// TODO: Kan caches
 func whereMonkeyHasDeltaSequence(monkey Monkey, sequence []int) int {
-	// TODO: Kan gjøre dette med builtins??
-	// TODO: Kan caches
-	// TODO: Kan hoppe typ 3 steg fremover hvis vi vet at det ikke er noen match
 	for i := 0; i < len(monkey.deltas); i++ {
 		delta := monkey.deltas[i]
-		//for i, delta := range monkey.deltas {
 		if delta == sequence[0] {
-			found := true
 			if i+len(sequence) > len(monkey.deltas) {
 				break
 			}
+			found := true
 			for j, seqDelta := range sequence {
 				if monkey.deltas[i+j] != seqDelta {
 					found = false
-					i += j
 					break
-
 				}
 			}
 			if found {
@@ -57,14 +52,14 @@ func whereMonkeyHasDeltaSequence(monkey Monkey, sequence []int) int {
 }
 
 func getValueOfDeltaSequence(monkeys []Monkey, sequence []int) int {
-	sum := 0
+	value := 0
 	for _, m := range monkeys {
 		startIdx := whereMonkeyHasDeltaSequence(m, sequence)
 		if startIdx != -1 {
-			sum += m.priceAtTime[startIdx+3]
+			value += m.priceAtTime[startIdx+3]
 		}
 	}
-	return sum
+	return value
 }
 
 type SeqResult struct {
@@ -78,7 +73,10 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 	currMax := -1
 	var bestSequence []int
 	// indre løkke kjører 4 millioner ganger
-	for _, m := range monkeys {
+	deler := float64(len(monkeys))
+	for counter, m := range monkeys {
+		percentage := float64(counter) / deler
+		fmt.Printf("Initializing goroutines: %.2f%%\n", percentage*100)
 		for i := 0; i < 2000; i++ {
 			go func() {
 				windowStart := i
@@ -93,11 +91,10 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 			}()
 		}
 	}
-	deler := float64(len(monkeys))
 	// indre løkke kjører 4 millioner ganger
 	for counter := range monkeys {
 		percentage := float64(counter) / deler
-		fmt.Printf("Progress: %.2f%%\n", percentage*100)
+		fmt.Printf("Reading values: %.2f%%\n", percentage*100)
 		for range 2000 {
 			res := <-ch
 			windowSum := res.value
@@ -113,26 +110,13 @@ func getBestDeltaSequence(monkeys []Monkey, sequenceSize int) []int {
 
 func getOptimalTimeToBuy(monkeys []Monkey) int {
 	bestSequence := getBestDeltaSequence(monkeys, 4)
-	fmt.Println("Best sequence:", bestSequence)
-
-	ch := make(chan int)
-	defer close(ch)
-	for _, m := range monkeys {
-		go func() {
-			idx := whereMonkeyHasDeltaSequence(m, bestSequence)
-			if idx != -1 {
-				println("Monkey", m.secrets[0], " selger på index:", idx)
-				ch <- m.priceAtTime[idx+3]
-			} else {
-				ch <- 0
-			}
-		}()
-	}
 	res := 0
-	for range monkeys {
-		res += <-ch
+	for _, m := range monkeys {
+		idx := whereMonkeyHasDeltaSequence(m, bestSequence)
+		if idx != -1 {
+			res += m.priceAtTime[idx+3]
+		}
 	}
-
 	return res
 }
 
@@ -140,13 +124,9 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	nums := readInput(scanner)
 
-	// nums = []int{123}
-
 	p1 := 0
 	monkeys := make([]Monkey, 0)
 	for _, x := range nums {
-		print(x)
-		print(": ")
 		m := Monkey{x, make([]int, 0), make([]int, 0), make([]int, 0), -1}
 		m.secrets = append(m.secrets, x)
 		m.deltas = append(m.deltas, x%10)
@@ -179,7 +159,6 @@ func main() {
 			m.priceAtTime = append(m.priceAtTime, lastDigit)
 		}
 		monkeys = append(monkeys, m)
-		println(m.secrets[2000])
 		p1 += m.secrets[2000]
 	}
 	fmt.Println("Part 1:", p1)
