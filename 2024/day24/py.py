@@ -9,3 +9,9 @@ print(lines)
 
 print(initial)
 print(commands)
+
+values = {}
+for x in initial:
+    key, val = x.split(": ")
+    values[key] = int(val)
+    print(key, val)
