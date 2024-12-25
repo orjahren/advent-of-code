@@ -30,8 +30,6 @@ pair<vector<vector<string>>, vector<vector<string>>> readInput()
 
 int *objToNumbers(vector<string> obj, string blockChar)
 {
-  int *numbers = new int[5];
-  // find height of each column
   int height = obj.size();
   int width = obj[0].size();
   int *columnHeights = new int[width];
@@ -62,82 +60,32 @@ int *objToNumbers(vector<string> obj, string blockChar)
 
 bool lockAndKeyOverlap(int *lock, int *key)
 {
-  cout << "Checking overlap between lock and key" << endl;
-  cout << "Lock: ";
-  for (int i = 0; i < 5; i++)
-  {
-    cout << lock[i] << " ";
-  }
-  cout << endl;
-  cout << "Key: ";
-  for (int i = 0; i < 5; i++)
-  {
-    cout << key[i] << " ";
-  }
-  cout << endl;
   for (int i = 0; i < 5; i++)
   {
     if ((lock[i] + key[i]) > 5)
     {
-      cout << "\t Overlap FOUND in column " << i << endl;
       return true;
     }
   }
-  cout << "No overlap" << endl;
   return false;
 }
 
 int main()
 {
-
   auto [locks, keys] = readInput();
-  cout << "Locks: " << locks.size() << endl;
+
   int **lockNumberPtrs = new int *[locks.size()];
   for (int i = 0; i < locks.size(); i++)
-  {
-    auto &lock = locks[i];
-    for (auto &line : lock)
-    {
-      cout << line << endl;
-    }
-    lockNumberPtrs[i] = objToNumbers(lock, "#");
-    for (int j = 0; j < 5; j++)
-    {
-      cout << lockNumberPtrs[i][j] << " ";
-    }
-    cout << endl;
-  }
-  cout << "Keys: " << keys.size() << endl;
+    lockNumberPtrs[i] = objToNumbers(locks[i], "#");
+
   int **keyNumberPtrs = new int *[keys.size()];
   for (int i = 0; i < keys.size(); i++)
-  {
-    auto &key = keys[i];
-    for (auto &line : key)
-    {
-      cout << line << endl;
-    }
-    keyNumberPtrs[i] = objToNumbers(key, ".");
-    for (int j = 0; j < 5; j++)
-    {
-      cout << keyNumberPtrs[i][j] << " ";
-    }
-    cout << endl;
-  }
+    keyNumberPtrs[i] = objToNumbers(keys[i], ".");
 
   int res = 0;
   for (int i = 0; i < locks.size(); i++)
-  {
     for (int j = 0; j < keys.size(); j++)
-    {
-      if (lockAndKeyOverlap(lockNumberPtrs[i], keyNumberPtrs[j]))
-      {
-      }
-      else
-      {
+      if (!lockAndKeyOverlap(lockNumberPtrs[i], keyNumberPtrs[j]))
         res++;
-      }
-    }
-  }
   cout << "Part 1: " << res << endl;
-  // 59615 too high
 }
