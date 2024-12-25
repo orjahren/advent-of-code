@@ -60,6 +60,33 @@ int *objToNumbers(vector<string> obj, string blockChar)
   return columnHeights;
 }
 
+bool lockAndKeyOverlap(int *lock, int *key)
+{
+  cout << "Checking overlap between lock and key" << endl;
+  cout << "Lock: ";
+  for (int i = 0; i < 5; i++)
+  {
+    cout << lock[i] << " ";
+  }
+  cout << endl;
+  cout << "Key: ";
+  for (int i = 0; i < 5; i++)
+  {
+    cout << key[i] << " ";
+  }
+  cout << endl;
+  for (int i = 0; i < 5; i++)
+  {
+    if ((lock[i] + key[i]) > 5)
+    {
+      cout << "\t Overlap FOUND in column " << i << endl;
+      return true;
+    }
+  }
+  cout << "No overlap" << endl;
+  return false;
+}
+
 int main()
 {
 
@@ -96,4 +123,21 @@ int main()
     }
     cout << endl;
   }
+
+  int res = 0;
+  for (int i = 0; i < locks.size(); i++)
+  {
+    for (int j = 0; j < keys.size(); j++)
+    {
+      if (lockAndKeyOverlap(lockNumberPtrs[i], keyNumberPtrs[j]))
+      {
+      }
+      else
+      {
+        res++;
+      }
+    }
+  }
+  cout << "Part 1: " << res << endl;
+  // 59615 too high
 }
