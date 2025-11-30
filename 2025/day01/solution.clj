@@ -1,12 +1,14 @@
-(ns aoc-25-1)
+(ns solution)
 (defn say [what]
-   (println what))
+  (println what))
 (say "Hello from the otter slide")
 
 (defn read-file [file-name]
-    (def content (slurp file-name))
+  ;(say (str "Filnavnet er " file-name))
+  (let [content (slurp file-name)]
     ;(println content)
-    content)
+    content))
 
+;(def input (read-file 'test-input))
 (def input (read-file "test-input"))
 (say input)
