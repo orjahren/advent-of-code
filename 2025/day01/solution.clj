@@ -10,23 +10,40 @@
     ;(println content)
     content))
 
+; Source - https://stackoverflow.com/a/12503724
+; Posted by jhnstn
+; Retrieved 2025-12-01, License - CC BY-SA 3.0
+(defn parse-int [s]
+  (Integer. (re-find  #"\d+" s)))
 
-;(defn rotate [direction old-state new-state]
-(defn rotate [direction]
-  (say (str "Direction: " direction))
+(defn wrap-100 [n]
+  (mod (+ n 100) 100))
+
+
+(defn rotate [direction old-state]
+  (say (str "\t --- Direction: " direction "---"))
   ;(say (get direction 0))
-  (let [distance (subs direction 1)]
-    ;(say distance)
-    (if (identical? (get direction 0) \L) (say (str "Left med dist: " distance)) (say (str "Høgern med dist " distance))))
-  direction)
+  (println "Old state: " old-state)
+  (let [distance (parse-int direction)]
+    (say distance)
+    (let [new-state (wrap-100 (if (identical? (get direction 0) \L)
+                                (do (println "Left med dist:" distance) (- old-state distance))
+                                (do (println "Høgern med dist " distance) (+ old-state distance))))]
+      (println "New state:" new-state) new-state)))
 
 (defn solve [file-name]
 ;(def input (read-file 'test-input))
   (let [lines (clojure.string/split-lines (read-file file-name))]
     ;(say lines)))
     (say "Will map lines")
-    (let [curr 50])
-    (let [new-state (map rotate lines)] (say new-state))))
+    (let [final-state
+          (reduce
+           (fn [curr line]
+             (println 'curr "er nå " curr)
+             (rotate line curr))
+           50
+           lines)]
+      (println "Final state: " final-state))))
 
 
 (solve "example")
