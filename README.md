@@ -69,3 +69,11 @@ Only completed part 1.
 </details>
 
 ## 2024
+
+## 2025
+
+I solved [day 1](./2025/day01/solution.sim) in Simula, which is cool. Stumpled
+accross
+[https://portablesimula.github.io/github.io/](https://portablesimula.github.io/github.io/).
+
+Will try to get C++ to overtake Go as the main repo language this year.
