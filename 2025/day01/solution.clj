@@ -27,6 +27,7 @@
   (let [distance (parse-int direction)]
     (say distance)
     (let [new-state (wrap-100 (if (identical? (get direction 0) \L)
+                                ; TODO: Må være mulig å forenkle dette. Hente ut +/- og så applisere det generisk
                                 (do (println "Left med dist:" distance) (- old-state distance))
                                 (do (println "Høgern med dist " distance) (+ old-state distance))))]
       (println "New state:" new-state) new-state)))
@@ -35,15 +36,20 @@
 ;(def input (read-file 'test-input))
   (let [lines (clojure.string/split-lines (read-file file-name))]
     ;(say lines)))
-    (say "Will map lines")
-    (let [final-state
-          (reduce
-           (fn [curr line]
-             (println 'curr "er nå " curr)
-             (rotate line curr))
-           50
-           lines)]
-      (println "Final state: " final-state))))
+    ;(say "Will map lines")
+    (let [states (reductions
+                  (fn [curr line]
+                    ;(println 'curr "er nå" curr)
+                    (rotate line curr))
+                  50
+                  lines)
+          zeros (count (filter #(= 0 %) states))]
+
+      (doseq [s states] (println "State:" s))
+      ;(println "Final state:" (last states))
+      (println states)
+      (println "Part 1:" zeros))))
 
 
-(solve "example")
+; (solve "example")
+(solve "input")
