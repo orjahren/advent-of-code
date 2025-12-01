@@ -1,5 +1,5 @@
 begin
-   integer curr, val, part1, part2,i;
+   integer curr, val, part1, part2, i;
    ref (InFile) Inf;
    text T, token, inpFileName, direction, valStem;
    OutText ("AoC 2025 day 1");
@@ -30,23 +30,20 @@ begin
 
       if direction="L" then
       begin
-         for i:=0 step 1 until val - 1 do
+         for i:=1 step 1 until val do
          begin
-            curr := curr - 1
-            curr := mod(curr, 100);
+            curr := mod(curr - 1, 100);
 
             if curr = 0 then
             begin
                part2 := part2 + 1;
             end;
          end
-
       end
       else begin
-         for i:=0 step 1 until val - 1 do
+         for i:=1 step 1 until val do
          begin
-            curr := curr + 1
-            curr := mod(curr, 100);
+            curr := mod(curr + 1, 100);
 
             if curr = 0 then
             begin
@@ -70,6 +67,4 @@ begin
    OutText("Part 2: ");
    outint(part2, 4);
    Outimage;
-
-
 end
