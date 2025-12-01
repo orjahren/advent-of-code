@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]))
 (defn say [what]
   (println what))
-(say "Hello from the otter slide")
+; (say "Hello from the otter slide")
 
 (defn read-file [file-name]
   ;(say (str "Filnavnet er " file-name))
@@ -16,40 +16,77 @@
 (defn parse-int [s]
   (Integer. (re-find  #"\d+" s)))
 
-(defn wrap-100 [n]
-  (mod (+ n 100) 100))
 
+(defn part1 [lines]
 
-(defn rotate [direction old-state]
-  (say (str "\t --- Direction: " direction "---"))
+  (defn wrap-100 [n]
+    (mod (+ n 100) 100))
+
+  (defn rotate [direction old-state]
+    ;(say (str "\t --- Direction: " direction "---"))
   ;(say (get direction 0))
-  (println "Old state: " old-state)
-  (let [distance (parse-int direction)]
-    (say distance)
-    (let [new-state (wrap-100 (if (identical? (get direction 0) \L)
+    ;(println "Old state: " old-state)
+    (let [distance (parse-int direction)]
+      ;(say distance)
+      (let [new-state (wrap-100 (if (identical? (get direction 0) \L)
                                 ; TODO: Må være mulig å forenkle dette. Hente ut +/- og så applisere det generisk
-                                (do (println "Left med dist:" distance) (- old-state distance))
-                                (do (println "Høgern med dist " distance) (+ old-state distance))))]
-      (println "New state:" new-state) new-state)))
+                                  (- old-state distance)
+                                  (+ old-state distance)))]
+         new-state)))
+
+  (let [states (reductions
+                (fn [curr line]
+                    ;(println 'curr "er nå" curr)
+                  (rotate line curr))
+                50
+                lines)
+        zeros (count (filter #(= 0 %) states))]
+
+    ; (doseq [s states] (println "State:" s))
+      ;(println "Final state:" (last states))
+    (println states)
+    (println "Part 1:" zeros)))
+
+(defn part2 [lines]
+
+  (defn wrap-100 [n]
+    (mod (+ n 100) 100))
+
+  (defn rotate [direction old-state]
+    (say (str "\t --- Direction: " direction "---"))
+  ;(say (get direction 0))
+    (println "Old state: " old-state)
+    (let [distance (parse-int direction)]
+      (say distance)
+      (let [new-state (wrap-100 (if (identical? (get direction 0) \L)
+                                ; TODO: Må være mulig å forenkle dette. Hente ut +/- og så applisere det generisk
+                                  (do (println "Left med dist:" distance) (- old-state distance))
+                                  (do (println "Høgern med dist " distance) (+ old-state distance))))]
+        (println "New state:" new-state) new-state)))
+
+  (let [states (reductions
+                (fn [curr line]
+                    ;(println 'curr "er nå" curr)
+                  (rotate line curr))
+                50
+                lines)
+        zeros (count (filter #(= 0 %) states))]
+
+    (doseq [s states] (println "State:" s))
+      ;(println "Final state:" (last states))
+    (println states)
+    (println "Part 2:" zeros)))
+ 
+ 
 
 (defn solve [file-name]
 ;(def input (read-file 'test-input))
   (let [lines (clojure.string/split-lines (read-file file-name))]
     ;(say lines)))
     ;(say "Will map lines")
-    (let [states (reductions
-                  (fn [curr line]
-                    ;(println 'curr "er nå" curr)
-                    (rotate line curr))
-                  50
-                  lines)
-          zeros (count (filter #(= 0 %) states))]
-
-      (doseq [s states] (println "State:" s))
-      ;(println "Final state:" (last states))
-      (println states)
-      (println "Part 1:" zeros))))
+    (part1 lines)))
+    ;(part2 lines)))
 
 
-; (solve "example")
-(solve "input")
+(solve "example")
+; (solve "input")
