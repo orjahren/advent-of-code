@@ -1,20 +1,11 @@
 begin
-   integer curr;
+   integer curr, val, part1, part2,i;
    ref (InFile) Inf;
-   text T;
-   text token;
-   text inpFileName;
-   text direction;
-   integer val;
-   text valStem;
-   integer part1;
-   integer part2;
-   integer i;
+   text T, token, inpFileName, direction, valStem;
    OutText ("AoC 2025 day 1");
    Outimage;
 
    direction :- Blanks(1)
-   comment val :- Blanks(2);
 
    inpFileName :- Blanks(10)
    inpFileName :- "input";
@@ -22,41 +13,23 @@ begin
 
    part1 := 0;
    part2 := 0;
-   
-
    curr := 50;
-   OutText ("Curr er borte men kjørrr");
-   Outimage;
-   OutInt(curr, 4);
-   Outimage;
-  Inf :- new InFile(inpFileName);
-   comment Inf :- new InFile("input");
-   comment Inf :- new InFile("example");
+
+   Inf :- new InFile(inpFileName);
    Inf.Open(Blanks(4)); comment tallet er linjelengde!;
 
    while not inf.LastItem do 
    begin 
       token :- inf.Image;
-      OutText(token);
+      OutText(token); comment jeg ANER ikke hvorfor, men det funker ikke uten denne printen;
       direction := token.sub(1, 1);
-      OutText(direction);
-      Outimage;
 
       valStem :- Blanks(token.length - 1)
       valStem := token.sub(2, token.length-1)
       val := valStem.getint;
-      OutInt(val, 4);
-      Outimage;
 
-
-      comment if direction = "L" then;
       if direction="L" then
       begin
-         OutText("Skal gå mot venstre :)")
-
-         comment curr := curr - val;
-
-         comment while i le val do;
          for i:=0 step 1 until val - 1 do
          begin
             curr := curr - 1
@@ -68,14 +41,8 @@ begin
             end;
          end
 
-
       end
       else begin
-         OutText("Skal gå mot høyre :)")
-
-         comment curr := curr + val;
-
-         comment while i le val do;
          for i:=0 step 1 until val - 1 do
          begin
             curr := curr + 1
@@ -87,29 +54,16 @@ begin
             end;
          end
       end;
-      Outimage;
-
-      comment curr := mod(curr, 100);
 
       if curr = 0 then
       begin
          part1 := part1 + 1;
-         OutText("\tER PÅ 0");
-         Outimage;
       end;
-
-
-      OutText("Curr etter det:");
-      OutInt(curr, 4);
-      Outimage;
 
    end;
    inf.close;
-   comment Inf.InImage;
-   comment T :- Inf.Image;
-   comment OutText(t);
-   comment Outimage;
 
+   Outimage;
    OutText("Part 1: ");
    outint(part1, 4);
    Outimage;
