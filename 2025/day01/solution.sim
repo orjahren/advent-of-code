@@ -4,11 +4,15 @@ begin
    text T;
    text token;
    text inpFileName;
+   text direction;
    OutText ("AoC 2025 day 1");
    Outimage;
 
+   direction :- Blanks(1)
+
    inpFileName :- Blanks(10)
-   inpFileName := "input";
+   comment inpFileName :- "input";
+   inpFileName :- "example";
    
 
    curr := 50;
@@ -16,16 +20,30 @@ begin
    Outimage;
    OutInt(curr, 4);
    Outimage;
-   comment Inf :- new InFile(inpFileName);
-   Inf :- new InFile("input");
-   Inf.Open(Blanks(800)); comment tallet er linjelengde!;
+  Inf :- new InFile(inpFileName);
+   comment Inf :- new InFile("input");
+   comment Inf :- new InFile("example");
+   Inf.Open(Blanks(4)); comment tallet er linjelengde!;
 
    while not inf.LastItem do 
    begin 
       token :- inf.Image;
       OutText(token);
+      direction := token.sub(1, 1);
+      OutText(direction);
+      Outimage;
+
+      comment if direction = "L" then;
+      if direction="L" then
+      begin
+         OutText("Skal gå mot venstre :)")
+      end
+      else begin
+         OutText("Skal gå mot høyre :)")
+      end;
+      Outimage;
+
    end;
-   Outimage;
    inf.close
    comment Inf.InImage;
    comment T :- Inf.Image;
