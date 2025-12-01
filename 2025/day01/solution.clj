@@ -1,4 +1,5 @@
-(ns solution)
+(ns solution
+  (:require [clojure.string :as str]))
 (defn say [what]
   (println what))
 (say "Hello from the otter slide")
@@ -9,6 +10,10 @@
     ;(println content)
     content))
 
+(defn solve [file-name]
 ;(def input (read-file 'test-input))
-(def input (read-file "test-input"))
-(say input)
+  (let [lines (clojure.string/split-lines (read-file file-name))]
+    (say lines)))
+
+
+(solve "example")
