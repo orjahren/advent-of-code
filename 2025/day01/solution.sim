@@ -8,6 +8,8 @@ begin
    integer val;
    text valStem;
    integer part1;
+   integer part2;
+   integer i;
    OutText ("AoC 2025 day 1");
    Outimage;
 
@@ -19,6 +21,7 @@ begin
    comment inpFileName :- "example";
 
    part1 := 0;
+   part2 := 0;
    
 
    curr := 50;
@@ -51,16 +54,42 @@ begin
       begin
          OutText("Skal gå mot venstre :)")
 
-         curr := curr - val
+         comment curr := curr - val;
+
+         comment while i le val do;
+         for i:=0 step 1 until val - 1 do
+         begin
+            curr := curr - 1
+            curr := mod(curr, 100);
+
+            if curr = 0 then
+            begin
+               part2 := part2 + 1;
+            end;
+         end
+
+
       end
       else begin
          OutText("Skal gå mot høyre :)")
 
-         curr := curr + val
+         comment curr := curr + val;
+
+         comment while i le val do;
+         for i:=0 step 1 until val - 1 do
+         begin
+            curr := curr + 1
+            curr := mod(curr, 100);
+
+            if curr = 0 then
+            begin
+               part2 := part2 + 1;
+            end;
+         end
       end;
       Outimage;
 
-      curr := mod(curr, 100);
+      comment curr := mod(curr, 100);
 
       if curr = 0 then
       begin
@@ -83,6 +112,9 @@ begin
 
    OutText("Part 1: ");
    outint(part1, 4);
+   Outimage;
+   OutText("Part 2: ");
+   outint(part2, 4);
    Outimage;
 
 
