@@ -1,0 +1,36 @@
+begin
+   integer curr;
+   ref (InFile) Inf;
+   text T;
+   text token;
+   text inpFileName;
+   OutText ("AoC 2025 day 1");
+   Outimage;
+
+   inpFileName :- Blanks(10)
+   inpFileName := "input";
+   
+
+   curr := 50;
+   OutText ("Curr er borte men kjørrr");
+   Outimage;
+   OutInt(curr, 4);
+   Outimage;
+   comment Inf :- new InFile(inpFileName);
+   Inf :- new InFile("input");
+   Inf.Open(Blanks(800)); comment tallet er linjelengde!;
+
+   while not inf.LastItem do 
+   begin 
+      token :- inf.Image;
+      OutText(token);
+   end;
+   Outimage;
+   inf.close
+   comment Inf.InImage;
+   comment T :- Inf.Image;
+   comment OutText(t);
+   comment Outimage;
+
+
+end
