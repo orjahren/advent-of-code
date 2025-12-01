@@ -63,25 +63,26 @@
       ;(say distance)
       (let [new-state (wrap-100 (if (identical? (get direction 0) \L)
                                 ; TODO: Må være mulig å forenkle dette. Hente ut +/- og så applisere det generisk
-                                  ;(do (println "Left med dist:" distance) (- old-state distance))
-                                  ;(do (println "Høgern med dist " distance) (+ old-state distance))))]
                                   (- old-state distance)
                                   (+ old-state distance)))]
         ;(println "New state:" new-state) new-state)))
         new-state)))
 
-  (let [states (reductions
-                (fn [curr line]
-                    ;(println 'curr "er nå" curr)
-                  (rotate line curr))
-                50
-                lines)
-        zeros (count (filter #(= 0 %) states))]
+  (let [{:keys [states wrap-count]}
+        (reduce
+          (fn [{:keys [curr wrap-count states]} line]
+            (let [distance (parse-int line)
+                  delta    (if (identical? (get line 0) \L) (- distance) distance)
+                  next     (+ curr delta)
+                  wraps    (Math/abs (Math/floorDiv (long next) 100))
+                  wrapped  (mod (+ next 100) 100)]
+              {:curr wrapped
+               :wrap-count (+ wrap-count wraps)
+               :states (conj states wrapped)}))
+          {:curr 50 :wrap-count 0 :states [50]}
+          lines)]
+    (println "Part 2:" wrap-count)))
 
-    (doseq [s states] (println "State:" s))
-      ;(println "Final state:" (last states))
-    (println states)
-    (println "Part 2:" zeros)))
  
  
 
@@ -92,7 +93,8 @@
     ;(say "Will map lines")
     ;(part1 lines)))
     (part2 lines)))
+    ; p2: 6580 too high
 
 
-(solve "example")
-; (solve "input")
+;(solve "example")
+(solve "input")
