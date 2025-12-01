@@ -49,20 +49,26 @@
 
 (defn part2 [lines]
 
-  (defn wrap-100 [n]
-    (mod (+ n 100) 100))
+    (defn wrap-100 [n]
+      (let [wrapped (mod (+ n 100) 100)
+            wraps   (Math/abs (Math/floorDiv (long n) 100))]
+        (println "n-wraps:" wraps)
+        wrapped))
 
   (defn rotate [direction old-state]
-    (say (str "\t --- Direction: " direction "---"))
+    ;(say (str "\t --- Direction: " direction "---"))
   ;(say (get direction 0))
-    (println "Old state: " old-state)
+    ;(println "Old state: " old-state)
     (let [distance (parse-int direction)]
-      (say distance)
+      ;(say distance)
       (let [new-state (wrap-100 (if (identical? (get direction 0) \L)
                                 ; TODO: Må være mulig å forenkle dette. Hente ut +/- og så applisere det generisk
-                                  (do (println "Left med dist:" distance) (- old-state distance))
-                                  (do (println "Høgern med dist " distance) (+ old-state distance))))]
-        (println "New state:" new-state) new-state)))
+                                  ;(do (println "Left med dist:" distance) (- old-state distance))
+                                  ;(do (println "Høgern med dist " distance) (+ old-state distance))))]
+                                  (- old-state distance)
+                                  (+ old-state distance)))]
+        ;(println "New state:" new-state) new-state)))
+        new-state)))
 
   (let [states (reductions
                 (fn [curr line]
@@ -84,8 +90,8 @@
   (let [lines (clojure.string/split-lines (read-file file-name))]
     ;(say lines)))
     ;(say "Will map lines")
-    (part1 lines)))
-    ;(part2 lines)))
+    ;(part1 lines)))
+    (part2 lines)))
 
 
 (solve "example")
