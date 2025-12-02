@@ -21,15 +21,13 @@ class Pair {
 class Solution {
 
     public final static boolean DEBUG = false;
-
-    private final String line;
-    private final int nThreads;
-
     public long p1Seq, p2Seq, p2Par;
 
+    private final int nThreads;
+
     Solution(final String line) {
-        this.line = line;
         this.nThreads = Runtime.getRuntime().availableProcessors();
+        solve(line);
     }
 
     private static Pair morphemeToPair(final String morpheme) {
@@ -114,7 +112,7 @@ class Solution {
 
     }
 
-    public long solveSeq(final List<Pair> pairs) {
+    private long solveSeq(final List<Pair> pairs) {
         long numInvalidIds = 0;
         for (Pair p : pairs) {
             if (DEBUG)
@@ -163,7 +161,7 @@ class Solution {
         }
     }
 
-    public long solvePar(final List<Pair> pairs) {
+    private long solvePar(final List<Pair> pairs) {
 
         AoCSolver[] threads = new AoCSolver[nThreads];
 
@@ -190,13 +188,36 @@ class Solution {
 
     }
 
-    public String solve() {
-        final List<Pair> pairs = lineToPairs(this.line);
+    private String solve(final String line) {
+        final List<Pair> pairs = lineToPairs(line);
 
         if (DEBUG)
             System.out.println("Pairs:");
         if (DEBUG)
             System.out.println(pairs);
+
+        Thread p1Solver = new Thread() {
+            @Override
+            public void run() {
+                long numInvalidIds = 0;
+                for (Pair p : pairs) {
+                    if (DEBUG)
+                        System.out.println("\t ---- Pair: " + p);
+                    for (long i = p.left; i <= p.right; i++) {
+                        if (!idIsValidP1(i)) {
+                            if (DEBUG)
+                                System.out.println("Iden " + i + " er invalid");
+                            numInvalidIds += i;
+                        }
+
+                    }
+                    if (DEBUG)
+                        System.out.println("\n\n");
+                }
+                p1Seq = numInvalidIds;
+            }
+        };
+        p1Solver.start();
 
         final long startTimeSeq = System.nanoTime();
         final long seqSolution = solveSeq(pairs);
@@ -245,9 +266,11 @@ class Solution {
         if (DEBUG)
             System.out.println(input);
 
-        final Solution solver = new Solution(input);
-        final String answer = solver.solve();
-        System.out.println("Answer: " + answer);
+        final Solution solution = new Solution(input);
+        final long p1 = solution.p1Seq;
+        final long p2 = solution.p2Par;
+        System.out.println("Part 1: " + p1);
+        System.out.println("Part 2: " + p2);
 
     }
 }
