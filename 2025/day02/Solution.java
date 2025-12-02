@@ -2,8 +2,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 class Pair {
@@ -39,7 +42,7 @@ class Solution {
         return Arrays.stream(spl).map(Solution::morphemeToPair).toList();
     }
 
-    private boolean idIsValid(long id) {
+    private boolean idIsValidP1(long id) {
         final String idAsString = String.valueOf(id);
 
         int middle = idAsString.length() / 2;
@@ -53,13 +56,68 @@ class Solution {
 
     }
 
+    private List<String> getShingles(final String stem) {
+        final Set<String> shingleSet = new HashSet<>();
+        for (int i = 1; i < stem.length(); i++) {
+            final String shingle = stem.substring(0, i);
+            shingleSet.add(shingle);
+        }
+
+        // Deduplicate
+        final List<String> res = new ArrayList<>();
+        // TODO: Finnes noe fancy syntax for dette?
+        for (String s : shingleSet)
+            res.add(s);
+
+        return res;
+    }
+
+    private boolean idIsValidP2(long id) {
+        final String idAsString = String.valueOf(id);
+
+        final List<String> shingles = getShingles(idAsString);
+        System.out.println("\tEvaluererer ID " + idAsString + " med følgende shingles: " + shingles);
+
+        for (String shingle : shingles) {
+
+            boolean allMatches = true;
+
+            final int windowSize = shingle.length();
+            System.out.println("\t\tProsesserer shingle: " + shingle + ", med window size " + windowSize);
+            for (int i = windowSize; i < idAsString.length(); i += windowSize) {
+                try {
+                    final String window = idAsString.substring(i, i + windowSize);
+                    System.out.println("\t\t\tWindow: " + window + " (fra i: " + i + ")");
+                    allMatches &= window.equals(shingle);
+
+                    // System.out.println(idAsString.substring(0, windowSize));
+                    // System.out.println(idAsString.substring(1, 2));
+                    // System.out.println(idAsString.substring(i, windowSize));
+
+                } catch (StringIndexOutOfBoundsException e) {
+
+                    // TODO: handle exception
+                    System.out.println("\t\t\tFikk ex med i=" + i);
+                    // continue;
+                    // return true;
+                    allMatches = false;
+                }
+            }
+            if (allMatches) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
     public long solveSeq(final List<Pair> pairs) {
         long numInvalidIds = 0;
         for (Pair p : pairs) {
             System.out.println("\t ---- Pair: " + p);
             for (long i = p.left; i <= p.right; i++) {
 
-                if (!idIsValid(i)) {
+                if (!idIsValidP2(i)) {
                     System.out.println("Iden " + i + " er invalid");
 
                     // numInvalidIds++;
@@ -67,6 +125,8 @@ class Solution {
                 }
 
             }
+            System.out.println("\n\n");
+            // return -1;
         }
         return numInvalidIds;
     }
