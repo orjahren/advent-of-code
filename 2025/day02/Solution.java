@@ -20,8 +20,12 @@ class Pair {
 
 class Solution {
 
+    public final static boolean DEBUG = false;
+
     private final String line;
     private final int nThreads;
+
+    public long p1Seq, p2Seq, p2Par;
 
     Solution(final String line) {
         this.line = line;
@@ -50,7 +54,8 @@ class Solution {
         final String first = idAsString.substring(0, middle);
         final String second = idAsString.substring(middle);
 
-        System.out.println(first + ", " + second);
+        if (DEBUG)
+            System.out.println(first + ", " + second);
 
         return !first.equals(second);
 
@@ -76,30 +81,28 @@ class Solution {
         final String idAsString = String.valueOf(id);
 
         final List<String> shingles = getShingles(idAsString);
-        System.out.println("\tEvaluererer ID " + idAsString + " med følgende shingles: " + shingles);
+        if (DEBUG)
+            System.out.println("\tEvaluererer ID " + idAsString + " med følgende shingles: " + shingles);
 
         for (String shingle : shingles) {
 
             boolean allMatches = true;
 
             final int windowSize = shingle.length();
-            System.out.println("\t\tProsesserer shingle: " + shingle + ", med window size " + windowSize);
+            if (DEBUG)
+                System.out.println("\t\tProsesserer shingle: " + shingle + ", med window size " + windowSize);
             for (int i = windowSize; i < idAsString.length(); i += windowSize) {
                 try {
                     final String window = idAsString.substring(i, i + windowSize);
-                    System.out.println("\t\t\tWindow: " + window + " (fra i: " + i + ")");
+                    if (DEBUG)
+                        System.out.println("\t\t\tWindow: " + window + " (fra i: " + i + ")");
                     allMatches &= window.equals(shingle);
 
-                    // System.out.println(idAsString.substring(0, windowSize));
-                    // System.out.println(idAsString.substring(1, 2));
-                    // System.out.println(idAsString.substring(i, windowSize));
-
                 } catch (StringIndexOutOfBoundsException e) {
+                    // TODO: Burde finne på noe bedre her
 
-                    // TODO: handle exception
-                    System.out.println("\t\t\tFikk ex med i=" + i);
-                    // continue;
-                    // return true;
+                    if (DEBUG)
+                        System.out.println("\t\t\tFikk ex med i=" + i);
                     allMatches = false;
                 }
             }
@@ -114,32 +117,86 @@ class Solution {
     public long solveSeq(final List<Pair> pairs) {
         long numInvalidIds = 0;
         for (Pair p : pairs) {
-            System.out.println("\t ---- Pair: " + p);
+            if (DEBUG)
+                System.out.println("\t ---- Pair: " + p);
             for (long i = p.left; i <= p.right; i++) {
-
                 if (!idIsValidP2(i)) {
-                    System.out.println("Iden " + i + " er invalid");
-
-                    // numInvalidIds++;
+                    if (DEBUG)
+                        System.out.println("Iden " + i + " er invalid");
                     numInvalidIds += i;
                 }
 
             }
-            System.out.println("\n\n");
-            // return -1;
+            if (DEBUG)
+                System.out.println("\n\n");
         }
         return numInvalidIds;
     }
 
-    public int solvePar(final List<Pair> pairs) {
-        return -1;
+    class AoCSolver extends Thread {
+        public final List<Pair> pairList;
+        public long res;
+        private int pairStart, pairEnd;
+
+        AoCSolver(final List<Pair> allPairsRef, final int pairStart, final int pairEnd) {
+            this.pairList = allPairsRef;
+            this.res = 0;
+            this.pairStart = pairStart;
+            this.pairEnd = pairEnd;
+            if (DEBUG)
+                System.out.println("Tråd som skal deale med pairs fra " + pairStart + " til " + pairEnd);
+        }
+
+        @Override
+        public void run() {
+            for (long i = pairStart; i < pairEnd; i++) {
+                final Pair p = pairList.get((int) i);
+                for (long j = p.left; j <= p.right; j++) {
+                    if (!idIsValidP2(j)) {
+                        if (DEBUG)
+                            System.out.println("Iden " + j + " er invalid");
+                        res += j;
+                    }
+                }
+            }
+
+        }
+    }
+
+    public long solvePar(final List<Pair> pairs) {
+
+        AoCSolver[] threads = new AoCSolver[nThreads];
+
+        final int pairsPrThread = pairs.size() / nThreads;
+
+        for (int i = 0; i < threads.length; i++) {
+            AoCSolver t = new AoCSolver(pairs, i * pairsPrThread,
+                    i == threads.length - 1 ? pairs.size() : (i + 1) * pairsPrThread);
+            threads[i] = t;
+            t.start();
+        }
+
+        this.p2Par = 0;
+        for (int i = 0; i < threads.length; i++) {
+            try {
+                threads[i].join();
+                this.p2Par += threads[i].res;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return this.p2Par;
+
     }
 
     public String solve() {
-        List<Pair> pairs = lineToPairs(this.line);
+        final List<Pair> pairs = lineToPairs(this.line);
 
-        System.out.println("Pairs:");
-        System.out.println(pairs);
+        if (DEBUG)
+            System.out.println("Pairs:");
+        if (DEBUG)
+            System.out.println(pairs);
 
         final long startTimeSeq = System.nanoTime();
         final long seqSolution = solveSeq(pairs);
@@ -148,17 +205,24 @@ class Solution {
 
         System.out.println("Sequential execution took " + TimeUnit.NANOSECONDS.toMillis(seqDuration) + "ms");
 
-        /*
-         * final long startTimePar = System.nanoTime();
-         * final int parSolution = solvePar();
-         * final long endTimePar = System.nanoTime();
-         * final long parDuration = endTimePar - startTimePar;
-         * 
-         * final double speedup = seqDuration / parDuration;
-         * System.out.println("Speedup: " + speedup);
-         */
+        final long startTimePar = System.nanoTime();
+        final long parSolution = solvePar(pairs);
+        final long endTimePar = System.nanoTime();
+        final long parDuration = endTimePar - startTimePar;
 
-        return String.valueOf(seqSolution);
+        if (seqSolution == parSolution) {
+            System.out.println("Fant riktig svar parallellt :D ");
+        } else {
+            System.out.println("Fant FEIL svar parallellt :o ");
+            System.out.println("Fikk " + parSolution + ", skal være " + seqSolution);
+            System.exit(1);
+        }
+
+        final double speedup = (double) seqDuration / parDuration;
+        System.out.println("Parallel execution took " + TimeUnit.NANOSECONDS.toMillis(parDuration) + "ms");
+        System.out.println("Speedup: " + speedup);
+
+        return String.valueOf(parSolution);
 
     }
 
@@ -178,7 +242,8 @@ class Solution {
         System.out.println("File name: " + fileName);
 
         final String input = getLine(fileName);
-        System.out.println(input);
+        if (DEBUG)
+            System.out.println(input);
 
         final Solution solver = new Solution(input);
         final String answer = solver.solve();
