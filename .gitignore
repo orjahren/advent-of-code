@@ -149,3 +149,6 @@ bin
 
 # 
 input
+
+# Java classes...
+*.class
