@@ -79,8 +79,11 @@ ll getValueP2(string bank) // <- merk pass by value
 
         // for (int j = len; j >= 0; j--)
         int del;
+        cout << " Ytre while " << endl;
+        cout << "Bank size er nå " << bank.size() << endl;
         for (int i = 1; i < bank.size(); i++)
         {
+
             cout << "I er " << i << endl;
             char cand = bank[i];
             cout << "cand er " << cand << endl;
@@ -100,6 +103,7 @@ ll getValueP2(string bank) // <- merk pass by value
             }
             goto hopp;
         hack:
+            prevIdx = i;
             while (bank[prevIdx] == REMOVED_FLAG || prevIdx == i)
             {
 
@@ -107,14 +111,15 @@ ll getValueP2(string bank) // <- merk pass by value
                 prevIdx++;
             }
         hopp:
-            cout << "Beregnet prev idx: " << prevIdx << endl;
+            // cout << "Beregnet prev idx: " << prevIdx << endl;
             if (cand == REMOVED_FLAG || bank[prevIdx] == REMOVED_FLAG)
                 continue;
             if (cand > bank[prevIdx])
             {
                 cout << "Loop-fjerner " << bank[prevIdx] << " på idx " << prevIdx << endl;
                 cout << "Nå skjer det" << endl;
-                bank[prevIdx] = REMOVED_FLAG;
+                // bank[prevIdx] = REMOVED_FLAG;
+                bank.erase(prevIdx, 1);
                 cout << "Nå er det gjort :)" << endl;
 
                 // freqMap[cand]--;
@@ -124,8 +129,10 @@ ll getValueP2(string bank) // <- merk pass by value
         }
         // ^hvis ikke noe ble fjernet over, må vi fjerne oss selv
         cout << "Edge fjerner " << bank[del] << " på idx " << del << endl;
-        bank[del] = REMOVED_FLAG;
+        // bank[del] = REMOVED_FLAG;
+        bank.erase(del);
     videre:
+        cout << "Skal gå videre" << endl;
     }
 
     string cand;
@@ -162,4 +169,5 @@ int main()
     }
     cout << "Part 1: " << p1 << endl;
     cout << "Part 2: " << p2 << endl;
+    // 167104957011479 too low
 }
