@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define REMOVED_FLAG -1
+#define REMOVED_FLAG 'x'
 typedef long long ll;
 
 int getValueP1(string &bank)
@@ -59,44 +59,72 @@ ll getValueP2(string bank) // <- merk pass by value
     int shouldPrune = len - 12;
     cout << "Should prune: " << shouldPrune << endl;
 
-    auto freqMap = getFreqMap(bank);
+    // auto freqMap = getFreqMap(bank);
 
-    auto types = getUniqueCharsInString(bank);
+    // auto types = getUniqueCharsInString(bank);
 
-    sort(types.begin(), types.end());
+    // sort(types.begin(), types.end());
 
-    for (int i = 0; i < types.size(); i++)
-    {
-        cout << types[i] << ": " << freqMap[types[i]] << endl;
-    }
+    // for (int i = 0; i < types.size(); i++)
+    //{
+    // cout << types[i] << ": " << freqMap[types[i]] << endl;
+    //}
 
-    for (int i = 0; i < shouldPrune; i++)
+    while (shouldPrune--)
     {
         int removeIdx = 0;
-        for (int j = 0; j < types.size(); j++)
-        {
-            if (freqMap[types[j]] > 0)
-            {
-                removeIdx = j;
-                // TODO: Bruke vanlig break?
-                goto fant;
-            }
-        }
-    fant:
-        char removeWhat = types[freqMap[removeIdx]];
-        cout << "Skal fjerne en " << removeWhat << endl;
+        // char removeWhat = types[freqMap[removeIdx]];
+        // char removeWhat = types[removeIdx];
+        // cout << "Skal fjerne en " << removeWhat << endl;
 
         // for (int j = len; j >= 0; j--)
-        for (int j = 0; j < bank.size(); j++)
+        int del;
+        for (int i = 1; i < bank.size(); i++)
         {
-            char cand = bank[j];
-            if (cand != REMOVED_FLAG && cand == removeWhat)
+            cout << "I er " << i << endl;
+            char cand = bank[i];
+            cout << "cand er " << cand << endl;
+            int prevIdx = i - 1;
+            cout << "Første prev idx er " << prevIdx << endl;
+            while (bank[prevIdx] == REMOVED_FLAG)
             {
-                bank[j] = REMOVED_FLAG;
-                freqMap[cand]--;
+
+                // cout << "Dekrementrer prev idx " << endl;
+                prevIdx--;
+                if (prevIdx < 0)
+                {
+                    // Kommer vi under 0 uten å finne noe må vi lete andre veien :D This is fine
+                    prevIdx = 0;
+                    goto hack;
+                }
+            }
+            goto hopp;
+        hack:
+            while (bank[prevIdx] == REMOVED_FLAG || prevIdx == i)
+            {
+
+                // cout << "INKREMENTERER prev idx " << endl;
+                prevIdx++;
+            }
+        hopp:
+            cout << "Beregnet prev idx: " << prevIdx << endl;
+            if (cand == REMOVED_FLAG || bank[prevIdx] == REMOVED_FLAG)
+                continue;
+            if (cand > bank[prevIdx])
+            {
+                cout << "Loop-fjerner " << bank[prevIdx] << " på idx " << prevIdx << endl;
+                cout << "Nå skjer det" << endl;
+                bank[prevIdx] = REMOVED_FLAG;
+                cout << "Nå er det gjort :)" << endl;
+
+                // freqMap[cand]--;
                 goto videre;
             }
+            del = i;
         }
+        // ^hvis ikke noe ble fjernet over, må vi fjerne oss selv
+        cout << "Edge fjerner " << bank[del] << " på idx " << del << endl;
+        bank[del] = REMOVED_FLAG;
     videre:
     }
 
@@ -109,7 +137,8 @@ ll getValueP2(string bank) // <- merk pass by value
 
         cand += bank[i];
     }
-    cout << "Final processed bank string: " << cand << endl;
+    cout << "Final processed cand string: " << cand << endl;
+    cout << "Mutated bank string: " << bank << endl;
     ll val = stoll(cand);
     cout << "Parse val: " << val << endl;
     return val; // curr = max(curr, val);
