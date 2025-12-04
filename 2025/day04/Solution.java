@@ -10,6 +10,14 @@ import java.util.concurrent.TimeUnit;
 class Pair {
     int left, right;
 
+    Pair() {
+    }
+
+    Pair(int left, int right) {
+        this.left = left;
+        this.right = right;
+    }
+
     @Override
     public String toString() {
         return "{" + left + ", " + right + "}";
@@ -19,7 +27,6 @@ class Pair {
 class Solution {
 
     public final static boolean DEBUG = false;
-    public long p1Seq, p2Seq, p2Par;
 
     private char[][] globalGrid;
     private List<String> lines;
@@ -46,9 +53,13 @@ class Solution {
         }
     }
 
-    private boolean isInBounds(int val, char[][] grid) {
-        return val >= 0 && val < grid.length && val < grid[0].length;
+    private boolean isInBounds(int val) {
+        return val >= 0 && val < globalGrid.length && val < globalGrid[0].length;
 
+    }
+
+    private boolean isInBounds(Pair p) {
+        return isInBounds(p.left) && isInBounds(p.right);
     }
 
     private List<Pair> getNeighbors(int x, int y, char[][] grid) {
@@ -60,15 +71,9 @@ class Solution {
 
         };
         for (int i = 0; i < coords.length; i++) {
-
-            int a = coords[i][0];
-            int b = coords[i][1];
-
-            Pair p = new Pair();
-
-            p.left = x + a;
-            p.right = y + b;
-            if (isInBounds(p.left, grid) && isInBounds(p.right, grid)) {
+            final int[] stem = coords[i];
+            final Pair p = new Pair(x + stem[0], y + stem[1]);
+            if (isInBounds(p)) {
                 res.add(p);
             }
         }
@@ -79,7 +84,7 @@ class Solution {
         final List<Pair> neighbors = getNeighbors(x, y, grid);
         int numOccupiedNeighbors = 0;
         for (Pair p : neighbors) {
-            char other = grid[p.left][p.right];
+            final char other = grid[p.left][p.right];
             if (other == '@') {
                 numOccupiedNeighbors++;
             }
@@ -113,9 +118,7 @@ class Solution {
 
     private Pair solve() {
         processLines();
-
         printGrid(this.globalGrid);
-        final Pair res = new Pair();
 
         final long startTimeSeq = System.nanoTime();
 
@@ -168,10 +171,7 @@ class Solution {
 
         System.out.println("Sequential execution took " + TimeUnit.NANOSECONDS.toMillis(seqDuration) + "ms");
 
-        res.left = p1;
-        res.right = p2;
-
-        return res;
+        return new Pair(p1, p2);
 
     }
 
