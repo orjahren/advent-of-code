@@ -112,7 +112,10 @@ class Solution {
 
         int seqSolution = 0;
 
-        final char[][] mutatedGrid = Arrays.copyOf(grid, grid.length);
+        final char[][] mutatedGrid = new char[grid.length][grid[0].length];
+        for (int i = 0; i < grid.length; i++) {
+            mutatedGrid[i] = Arrays.copyOf(grid[i], grid[i].length);
+        }
 
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
@@ -124,7 +127,7 @@ class Solution {
                 System.out.println("SJekker naboer for " + c + " på pos " + i + ", " + j);
                 if (isElidgeble(i, j, 4)) {
                     seqSolution++;
-                    // mutatedGrid[i][j] = 'x';
+                    mutatedGrid[i][j] = 'x';
                 }
             }
             System.out.println();
