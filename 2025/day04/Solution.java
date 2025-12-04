@@ -21,13 +21,13 @@ class Solution {
     public final static boolean DEBUG = true;
     public long p1Seq, p2Seq, p2Par;
 
-    private char[][] grid;
+    private char[][] globalGrid;
     private List<String> lines;
 
     Solution(List<String> lines) {
         int x = lines.get(0).length();
         int y = lines.size();
-        this.grid = new char[x][y];
+        this.globalGrid = new char[x][y];
         this.lines = lines;
     }
 
@@ -40,18 +40,18 @@ class Solution {
             for (int j = 0; j < line.length(); j++) {
                 final char c = line.charAt(j);
                 System.out.println("{" + i + ", " + j + "}");
-                grid[i][j] = c;
+                globalGrid[i][j] = c;
             }
             System.out.println();
         }
     }
 
-    private boolean isInBounds(int val) {
+    private boolean isInBounds(int val, char[][] grid) {
         return val >= 0 && val < grid.length && val < grid[0].length;
 
     }
 
-    private List<Pair> getNeighbors(int x, int y) {
+    private List<Pair> getNeighbors(int x, int y, char[][] grid) {
         final List<Pair> res = new ArrayList<>();
         final int[][] coords = new int[][] {
                 { -1, -1 }, { -1, 0 }, { -1, 1 },
@@ -68,16 +68,16 @@ class Solution {
 
             p.left = x + a;
             p.right = y + b;
-            if (isInBounds(p.left) && isInBounds(p.right)) {
+            if (isInBounds(p.left, grid) && isInBounds(p.right, grid)) {
                 res.add(p);
             }
         }
         return res;
     }
 
-    private boolean isElidgeble(int x, int y, int maxOccupied) {
+    private boolean isElidgeble(int x, int y, int maxOccupied, char[][] grid) {
 
-        final List<Pair> neighbors = getNeighbors(x, y);
+        final List<Pair> neighbors = getNeighbors(x, y, grid);
         System.out.println("Jeg er " + x + " , " + y + ", og dette er mine naboer: ");
         System.out.println(neighbors);
         int numOccupiedNeighbors = 0;
@@ -104,33 +104,53 @@ class Solution {
         }
     }
 
-    private int solve() {
-        processLines();
-
-        printGrid(this.grid);
-        final long startTimeSeq = System.nanoTime();
-
-        int seqSolution = 0;
-
+    private char[][] getDeepGridCopy(char[][] grid) {
         final char[][] mutatedGrid = new char[grid.length][grid[0].length];
         for (int i = 0; i < grid.length; i++) {
             mutatedGrid[i] = Arrays.copyOf(grid[i], grid[i].length);
         }
+        return mutatedGrid;
+    }
 
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[i].length; j++) {
-                final char c = grid[i][j];
-                if (c == '.') {
-                    continue;
+    private int solve() {
+        processLines();
+
+        printGrid(this.globalGrid);
+        final long startTimeSeq = System.nanoTime();
+
+        int seqSolution = 0;
+
+        char[][] currentGrid = getDeepGridCopy(this.globalGrid);
+
+        boolean done = false;
+        while (!done) {
+            char[][] nextGrid = getDeepGridCopy(currentGrid);
+
+            int generation = 0;
+
+            // TODO: Kan bruke heuristics for å ikke itererere over known deadspots mange
+            // ganger
+            for (int i = 0; i < currentGrid.length; i++) {
+                for (int j = 0; j < currentGrid[i].length; j++) {
+                    final char c = currentGrid[i][j];
+                    if (c == '.') {
+                        continue;
+                    }
+                    if (c == 'x') {
+                        continue;
+                    }
+                    // System.out.print(c);
+                    System.out.println("SJekker naboer for " + c + " på pos " + i + ", " + j);
+                    if (isElidgeble(i, j, 4, currentGrid)) {
+                        generation++;
+                        nextGrid[i][j] = 'x';
+                    }
                 }
-                // System.out.print(c);
-                System.out.println("SJekker naboer for " + c + " på pos " + i + ", " + j);
-                if (isElidgeble(i, j, 4)) {
-                    seqSolution++;
-                    mutatedGrid[i][j] = 'x';
-                }
+                System.out.println();
             }
-            System.out.println();
+            currentGrid = nextGrid;
+            seqSolution += generation;
+            done = generation == 0;
         }
 
         final long endTimeSeq = System.nanoTime();
@@ -138,7 +158,7 @@ class Solution {
 
         System.out.println("Sequential execution took " + TimeUnit.NANOSECONDS.toMillis(seqDuration) + "ms");
         System.out.println("\nMutated grid: ");
-        printGrid(mutatedGrid);
+        printGrid(currentGrid);
 
         return seqSolution;
 
