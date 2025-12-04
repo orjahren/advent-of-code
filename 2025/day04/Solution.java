@@ -18,7 +18,7 @@ class Pair {
 
 class Solution {
 
-    public final static boolean DEBUG = true;
+    public final static boolean DEBUG = false;
     public long p1Seq, p2Seq, p2Par;
 
     private char[][] globalGrid;
@@ -32,17 +32,17 @@ class Solution {
     }
 
     private void processLines() {
-        // for (String line : lines) {
         for (int i = 0; i < lines.size(); i++) {
             final String line = lines.get(i);
-            // final String[] spl = line.split("");
             // TODO: Alle linjer vil ha samme lengde, kan forenkle?
             for (int j = 0; j < line.length(); j++) {
                 final char c = line.charAt(j);
-                System.out.println("{" + i + ", " + j + "}");
+                if (DEBUG)
+                    System.out.println("{" + i + ", " + j + "}");
                 globalGrid[i][j] = c;
             }
-            System.out.println();
+            if (DEBUG)
+                System.out.println();
         }
     }
 
@@ -76,20 +76,19 @@ class Solution {
     }
 
     private boolean isElidgeble(int x, int y, int maxOccupied, char[][] grid) {
-
         final List<Pair> neighbors = getNeighbors(x, y, grid);
-        System.out.println("Jeg er " + x + " , " + y + ", og dette er mine naboer: ");
-        System.out.println(neighbors);
         int numOccupiedNeighbors = 0;
         for (Pair p : neighbors) {
             char other = grid[p.left][p.right];
-            System.out.print(other);
             if (other == '@') {
                 numOccupiedNeighbors++;
             }
         }
-        System.out.println();
-        System.out.println("Denne har " + numOccupiedNeighbors + " occupied :o ");
+        if (DEBUG) {
+            System.out.println("Jeg er " + x + " , " + y + ", og dette er mine naboer: ");
+            System.out.println(neighbors);
+            System.out.println("Denne har " + numOccupiedNeighbors + " occupied :o ");
+        }
         return numOccupiedNeighbors < maxOccupied;
 
     }
@@ -112,55 +111,67 @@ class Solution {
         return mutatedGrid;
     }
 
-    private int solve() {
+    private Pair solve() {
         processLines();
 
         printGrid(this.globalGrid);
+        final Pair res = new Pair();
+
         final long startTimeSeq = System.nanoTime();
 
-        int seqSolution = 0;
+        int p1 = 0;
+        int p2 = 0;
 
         char[][] currentGrid = getDeepGridCopy(this.globalGrid);
 
         boolean done = false;
+        int cnt = 0;
         while (!done) {
             char[][] nextGrid = getDeepGridCopy(currentGrid);
 
             int generation = 0;
+            // Count iterations to account for p1.
+            cnt++;
 
             // TODO: Kan bruke heuristics for å ikke itererere over known deadspots mange
             // ganger
             for (int i = 0; i < currentGrid.length; i++) {
                 for (int j = 0; j < currentGrid[i].length; j++) {
                     final char c = currentGrid[i][j];
-                    if (c == '.') {
+                    if (c == '.' || c == 'x') {
                         continue;
                     }
-                    if (c == 'x') {
-                        continue;
+                    if (DEBUG) {
+                        System.out.println("SJekker naboer for " + c + " på pos " + i + ", " + j);
                     }
-                    // System.out.print(c);
-                    System.out.println("SJekker naboer for " + c + " på pos " + i + ", " + j);
                     if (isElidgeble(i, j, 4, currentGrid)) {
                         generation++;
-                        nextGrid[i][j] = 'x';
+                        nextGrid[i][j] = '.';
+                        if (cnt == 1)
+                            p1++;
                     }
                 }
-                System.out.println();
+                if (DEBUG) {
+                    System.out.println();
+                }
             }
             currentGrid = nextGrid;
-            seqSolution += generation;
+            p2 += generation;
             done = generation == 0;
         }
 
         final long endTimeSeq = System.nanoTime();
         final long seqDuration = endTimeSeq - startTimeSeq;
 
-        System.out.println("Sequential execution took " + TimeUnit.NANOSECONDS.toMillis(seqDuration) + "ms");
         System.out.println("\nMutated grid: ");
         printGrid(currentGrid);
 
-        return seqSolution;
+        System.out.println("Sequential execution took " + TimeUnit.NANOSECONDS.toMillis(seqDuration) + "ms");
+
+        res.left = p1;
+        res.right = p2;
+
+        return res;
 
     }
 
@@ -182,8 +193,9 @@ class Solution {
         final String input = getLine(fileName);
 
         final Solution solution = new Solution(input.lines().toList());
-        final int p1 = solution.solve();
-        System.out.println("Part 1: " + p1);
+        final Pair res = solution.solve();
+        System.out.println("Part 1: " + res.left);
+        System.out.println("Part 2: " + res.right);
 
     }
 }
