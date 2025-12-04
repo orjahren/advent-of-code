@@ -122,19 +122,13 @@ class Solution {
 
         final long startTimeSeq = System.nanoTime();
 
-        int p1 = 0;
-        int p2 = 0;
-
         char[][] currentGrid = getDeepGridCopy(this.globalGrid);
 
-        boolean done = false;
-        int cnt = 0;
-        while (!done) {
-            char[][] nextGrid = getDeepGridCopy(currentGrid);
+        final List<Integer> gains = new ArrayList<>();
+        do {
+            final char[][] nextGrid = getDeepGridCopy(currentGrid);
 
             int generation = 0;
-            // Count iterations to account for p1.
-            cnt++;
 
             // TODO: Kan bruke heuristics for å ikke itererere over known deadspots mange
             // ganger
@@ -150,18 +144,15 @@ class Solution {
                     if (isElidgeble(i, j, 4, currentGrid)) {
                         generation++;
                         nextGrid[i][j] = '.';
-                        if (cnt == 1)
-                            p1++;
                     }
                 }
                 if (DEBUG) {
                     System.out.println();
                 }
             }
+            gains.add(generation);
             currentGrid = nextGrid;
-            p2 += generation;
-            done = generation == 0;
-        }
+        } while (gains.getLast() > 0);
 
         final long endTimeSeq = System.nanoTime();
         final long seqDuration = endTimeSeq - startTimeSeq;
@@ -170,6 +161,9 @@ class Solution {
         printGrid(currentGrid);
 
         System.out.println("Sequential execution took " + TimeUnit.NANOSECONDS.toMillis(seqDuration) + "ms");
+
+        final int p1 = gains.get(0);
+        final int p2 = gains.stream().mapToInt(Integer::intValue).sum();
 
         return new Pair(p1, p2);
 
