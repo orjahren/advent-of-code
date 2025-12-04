@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -124,7 +125,7 @@ class Solution {
 
         char[][] currentGrid = getDeepGridCopy(this.globalGrid);
 
-        final List<Integer> gains = new ArrayList<>();
+        final List<Integer> gains = new LinkedList<>();
         do {
             final char[][] nextGrid = getDeepGridCopy(currentGrid);
 
