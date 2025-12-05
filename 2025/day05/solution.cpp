@@ -43,10 +43,25 @@ int main()
         maxVal = max(maxVal, p.second);
     }
     cout << "Min og max: " << minVal << ", " << maxVal << endl;
-    ll spenn = maxVal - minVal;
+    ll spenn = maxVal - minVal + 1;
     cout << "Spenn: " << spenn << endl;
-    char flags[spenn];
-    memset(flags, 0, sizeof(char) * spenn);
+    char *flags = (char *)malloc(sizeof(char) * spenn);
+    cout << "har allokert flags-minne" << endl;
+    cout << "Flags ptr: " << (int *)flags << endl;
+    if (flags == 0)
+    {
+        cout << "Unable to allocate memory :o " << endl;
+        return 1;
+    }
+    // char flags[spenn];
+    // TODO: Hvorfor slutet memset å fune?
+    // memset(flags, 0, sizeof(char) * spenn);
+    for (ll i = 0; i < spenn; i++)
+    {
+        cout << i << endl;
+        flags[i] = 0;
+    }
+    cout << "Har memsatt" << endl;
 
     for (int i = 0; i < ranges.size(); i++)
     {
@@ -91,6 +106,7 @@ int main()
             cout << "ER fresh " << endl;
         }
     }
+    free(flags);
 
     cout << "Part 1: " << p1 << endl;
 }
