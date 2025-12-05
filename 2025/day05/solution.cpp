@@ -1,13 +1,15 @@
 #include <bits/stdc++.h>
 
+typedef long long ll;
+
 using namespace std;
 
-pair<int, int> parseLine(string &line)
+pair<ll, ll> parseLine(string &line)
 {
     int splIdx = line.find("-");
     string a = line.substr(0, splIdx);
     string b = line.substr(splIdx + 1);
-    pair<int, int> p = make_pair(stoi(a), stoi(b));
+    pair<ll, ll> p = make_pair(stoll(a), stoll(b));
     cout << "Parret: " << endl;
     cout << p.first << endl;
     cout << p.second << endl;
@@ -18,7 +20,7 @@ int main()
 {
     string inp;
     int i = 0;
-    vector<pair<int, int>> ranges;
+    vector<pair<ll, ll>> ranges;
 
     while (cin >> inp)
     {
@@ -32,8 +34,8 @@ int main()
         ranges.push_back(p);
     }
 
-    int minVal = INT_MAX;
-    int maxVal = INT_MIN;
+    ll minVal = ranges[0].first;
+    ll maxVal = ranges[0].second;
     for (int i = 0; i < ranges.size(); i++)
     {
         auto p = ranges[i];
@@ -41,7 +43,7 @@ int main()
         maxVal = max(maxVal, p.second);
     }
     cout << "Min og max: " << minVal << ", " << maxVal << endl;
-    int spenn = maxVal - minVal;
+    ll spenn = maxVal - minVal;
     cout << "Spenn: " << spenn << endl;
     char flags[spenn];
     memset(flags, 0, sizeof(char) * spenn);
@@ -51,9 +53,9 @@ int main()
         auto p = ranges[i];
         cout << "Behandler par " << p.first << ", " << p.second << endl;
         // TODO: Burde optimalisere dette
-        for (int j = p.first; j <= p.second; j++)
+        for (ll j = p.first; j <= p.second; j++)
         {
-            int idx = j - minVal;
+            ll idx = j - minVal;
             cout << "Tagger " << idx << endl;
             flags[j - minVal] = 1;
         }
@@ -64,7 +66,7 @@ int main()
     do
     {
         cout << "Inp 2: " << inp << ", iteratsjon: " << i++ << endl;
-        int parsed = stoi(inp);
+        ll parsed = stoll(inp);
         cout << "Parsed query: " << parsed << endl;
         queries.push_back(parsed);
     } while (cin >> inp);
