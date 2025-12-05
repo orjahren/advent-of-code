@@ -31,6 +31,17 @@ int main()
         auto p = parseLine(inp);
         ranges.push_back(p);
     }
+
+    int minVal = -1;
+    int maxVal = -1;
+    for (int i = 0; i < ranges.size(); i++)
+    {
+        auto p = ranges[i];
+        minVal = min(minVal, p.first);
+        maxVal = max(maxVal, p.second);
+    }
+    cout << "Min og max: " << minVal << ", " << maxVal << endl;
+
     vector<int> queries;
 
     do
