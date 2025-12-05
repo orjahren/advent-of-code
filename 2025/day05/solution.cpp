@@ -32,8 +32,8 @@ int main()
         ranges.push_back(p);
     }
 
-    int minVal = -1;
-    int maxVal = -1;
+    int minVal = INT_MAX;
+    int maxVal = INT_MIN;
     for (int i = 0; i < ranges.size(); i++)
     {
         auto p = ranges[i];
@@ -41,6 +41,23 @@ int main()
         maxVal = max(maxVal, p.second);
     }
     cout << "Min og max: " << minVal << ", " << maxVal << endl;
+    int spenn = maxVal - minVal;
+    cout << "Spenn: " << spenn << endl;
+    char flags[spenn];
+    memset(flags, 0, sizeof(char) * spenn);
+
+    for (int i = 0; i < ranges.size(); i++)
+    {
+        auto p = ranges[i];
+        cout << "Behandler par " << p.first << ", " << p.second << endl;
+        // TODO: Burde optimalisere dette
+        for (int j = p.first; j <= p.second; j++)
+        {
+            int idx = j - minVal;
+            cout << "Tagger " << idx << endl;
+            flags[j - minVal] = 1;
+        }
+    }
 
     vector<int> queries;
 
@@ -53,7 +70,25 @@ int main()
     } while (cin >> inp);
     cout << "Has " << queries.size() << " queries " << endl;
 
-    int curr = 50;
     int p1 = 0;
+
+    for (int i = 0; i < queries.size(); i++)
+    {
+        int query = queries[i];
+        cout << "Sjekker ID " << query << endl;
+        if (query < minVal || query > maxVal)
+        {
+
+            cout << "Auto-continuer" << endl;
+            continue;
+        }
+        cout << "Verdien er " << (int)(flags[query - minVal]) << " og idx er " << query - minVal << endl;
+        if (flags[query - minVal])
+        {
+            p1++;
+            cout << "ER fresh " << endl;
+        }
+    }
+
     cout << "Part 1: " << p1 << endl;
 }
