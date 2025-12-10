@@ -124,10 +124,18 @@ type Operation struct {
 	indeces []int
 }
 
+func newStateIsSane(state State, targetMachine Machine) bool {
+	// Check that no joltage exceeds target joltage
+	for i, jolt := range state.currentJoltages {
+		if jolt > targetMachine.joltageTarget[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func solveMachineBfs(machine Machine) int {
 	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0), make([]int, len(machine.joltageTarget))}
-	println("Initial state:")
-	fmt.Println(initialState)
 
 	queue := make([]State, 0)
 	queue = append(queue, initialState)
@@ -141,6 +149,9 @@ func solveMachineBfs(machine Machine) int {
 		currentState := queue[0]
 		queue = queue[1:]
 
+		//println("Processing state:")
+		//fmt.Println(currentState)
+
 		// Check if we reached the target
 		if string(currentState.current) == string(currentState.target) && slices.Equal(currentState.currentJoltages, machine.joltageTarget) {
 			return len(currentState.history)
@@ -152,9 +163,10 @@ func solveMachineBfs(machine Machine) int {
 				target:          currentState.target,
 				current:         make([]rune, len(currentState.current)),
 				history:         append(currentState.history, op),
-				currentJoltages: currentState.currentJoltages,
+				currentJoltages: make([]int, len(currentState.currentJoltages)),
 			}
 			copy(newState.current, currentState.current)
+			copy(newState.currentJoltages, currentState.currentJoltages)
 
 			// Apply operation
 			for _, idx := range op.indeces {
@@ -165,7 +177,10 @@ func solveMachineBfs(machine Machine) int {
 				}
 			}
 
-			queue = append(queue, newState)
+			if newStateIsSane(newState, machine) {
+				//continue
+				queue = append(queue, newState)
+			}
 
 		}
 		steps++
