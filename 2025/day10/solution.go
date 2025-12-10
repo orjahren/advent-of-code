@@ -119,6 +119,7 @@ type State struct {
 	target, current []rune
 	history         []Operation
 	currentJoltages []int
+	cnt             int
 }
 type Operation struct {
 	indeces []int
@@ -134,7 +135,7 @@ func newStateIsSane(state State, targetMachine Machine) bool {
 	return true
 }
 func solveMachineP1(machine Machine) int {
-	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0), make([]int, len(machine.joltageTarget))}
+	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0), make([]int, len(machine.joltageTarget)), 0}
 
 	queue := make([]State, 0)
 	queue = append(queue, initialState)
@@ -179,11 +180,11 @@ func solveMachineP1(machine Machine) int {
 }
 
 func solveMachineBfsP2(machine Machine) int {
-	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0), make([]int, len(machine.joltageTarget))}
+	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0), make([]int, len(machine.joltageTarget)), 0}
 	println("Joltage target:")
 	fmt.Println(machine.joltageTarget)
 
-	println("Initial joltage:")
+	//println("Initial joltage:")
 	fmt.Println(initialState.currentJoltages)
 
 	queue := make([]State, 0)
@@ -200,25 +201,18 @@ func solveMachineBfsP2(machine Machine) int {
 		// println("Processing state:")
 		// fmt.Println(currentState)
 
-		// Check if we reached the target
-		if string(currentState.current) == string(currentState.target) {
-			println("*** FANT EN LØSNING ")
-			if slices.Equal(currentState.currentJoltages, machine.joltageTarget) {
-				return len(currentState.history)
-			} else {
-				println("Men joltage stemmer ikke:")
-				fmt.Println("Current joltage:", currentState.currentJoltages)
-				fmt.Println("Target joltage:", machine.joltageTarget)
-			}
+		if slices.Equal(currentState.currentJoltages, machine.joltageTarget) {
+			return currentState.cnt
 		}
 
 		// Generate new states by applying each operation
 		for _, op := range machine.opertions {
 			newState := State{
-				target:          currentState.target,
-				current:         make([]rune, len(currentState.current)),
-				history:         append(currentState.history, op),
+				target:  currentState.target,
+				current: make([]rune, len(currentState.current)),
+				//history:         append(currentState.history, op),
 				currentJoltages: make([]int, len(currentState.currentJoltages)),
+				cnt:             currentState.cnt + 1,
 			}
 			copy(newState.current, currentState.current)
 			copy(newState.currentJoltages, currentState.currentJoltages)
