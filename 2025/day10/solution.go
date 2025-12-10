@@ -133,17 +133,11 @@ func newStateIsSane(state State, targetMachine Machine) bool {
 	}
 	return true
 }
-
-func solveMachineBfs(machine Machine) int {
+func solveMachineP1(machine Machine) int {
 	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0), make([]int, len(machine.joltageTarget))}
 
 	queue := make([]State, 0)
 	queue = append(queue, initialState)
-
-	// Apply operations until we find a solution that makes the current state
-	// match the target state
-	// Assume what we may need to apply the same steps several times
-	steps := 0
 
 	for len(queue) > 0 {
 		currentState := queue[0]
@@ -153,8 +147,69 @@ func solveMachineBfs(machine Machine) int {
 		//fmt.Println(currentState)
 
 		// Check if we reached the target
-		if string(currentState.current) == string(currentState.target) && slices.Equal(currentState.currentJoltages, machine.joltageTarget) {
+		if string(currentState.current) == string(currentState.target) {
 			return len(currentState.history)
+		}
+
+		// Generate new states by applying each operation
+		for _, op := range machine.opertions {
+			newState := State{
+				target:          currentState.target,
+				current:         make([]rune, len(currentState.current)),
+				history:         append(currentState.history, op),
+				currentJoltages: make([]int, len(currentState.currentJoltages)),
+			}
+			copy(newState.current, currentState.current)
+			copy(newState.currentJoltages, currentState.currentJoltages)
+
+			// Apply operation
+			for _, idx := range op.indeces {
+				if idx >= 0 && idx < len(newState.current) {
+					newState.current[idx] ^= 1 // Toggle bit
+					// increment joltages
+				}
+			}
+
+			queue = append(queue, newState)
+
+		}
+	}
+
+	return -1 // No solution found
+}
+
+func solveMachineBfsP2(machine Machine) int {
+	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0), make([]int, len(machine.joltageTarget))}
+	println("Joltage target:")
+	fmt.Println(machine.joltageTarget)
+
+	println("Initial joltage:")
+	fmt.Println(initialState.currentJoltages)
+
+	queue := make([]State, 0)
+	queue = append(queue, initialState)
+
+	// Apply operations until we find a solution that makes the current state
+	// match the target state
+	// Assume what we may need to apply the same steps several times
+
+	for len(queue) > 0 {
+		currentState := queue[0]
+		queue = queue[1:]
+
+		// println("Processing state:")
+		// fmt.Println(currentState)
+
+		// Check if we reached the target
+		if string(currentState.current) == string(currentState.target) {
+			println("*** FANT EN LØSNING ")
+			if slices.Equal(currentState.currentJoltages, machine.joltageTarget) {
+				return len(currentState.history)
+			} else {
+				println("Men joltage stemmer ikke:")
+				fmt.Println("Current joltage:", currentState.currentJoltages)
+				fmt.Println("Target joltage:", machine.joltageTarget)
+			}
 		}
 
 		// Generate new states by applying each operation
@@ -183,7 +238,6 @@ func solveMachineBfs(machine Machine) int {
 			}
 
 		}
-		steps++
 	}
 
 	return -1 // No solution found
@@ -197,14 +251,20 @@ func main() {
 	fmt.Println(machines)
 	fmt.Println("Num machines:", len(machines))
 
+	p1 := 0
 	p2 := 0
 	for i, machine := range machines {
 		fmt.Println("*** Processing machine", i, "->", machine)
-		steps := solveMachineBfs(machine)
-		fmt.Println("Machine", i, "solved in", steps, "steps")
-		p2 += steps
+		p1steps := -1 //solveMachineP1(machine)
+		//fmt.Println("Machine", i, "solved in", p1steps, "steps")
+		p1 += p1steps
+
+		p2steps := solveMachineBfsP2(machine)
+		fmt.Println("Machine", i, "solved in", p2steps, "steps")
+		p2 += p2steps
 	}
 
+	fmt.Println("Part 1:", p1)
 	fmt.Println("Part 2:", p2)
 
 }
