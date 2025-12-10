@@ -99,6 +99,53 @@ type Operation struct {
 	indeces []int
 }
 
+func solveMachineBfs(machine Machine) int {
+	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0)}
+	println("Initial state:")
+	fmt.Println(initialState)
+
+	queue := make([]State, 0)
+	queue = append(queue, initialState)
+
+	// Apply operations until we find a solution that makes the current state
+	// match the target state
+	// Assume what we may need to apply the same steps several times
+	steps := 0
+
+	for len(queue) > 0 {
+		currentState := queue[0]
+		queue = queue[1:]
+
+		// Check if we reached the target
+		if string(currentState.current) == string(currentState.target) {
+			return len(currentState.history)
+		}
+
+		// Generate new states by applying each operation
+		for _, op := range machine.opertions {
+			newState := State{
+				target:  currentState.target,
+				current: make([]rune, len(currentState.current)),
+				history: append(currentState.history, op),
+			}
+			copy(newState.current, currentState.current)
+
+			// Apply operation
+			for _, idx := range op.indeces {
+				if idx >= 0 && idx < len(newState.current) {
+					newState.current[idx] ^= 1 // Toggle bit
+				}
+			}
+
+			queue = append(queue, newState)
+
+		}
+		steps++
+	}
+
+	return -1 // No solution found
+}
+
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	machines := readInput(scanner)
@@ -107,11 +154,13 @@ func main() {
 	fmt.Println(machines)
 	fmt.Println("Num machines:", len(machines))
 
+	p1 := 0
 	for i, machine := range machines {
 		fmt.Println("*** Processing machine", i, "->", machine)
+		steps := solveMachineBfs(machine)
+		fmt.Println("Machine", i, "solved in", steps, "steps")
+		p1 += steps
 	}
-
-	p1 := 0
 
 	fmt.Println("Part 1:", p1)
 
