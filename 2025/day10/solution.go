@@ -248,6 +248,9 @@ func main() {
 	p1 := 0
 	p2 := 0
 	for i, machine := range machines {
+		// print progress status
+		println("Status: ", i, "/", len(machines))
+
 		fmt.Println("*** Processing machine", i, "->", machine)
 		p1steps := -1 //solveMachineP1(machine)
 		//fmt.Println("Machine", i, "solved in", p1steps, "steps")
