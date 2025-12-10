@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -13,70 +14,58 @@ func printStringArray(stringArr []string) {
 	}
 }
 
-func readInput(scanner *bufio.Scanner) []Machine {
+type Pair struct {
+	a, b int
+}
 
-	machines := make([]Machine, 0)
+func readInput(scanner *bufio.Scanner) []Pair {
+
+	pairs := make([]Pair, 0)
 
 	for scanner.Scan() {
 
 		text := scanner.Text()
 		stripped := strings.Trim(text, "\n")
 		println(stripped)
-		spl := strings.Split(stripped, " ")
+		spl := strings.Split(stripped, ",")
 		//println(spl)
 		fmt.Println(spl)
 		printStringArray(spl)
 
-		for _, x := range spl {
-			if x[0] == '(' {
-			} else if x[0] == '{' {
-
-			}
-		}
-
-		if len(stripped) == 0 {
-		}
+		a, _ := strconv.Atoi(spl[0])
+		b, _ := strconv.Atoi(spl[1])
+		pair := Pair{a: a, b: b}
+		pairs = append(pairs, pair)
 
 	}
 
-	return machines
+	return pairs
 }
 
-type Machine struct {
-	target        []rune
-	opertions     []Operation
-	joltageTarget []int
-}
-
-type State struct {
-	target, current []rune
-	history         []Operation
-	currentJoltages []int
-	cnt             int
-}
-type Operation struct {
-	indeces []int
+func getRectangleSize(start, end Pair) int {
+	width := end.a - start.a + 1
+	height := end.b - start.b + 1
+	return width * height
 }
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	machines := readInput(scanner)
+	pairs := readInput(scanner)
 	println("Machines:")
-	println(machines)
-	fmt.Println(machines)
-	fmt.Println("Num machines:", len(machines))
+	println(pairs)
+	fmt.Println(pairs)
+	fmt.Println("Num pairs:", len(pairs))
 
-	p1 := 0
-	for i, machine := range machines {
-		// print progress status
-		println("Status: ", i, "/", len(machines))
-
-		fmt.Println("*** Processing machine", i, "->", machine)
-		p1steps := -1 //solveMachineP1(machine)
-		//fmt.Println("Machine", i, "solved in", p1steps, "steps")
-		p1 += p1steps
-
+	m := 0
+	for i, x := range pairs {
+		for j, y := range pairs {
+			if i != j {
+				area := getRectangleSize(x, y)
+				m = max(m, area)
+			}
+		}
 	}
+	p1 := m
 
 	fmt.Println("Part 1:", p1)
 
