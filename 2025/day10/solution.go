@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -48,13 +50,36 @@ func parseOperation(op string) Operation {
 	return Operation{indeces}
 }
 
+func parseJoltage(joltage string) []int {
+	len := len(joltage)
+	println(len)
+	joltages := make([]int, 0)
+	fmt.Println(joltage)
+	spl := strings.Split(joltage, ",")
+	fmt.Println(spl)
+	for _, x := range spl {
+		parsed, err := strconv.Atoi(strings.Trim(x, "{}"))
+		if err != nil {
+			fmt.Println("Error parsing joltage:", err)
+			continue
+		}
+		// TODO: Hva er en sane max?
+		if parsed >= 0 && parsed < 127 {
+			fmt.Println("Joltage: Parset ", x, " til ", parsed)
+			joltages = append(joltages, parsed)
+		}
+	}
+	fmt.Println(joltages)
+	return joltages
+}
+
 func readInput(scanner *bufio.Scanner) []Machine {
 
 	machines := make([]Machine, 0)
 
 	for scanner.Scan() {
 		operations := make([]Operation, 0)
-		joltages := make([]string, 0)
+		var joltage []int
 
 		text := scanner.Text()
 		stripped := strings.Trim(text, "\n")
@@ -70,15 +95,14 @@ func readInput(scanner *bufio.Scanner) []Machine {
 				operations = append(operations, parseOperation((x)))
 			} else if x[0] == '{' {
 
-				joltages = append(joltages, x)
+				joltage = parseJoltage(x)
 			}
 		}
 
 		if len(stripped) == 0 {
 		}
 
-		// TODO: Virker ikke som man trenger joltages for p1
-		var m Machine = Machine{parseTarget(targetRepr), operations, nil}
+		var m Machine = Machine{parseTarget(targetRepr), operations, joltage}
 		machines = append(machines, m)
 	}
 
@@ -86,21 +110,22 @@ func readInput(scanner *bufio.Scanner) []Machine {
 }
 
 type Machine struct {
-	target    []rune
-	opertions []Operation
-	joltages  []rune
+	target        []rune
+	opertions     []Operation
+	joltageTarget []int
 }
 
 type State struct {
 	target, current []rune
 	history         []Operation
+	currentJoltages []int
 }
 type Operation struct {
 	indeces []int
 }
 
 func solveMachineBfs(machine Machine) int {
-	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0)}
+	initialState := State{machine.target, make([]rune, len(machine.target)), make([]Operation, 0), make([]int, len(machine.joltageTarget))}
 	println("Initial state:")
 	fmt.Println(initialState)
 
@@ -117,16 +142,17 @@ func solveMachineBfs(machine Machine) int {
 		queue = queue[1:]
 
 		// Check if we reached the target
-		if string(currentState.current) == string(currentState.target) {
+		if string(currentState.current) == string(currentState.target) && slices.Equal(currentState.currentJoltages, machine.joltageTarget) {
 			return len(currentState.history)
 		}
 
 		// Generate new states by applying each operation
 		for _, op := range machine.opertions {
 			newState := State{
-				target:  currentState.target,
-				current: make([]rune, len(currentState.current)),
-				history: append(currentState.history, op),
+				target:          currentState.target,
+				current:         make([]rune, len(currentState.current)),
+				history:         append(currentState.history, op),
+				currentJoltages: currentState.currentJoltages,
 			}
 			copy(newState.current, currentState.current)
 
@@ -134,6 +160,8 @@ func solveMachineBfs(machine Machine) int {
 			for _, idx := range op.indeces {
 				if idx >= 0 && idx < len(newState.current) {
 					newState.current[idx] ^= 1 // Toggle bit
+					// increment joltages
+					newState.currentJoltages[idx] += 1
 				}
 			}
 
@@ -154,14 +182,14 @@ func main() {
 	fmt.Println(machines)
 	fmt.Println("Num machines:", len(machines))
 
-	p1 := 0
+	p2 := 0
 	for i, machine := range machines {
 		fmt.Println("*** Processing machine", i, "->", machine)
 		steps := solveMachineBfs(machine)
 		fmt.Println("Machine", i, "solved in", steps, "steps")
-		p1 += steps
+		p2 += steps
 	}
 
-	fmt.Println("Part 1:", p1)
+	fmt.Println("Part 2:", p2)
 
 }
