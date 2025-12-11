@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <map>
+#include <unordered_set>
 
 typedef long long ll;
 
@@ -27,9 +28,12 @@ void printNode(Node *n, int depth)
     }
 }
 
-vector<vector<string>> getAllPathsDfs(Node *from, Node *target, map<string, Node *> &nodeMap, vector<string> &path)
+vector<vector<string>> getAllPathsDfs(Node *from, Node *target, map<string, Node *> &nodeMap, vector<string> &path, unordered_set<string> &visiting)
 {
-    cout << "Visiting node: " << from->name << endl;
+    if (visiting.count(from->name))
+        return {};
+
+    visiting.insert(from->name);
     path.push_back(from->name);
 
     vector<vector<string>> paths;
@@ -40,18 +44,20 @@ vector<vector<string>> getAllPathsDfs(Node *from, Node *target, map<string, Node
     }
     else
     {
-        for (auto childName : from->childNames)
+        for (auto &childName : from->childNames)
         {
-            Node *childNode = nodeMap[childName];
-            auto childPaths = getAllPathsDfs(childNode, target, nodeMap, path);
-            for (auto cp : childPaths)
-            {
-                paths.push_back(cp);
-            }
+            auto it = nodeMap.find(childName);
+            if (it == nodeMap.end())
+                continue;
+
+            Node *childNode = it->second;
+            auto childPaths = getAllPathsDfs(childNode, target, nodeMap, path, visiting);
+            paths.insert(paths.end(), childPaths.begin(), childPaths.end());
         }
     }
 
     path.pop_back();
+    visiting.erase(from->name);
 
     return paths;
 }
@@ -93,7 +99,39 @@ int main()
     }
 
     vector<string> path;
-    auto paths = getAllPathsDfs(nodeMap["you"], nodeMap["out"], nodeMap, path);
+    unordered_set<string> visiting;
+
+    int p2 = 0;
+    cout << "Beginning Part 2 computation..." << endl;
+    auto pathsP2 = getAllPathsDfs(nodeMap["svr"], nodeMap["out"], nodeMap, path, visiting);
+    cout << "Total paths from 'svr' to 'out': " << pathsP2.size() << endl;
+    vector<string> mustContain{"dac", "fft"};
+    for (auto p : pathsP2)
+    {
+        cout << "Checking path: ";
+        for (auto pn : p)
+        {
+            cout << pn << " ";
+        }
+        cout << endl;
+        bool containsAll = true;
+        for (auto mc : mustContain)
+        {
+            if (find(p.begin(), p.end(), mc) == p.end())
+            {
+                containsAll = false;
+                break;
+            }
+        }
+        if (containsAll)
+        {
+            p2++;
+        }
+    }
+    cout << "Part 2: " << p2 << endl;
+
+    return 0;
+    auto paths = getAllPathsDfs(nodeMap["you"], nodeMap["out"], nodeMap, path, visiting);
     cout << "All paths from 'you' to 'out':" << endl;
     for (auto p : paths)
     {
