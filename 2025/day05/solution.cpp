@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include <iostream>
 
 typedef long long ll;
 
@@ -14,6 +14,38 @@ pair<ll, ll> parseLine(string &line)
     cout << p.first << endl;
     cout << p.second << endl;
     return p;
+}
+bool myComparison(const pair<ll, ll> &a, const pair<ll, ll> &b)
+{
+    return a.second < b.second;
+}
+
+bool isFresh(ll val, vector<pair<ll, ll>> &ranges)
+{
+
+    cout << "\tSjekker freshness for " << val << endl;
+    auto startPoint = lower_bound(ranges.begin(), ranges.end(), make_pair(val, numeric_limits<ll>::min()));
+    int startIdx = (startPoint - ranges.begin()) - 1;
+    cout << "Startidx: " << startIdx << endl;
+    for (int i = startIdx; i < ranges.size(); i++)
+    {
+        pair<ll, ll> &p = ranges[i];
+
+        cout << "Pair " << p.first << ", " << p.second << endl;
+        // bool localGood = p.first <= val && p.second >= val;
+        bool localGood = p.first <= val && p.second >= val;
+        if (localGood)
+        {
+            cout << "OK" << endl;
+            return true;
+        }
+        else
+        {
+            cout << "MØTER IKKE DETTE KRAVET" << endl;
+        }
+    }
+
+    return false;
 }
 
 int main()
@@ -34,49 +66,12 @@ int main()
         ranges.push_back(p);
     }
 
-    ll minVal = ranges[0].first;
-    ll maxVal = ranges[0].second;
-    for (int i = 0; i < ranges.size(); i++)
-    {
-        auto p = ranges[i];
-        minVal = min(minVal, p.first);
-        maxVal = max(maxVal, p.second);
-    }
-    cout << "Min og max: " << minVal << ", " << maxVal << endl;
-    ll spenn = maxVal - minVal + 1;
-    cout << "Spenn: " << spenn << endl;
-    char *flags = (char *)malloc(sizeof(char) * spenn);
-    cout << "har allokert flags-minne" << endl;
-    cout << "Flags ptr: " << (int *)flags << endl;
-    if (flags == 0)
-    {
-        cout << "Unable to allocate memory :o " << endl;
-        return 1;
-    }
-    // char flags[spenn];
-    // TODO: Hvorfor slutet memset å fune?
-    // memset(flags, 0, sizeof(char) * spenn);
-    for (ll i = 0; i < spenn; i++)
-    {
-        cout << i << endl;
-        flags[i] = 0;
-    }
-    cout << "Har memsatt" << endl;
+    // Sorterer parene på FIRST slik at vi kan gjøre binærsøk for å filtrere ut de som er relevante å sjekke
+    cout << "Sorting pairs...";
+    sort(ranges.begin(), ranges.end(), myComparison);
+    cout << "..done" << endl;
 
-    for (int i = 0; i < ranges.size(); i++)
-    {
-        auto p = ranges[i];
-        cout << "Behandler par " << p.first << ", " << p.second << endl;
-        // TODO: Burde optimalisere dette
-        for (ll j = p.first; j <= p.second; j++)
-        {
-            ll idx = j - minVal;
-            cout << "Tagger " << idx << endl;
-            flags[j - minVal] = 1;
-        }
-    }
-
-    vector<int> queries;
+    vector<ll> queries;
 
     do
     {
@@ -91,22 +86,13 @@ int main()
 
     for (int i = 0; i < queries.size(); i++)
     {
-        int query = queries[i];
-        cout << "Sjekker ID " << query << endl;
-        if (query < minVal || query > maxVal)
-        {
-
-            cout << "Auto-continuer" << endl;
-            continue;
-        }
-        cout << "Verdien er " << (int)(flags[query - minVal]) << " og idx er " << query - minVal << endl;
-        if (flags[query - minVal])
+        ll query = queries[i];
+        if (isFresh(query, ranges))
         {
             p1++;
-            cout << "ER fresh " << endl;
+            cout << " ID " << query << " ER fresh " << endl;
         }
     }
-    free(flags);
 
     cout << "Part 1: " << p1 << endl;
 }
