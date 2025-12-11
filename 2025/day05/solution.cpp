@@ -17,6 +17,8 @@ pair<ll, ll> parseLine(string &line)
 }
 bool myComparison(const pair<ll, ll> &a, const pair<ll, ll> &b)
 {
+    if (a.first != b.first)
+        return a.first < b.first;
     return a.second < b.second;
 }
 
@@ -46,6 +48,32 @@ bool isFresh(ll val, vector<pair<ll, ll>> &ranges)
     }
 
     return false;
+}
+
+ll getP2(vector<pair<ll, ll>> &ranges)
+{
+
+    ll res = 0;
+    ll currStart = ranges[0].first;
+    ll currEnd = ranges[0].second;
+
+    for (int i = 1; i < ranges.size(); ++i)
+    {
+        const auto &seg = ranges[i];
+        if (seg.first <= currEnd)
+        {
+            currEnd = max(currEnd, seg.second);
+        }
+        else
+        {
+            res += (currEnd - currStart + 1);
+            currStart = seg.first;
+            currEnd = seg.second;
+        }
+    }
+
+    res += (currEnd - currStart + 1);
+    return res;
 }
 
 int main()
@@ -95,4 +123,7 @@ int main()
     }
 
     cout << "Part 1: " << p1 << endl;
+
+    ll p2 = getP2(ranges);
+    cout << "Part 2: " << p2 << endl;
 }
