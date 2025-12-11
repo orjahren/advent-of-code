@@ -10,12 +10,15 @@ pair<ll, ll> parseLine(string &line)
     string a = line.substr(0, splIdx);
     string b = line.substr(splIdx + 1);
     pair<ll, ll> p = make_pair(stoll(a), stoll(b));
-    cout << "Parret: " << endl;
-    cout << p.first << endl;
-    cout << p.second << endl;
     return p;
 }
-bool myComparison(const pair<ll, ll> &a, const pair<ll, ll> &b)
+
+// TODO: Burde kunne merge disse...
+bool p1Sort(const pair<ll, ll> &a, const pair<ll, ll> &b)
+{
+    return a.second < b.second;
+}
+bool p2Sort(const pair<ll, ll> &a, const pair<ll, ll> &b)
 {
     if (a.first != b.first)
         return a.first < b.first;
@@ -24,29 +27,14 @@ bool myComparison(const pair<ll, ll> &a, const pair<ll, ll> &b)
 
 bool isFresh(ll val, vector<pair<ll, ll>> &ranges)
 {
-
-    cout << "\tSjekker freshness for " << val << endl;
     auto startPoint = lower_bound(ranges.begin(), ranges.end(), make_pair(val, numeric_limits<ll>::min()));
     int startIdx = (startPoint - ranges.begin()) - 1;
-    cout << "Startidx: " << startIdx << endl;
     for (int i = startIdx; i < ranges.size(); i++)
     {
-        pair<ll, ll> &p = ranges[i];
-
-        cout << "Pair " << p.first << ", " << p.second << endl;
-        // bool localGood = p.first <= val && p.second >= val;
-        bool localGood = p.first <= val && p.second >= val;
-        if (localGood)
-        {
-            cout << "OK" << endl;
+        auto [lo, hi] = ranges[i];
+        if (lo <= val && hi >= val)
             return true;
-        }
-        else
-        {
-            cout << "MØTER IKKE DETTE KRAVET" << endl;
-        }
     }
-
     return false;
 }
 
@@ -79,13 +67,10 @@ ll getP2(vector<pair<ll, ll>> &ranges)
 int main()
 {
     string inp;
-    int i = 0;
     vector<pair<ll, ll>> ranges;
 
     while (cin >> inp)
     {
-        cout << "Inp 1: " << inp << ", iteratsjon: " << i++ << endl;
-        // cout << inp.find("-") << endl;
         if (inp.find("-") == string::npos)
         {
             break;
@@ -94,36 +79,17 @@ int main()
         ranges.push_back(p);
     }
 
-    // Sorterer parene på FIRST slik at vi kan gjøre binærsøk for å filtrere ut de som er relevante å sjekke
-    cout << "Sorting pairs...";
-    sort(ranges.begin(), ranges.end(), myComparison);
-    cout << "..done" << endl;
-
-    vector<ll> queries;
-
+    ll p1 = 0;
+    sort(ranges.begin(), ranges.end(), p1Sort);
     do
     {
-        cout << "Inp 2: " << inp << ", iteratsjon: " << i++ << endl;
-        ll parsed = stoll(inp);
-        cout << "Parsed query: " << parsed << endl;
-        queries.push_back(parsed);
-    } while (cin >> inp);
-    cout << "Has " << queries.size() << " queries " << endl;
-
-    int p1 = 0;
-
-    for (int i = 0; i < queries.size(); i++)
-    {
-        ll query = queries[i];
+        ll query = stoll(inp);
         if (isFresh(query, ranges))
-        {
             p1++;
-            cout << " ID " << query << " ER fresh " << endl;
-        }
-    }
-
+    } while (cin >> inp);
     cout << "Part 1: " << p1 << endl;
 
+    sort(ranges.begin(), ranges.end(), p2Sort);
     ll p2 = getP2(ranges);
     cout << "Part 2: " << p2 << endl;
 }
