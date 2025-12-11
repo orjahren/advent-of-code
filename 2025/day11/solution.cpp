@@ -28,38 +28,28 @@ void printNode(Node *n, int depth)
     }
 }
 
-vector<vector<string>> getAllPathsDfs(Node *from, Node *target, map<string, Node *> &nodeMap, vector<string> &path, unordered_set<string> &visiting)
+ll countPathsDfs(Node *from, Node *target, map<string, Node *> &nodeMap, unordered_set<string> &visiting)
 {
-    if (visiting.count(from->name))
-        return {};
-
-    visiting.insert(from->name);
-    path.push_back(from->name);
-
-    vector<vector<string>> paths;
+    if (from == nullptr || target == nullptr || visiting.count(from->name))
+        return 0;
 
     if (from->name == target->name)
-    {
-        paths.push_back(path);
-    }
-    else
-    {
-        for (auto &childName : from->childNames)
-        {
-            auto it = nodeMap.find(childName);
-            if (it == nodeMap.end())
-                continue;
+        return 1;
 
-            Node *childNode = it->second;
-            auto childPaths = getAllPathsDfs(childNode, target, nodeMap, path, visiting);
-            paths.insert(paths.end(), childPaths.begin(), childPaths.end());
-        }
+    visiting.insert(from->name);
+
+    ll total = 0;
+    for (const auto &childName : from->childNames)
+    {
+        auto it = nodeMap.find(childName);
+        if (it == nodeMap.end())
+            continue;
+
+        total += countPathsDfs(it->second, target, nodeMap, visiting);
     }
 
-    path.pop_back();
     visiting.erase(from->name);
-
-    return paths;
+    return total;
 }
 
 int main()
@@ -71,6 +61,8 @@ int main()
     Node *out = new Node();
     out->name = "out";
 
+    map<string, Node *> nodeMap;
+    nodeMap["out"] = out;
     vector<Node *> nodes{out};
 
     Node *n;
@@ -89,67 +81,35 @@ int main()
         }
     }
 
-    map<string, Node *> nodeMap;
-    nodeMap["out"] = out;
-
     for (auto n : nodes)
     {
         printNode(n, 0);
         nodeMap[n->name] = n;
     }
 
-    vector<string> path;
-    unordered_set<string> visiting;
-
-    int p2 = 0;
-    cout << "Beginning Part 2 computation..." << endl;
-    auto pathsP2 = getAllPathsDfs(nodeMap["svr"], nodeMap["out"], nodeMap, path, visiting);
-    cout << "Total paths from 'svr' to 'out': " << pathsP2.size() << endl;
-    vector<string> mustContain{"dac", "fft"};
-    for (auto p : pathsP2)
+    auto countPaths = [&](const string &fromName, const string &toName) -> ll
     {
-        cout << "Checking path: ";
-        for (auto pn : p)
-        {
-            cout << pn << " ";
-        }
-        cout << endl;
-        bool containsAll = true;
-        for (auto mc : mustContain)
-        {
-            if (find(p.begin(), p.end(), mc) == p.end())
-            {
-                containsAll = false;
-                break;
-            }
-        }
-        if (containsAll)
-        {
-            p2++;
-        }
-    }
+        unordered_set<string> visiting;
+        return countPathsDfs(nodeMap[fromName], nodeMap[toName], nodeMap, visiting);
+    };
+
+    ll p1 = countPaths("you", "out");
+    cout << "Part 1: " << p1 << endl;
+
+    cout << "Beginning Part 2 computation..." << endl;
+
+    ll a = countPaths("svr", "fft");
+    cout << "Paths from 'svr' to 'fft': " << a << endl;
+
+    ll b = countPaths("fft", "dac");
+    cout << "Paths from 'fft' to 'dac': " << b << endl;
+
+    ll c = countPaths("dac", "out");
+    cout << "Paths from 'dac' to 'out': " << c << endl;
+
+    ll p2 = a * b * c;
+    cout << "Total paths from 'svr' to 'out': " << p2 << endl;
     cout << "Part 2: " << p2 << endl;
 
     return 0;
-    auto paths = getAllPathsDfs(nodeMap["you"], nodeMap["out"], nodeMap, path, visiting);
-    cout << "All paths from 'you' to 'out':" << endl;
-    for (auto p : paths)
-    {
-        for (int j = 0; j < p.size(); j++)
-        {
-            string nodeName = p[j];
-            if (j < p.size() - 1)
-                cout << nodeName << " -> ";
-            else
-                cout << nodeName;
-        }
-        cout << endl;
-    }
-    cout << endl;
-
-    cout << "Total paths: " << paths.size() << endl;
-
-    int p1 = 0;
-
-    cout << "Part 1: " << p1 << endl;
 }
