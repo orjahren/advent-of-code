@@ -10,7 +10,7 @@
 
 typedef long long ll;
 
-#define N_CONNECTIONS 1000
+#define N_CONNECTIONS 10
 #define K_BIGGEST 3
 
 using namespace std;
@@ -183,5 +183,30 @@ int main()
     }
     cout << "Part 1: " << p1 << endl;
 
-    return 0;
+    parent.clear();
+    for (int i = 0; i < nodes.size(); i++)
+    {
+        parent.push_back(nodes[i]->id);
+    }
+    int nCircuits = nodes.size();
+    for (int i = 0; i < edges.size(); i++)
+    {
+        auto &e = edges[i];
+        Node *n1 = nodes[e.first];
+        Node *n2 = nodes[e.second];
+        if (root(n1, parent, nodeMap) == root(n2, parent, nodeMap))
+        {
+            continue;
+        }
+        cout << "P2: Connecting nodes " << n1->id << " and " << n2->id << endl;
+        merge(n1, n2, parent, nodeMap);
+        nCircuits--;
+        if (nCircuits == 1)
+        {
+            cout << "All nodes connected after " << i + 1 << " connections." << endl;
+            cout << "Last connected nodes: " << n1->id << " and " << n2->id << endl;
+            cout << "Part 2: " << n1->x * n2->x << endl;
+            return 0;
+        }
+    }
 }
