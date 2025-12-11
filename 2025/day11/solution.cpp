@@ -4,6 +4,8 @@
 #include <utility>
 #include <map>
 #include <unordered_set>
+#include <queue>
+#include <unordered_map>
 
 typedef long long ll;
 
@@ -28,13 +30,20 @@ void printNode(Node *n, int depth)
     }
 }
 
-ll countPathsDfs(Node *from, Node *target, map<string, Node *> &nodeMap, unordered_set<string> &visiting)
+ll countPathsMemo(Node *from, Node *target, map<string, Node *> &nodeMap, unordered_map<string, ll> &memo, unordered_set<string> &visiting)
 {
-    if (from == nullptr || target == nullptr || visiting.count(from->name))
+    if (from == nullptr || target == nullptr)
         return 0;
 
+    string key = from->name + "|" + target->name;
+    if (memo.count(key))
+        return memo[key];
+
     if (from->name == target->name)
-        return 1;
+        return memo[key] = 1;
+
+    if (visiting.count(from->name))
+        return 0;
 
     visiting.insert(from->name);
 
@@ -45,10 +54,11 @@ ll countPathsDfs(Node *from, Node *target, map<string, Node *> &nodeMap, unorder
         if (it == nodeMap.end())
             continue;
 
-        total += countPathsDfs(it->second, target, nodeMap, visiting);
+        total += countPathsMemo(it->second, target, nodeMap, memo, visiting);
     }
 
     visiting.erase(from->name);
+    memo[key] = total;
     return total;
 }
 
@@ -89,26 +99,15 @@ int main()
 
     auto countPaths = [&](const string &fromName, const string &toName) -> ll
     {
+        unordered_map<string, ll> memo;
         unordered_set<string> visiting;
-        return countPathsDfs(nodeMap[fromName], nodeMap[toName], nodeMap, visiting);
+        return countPathsMemo(nodeMap[fromName], nodeMap[toName], nodeMap, memo, visiting);
     };
 
     ll p1 = countPaths("you", "out");
     cout << "Part 1: " << p1 << endl;
 
-    cout << "Beginning Part 2 computation..." << endl;
-
-    ll a = countPaths("svr", "fft");
-    cout << "Paths from 'svr' to 'fft': " << a << endl;
-
-    ll b = countPaths("fft", "dac");
-    cout << "Paths from 'fft' to 'dac': " << b << endl;
-
-    ll c = countPaths("dac", "out");
-    cout << "Paths from 'dac' to 'out': " << c << endl;
-
-    ll p2 = a * b * c;
-    cout << "Total paths from 'svr' to 'out': " << p2 << endl;
+    ll p2 = countPaths("svr", "fft") * countPaths("fft", "dac") * countPaths("dac", "out");
     cout << "Part 2: " << p2 << endl;
 
     return 0;
